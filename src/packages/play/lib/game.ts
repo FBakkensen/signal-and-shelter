@@ -241,17 +241,19 @@ export function eyeHeight(state: GameState) {
   return state.crouching ? 1.27 : 1.62;
 }
 
-export function viewPosition(state: GameState) {
+export function renderPose(state: GameState) {
   const alpha =
     state.paused || state.overview ? 1 : Math.min(1, state.accumulator / STEP);
-  return {
+  const ground = {
     x: state.previousPosition.x + (state.x - state.previousPosition.x) * alpha,
-    y:
-      state.previousPosition.y +
-      (state.y - state.previousPosition.y) * alpha +
-      eyeHeight(state),
+    y: state.previousPosition.y + (state.y - state.previousPosition.y) * alpha,
     z: state.previousPosition.z + (state.z - state.previousPosition.z) * alpha,
   };
+  return { ground, eye: { ...ground, y: ground.y + eyeHeight(state) } };
+}
+
+export function viewPosition(state: GameState) {
+  return renderPose(state).eye;
 }
 
 export function canUseTerminal(state: GameState, island: Island): boolean {

@@ -10,7 +10,7 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `src/packages/island/index.ts`    | Seed selection and complete island generation, including solid geometry                                                   |
 | `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering                       |
-| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause/overview, restart and island replacement  |
+| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause/overview, restart and island replacement                 |
 | `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
 | `src/resources.ts`                | Three.js resource mesh adapter using island geometry                                                                      |
 | `src/scene.ts`                    | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime                                      |
@@ -41,7 +41,7 @@ The square player footprint is 0.6 metres wide; body height is 1.8 metres standi
 
 ## Camera, controls and interaction
 
-The normal entry uses `GameApplication` in third-person mode. `camera.ts` owns the shoulder framing: manual wheel zoom from 3.5 to 70 metres, a fixed 55° FOV and tilt derived from zoom. It follows the interpolated humanoid anchor and adapts shoulder offset to portrait aspect ratios. Obstructions never adjust zoom, heading, tilt or FOV. The avatar is visible during play and faces its movement direction.
+The normal entry uses `GameApplication` in third-person mode. `camera.ts` owns the shoulder framing: manual wheel zoom from 3.5 to 70 metres, a fixed 55° FOV and tilt derived from zoom. Play exposes one interpolated render pose with ground and eye positions; main samples it once per frame for the avatar, occlusion target and camera. The camera follows that eye anchor and adapts shoulder offset to portrait aspect ratios. Obstructions never adjust zoom, heading, tilt or FOV. The avatar is visible during play and faces its movement direction.
 
 WASD moves relative to camera heading; Q/E or Left/Right orbit, Home restores starting heading without changing zoom, and Space/Ctrl/Shift retain jump/sprint/sneak physics. The pointer stays free. Wheel over the world zooms; wheel over UI does not. Gameplay shortcuts leave form-field typing alone. Pointer capture and keyboard-look settings are absent from the production UI; legacy capture APIs remain covered by regression tests inside play.
 

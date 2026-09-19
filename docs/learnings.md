@@ -177,3 +177,8 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Extracted the production raycast into `picking.ts`; the scene delegates to this same implementation. Real geometry tests now cover nested ship/resource identifiers, offset canvas projection, avatar exclusion, nearest-hit ordering, faded scenery blocking and no-selection cases.
 - Replaced obsolete active-control descriptions in architecture and consolidated prototype details into archived evidence links.
 - Evidence: full checks and all 58 tests passed. Integrated-browser ship selection, F use, explicit return and ground deselection passed; visual inspection and browser logs were clear. See [review-fix validation](testing/picking-review-fixes.md).
+
+## 2026-09-19 — Share interpolation between camera and avatar
+
+- Codex review found the visible avatar used the newest physics sample while the camera interpolated between samples. The renderer now consumes one play-owned ground/eye pose, also positioning the avatar before occlusion probing.
+- Regression coverage checks fractional-step positions and lifecycle/crouch boundaries. Full checks and focused browser jump/landing/pause inspection passed; high-refresh smoothness is not inferred from screenshots. See [validation](testing/avatar-interpolation.md).

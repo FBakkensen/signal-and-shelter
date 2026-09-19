@@ -5,6 +5,7 @@ import {
   look,
   transition,
   viewPosition,
+  renderPose,
 } from "./game.ts";
 import { createSimulation } from "../simulation.ts";
 import { mouseLook } from "./controls.ts";
@@ -103,6 +104,9 @@ export class GameApplication {
       !this.currentState.paused &&
       canUseTerminal(this.currentState, this.island)
     );
+  }
+  get renderPose() {
+    return renderPose(this.currentState);
   }
   get viewPosition() {
     return viewPosition(this.currentState);

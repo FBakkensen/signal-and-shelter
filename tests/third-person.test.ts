@@ -133,3 +133,42 @@ void test("orbit aliases remain held independently and pause clears both", () =>
   app.tick(0.05);
   assert.ok(Math.abs(app.state.yaw - angle) < 1e-10);
 });
+
+void test("avatar ground and camera eye share interpolation through fractional frames and lifecycle changes", () => {
+  const island = createIsland("map-check");
+  const app = new GameApplication(island, true);
+  app.start(island, true);
+  const start = app.renderPose.ground;
+  app.press("KeyD");
+  app.press("Space");
+  app.tick(1.5 / 120);
+  const halfway = app.renderPose;
+  assert.ok(Math.abs(halfway.ground.x - (start.x + app.state.x) / 2) < 1e-9);
+  assert.ok(Math.abs(halfway.ground.y - (start.y + app.state.y) / 2) < 1e-9);
+  assert.notEqual(halfway.ground.x, app.state.x);
+  assert.deepEqual(halfway.eye, app.viewPosition);
+  assert.equal(halfway.eye.x, halfway.ground.x);
+  assert.equal(halfway.eye.z, halfway.ground.z);
+  assert.ok(Math.abs(halfway.eye.y - halfway.ground.y - 1.62) < 1e-9);
+  app.tick(0.25 / 120);
+  assert.ok(app.renderPose.ground.x > halfway.ground.x);
+  app.pause();
+  assert.deepEqual(app.renderPose.ground, {
+    x: app.state.x,
+    y: app.state.y,
+    z: app.state.z,
+  });
+  app.resume();
+  assert.deepEqual(app.renderPose.ground, {
+    x: app.state.x,
+    y: app.state.y,
+    z: app.state.z,
+  });
+  app.restart();
+  assert.deepEqual(app.renderPose.ground, start);
+  app.press("ShiftLeft");
+  app.tick(1.5 / 120);
+  const crouched = app.renderPose;
+  assert.equal(app.state.crouching, true);
+  assert.ok(Math.abs(crouched.eye.y - crouched.ground.y - 1.27) < 1e-9);
+});

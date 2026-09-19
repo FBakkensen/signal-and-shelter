@@ -275,14 +275,15 @@ function tick(now: number) {
       : "Approach to survey. Gathering is not available yet.";
   $("camera-status").textContent =
     `Zoom ${String(Math.round(camera.zoom * 100))}% · Orbit ${String(Math.round((app.state.yaw * 180) / Math.PI))}°`;
+  const pose = app.renderPose;
   world.render(
     app.state,
-    app.viewPosition,
+    pose,
     now / 1000,
     app.started,
     app.started && !app.state.overview
       ? camera.frame(
-          app.viewPosition,
+          pose.eye,
           app.state.yaw,
           app.facing,
           innerWidth / innerHeight

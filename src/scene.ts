@@ -1,4 +1,4 @@
-import type { CameraFrame } from "./camera.ts";
+import type { CameraFrame, Position3 } from "./camera.ts";
 import { createPicker } from "./picking.ts";
 import { createOcclusion } from "./occlusion.ts";
 import { createResourceGroup } from "./resources.ts";
@@ -208,13 +208,12 @@ export function createScene(
   window.addEventListener("resize", resize);
   function render(
     state: PlayState,
-    view: { x: number; y: number; z: number },
+    pose: { ground: Position3; eye: Position3 },
     time: number,
     started: boolean,
     frame?: CameraFrame
   ) {
-    const y = state.y;
-    avatar.position.set(state.x, y, state.z);
+    avatar.position.set(pose.ground.x, pose.ground.y, pose.ground.z);
     avatar.rotation.y = frame?.facing ?? state.yaw;
     left.rotation.x = Math.sin(state.distance * 3) * 0.4;
     right.rotation.x = -left.rotation.x;
@@ -232,7 +231,7 @@ export function createScene(
       camera.position.set(49, 53, 66);
       camera.lookAt(0, 2, 0);
     } else {
-      camera.position.set(view.x, view.y, view.z);
+      camera.position.set(pose.eye.x, pose.eye.y, pose.eye.z);
       camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
     }
     grains.position.y = Math.sin(time * 0.25) * 0.15;
