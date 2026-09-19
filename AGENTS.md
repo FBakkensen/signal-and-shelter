@@ -52,7 +52,7 @@ Packages are deep modules — see [src/packages/README.md](./src/packages/README
 
 ### Wayfinder prototypes and implementation
 
-Before creating a prototype ticket, beginning implementation after a prototype, or handing off a wayfinder increment, read [docs/agents/prototype-handoff.md](docs/agents/prototype-handoff.md). Prototype source stays on archived experiment branches; implementation branches contain production code and decision records.
+Before planning, creating, revising or finishing a prototype, changing prototype workflow instructions, beginning implementation after a prototype, or handing off a wayfinder increment, read [docs/agents/prototype-handoff.md](docs/agents/prototype-handoff.md). Follow its commit, push and return-to-branch sequence. Prototype branches are archives and must never be merged.
 
 ### PR babysitting
 

@@ -104,3 +104,13 @@ The play simulation owns immutable exploration rows, initialized around spawn be
 `atlas.ts` projects a 2 m terrain chart and exact block footprint bounds through the existing Three.js camera onto a canvas overlay. CPU clipping uses the same half-metre mask as close-play shaders. Unknown scenery is omitted entirely, including ship portions outside explored ground. Smooth blending uses 62–80% of manual zoom; picking uses the dominant presentation. Identity labels anchor to revealed fragments, prioritize selection, and avoid the humanoid, selected geometry, UI and other labels. Revealed areas remain visible and play remains active at every zoom. The chart is a simplified presentation, not a navigation guarantee.
 
 See [atlas validation](testing/active-strategic-atlas.md) for real browser evidence and remaining sustained-play/performance limits.
+
+## Accepted navigation direction — implementation pending, 2026-09-19
+
+[Choose shared navigation boundaries and capability model](https://github.com/FBakkensen/signal-and-shelter/issues/19) owns the accepted design. A reusable navigation module handles movement requests, planning and execution through shared movement physics. Player controls, camera, terminal UI and future robot job management remain outside it. Island geometry remains the physical source; navigation consumes explored-area knowledge and each individual's current movement capabilities. Planning and execution use the same feasibility rules and movement settings.
+
+Represent supported surfaces at distinct heights where geometry permits them, including lower surfaces beneath raised solids. Clearance alone is insufficient: current `canStandAt` can return true at unsupported heights. Navigation must validate support, body clearance and executable transitions. A known clicked surface retains its height; unknown destinations initially retain their horizontal position.
+
+Navigation reports arrival or inability to progress. Humanoid recovery retains the requested destination and replans from actual position without immediately repeating the failed transition. Individual capabilities may depend on type and upgrades; upgrades interrupt movement before changes take effect. Robot retry/job scheduling and terrain-specific or flying movement remain separate future decisions. Exact public method names and internal search structures are implementation choices, not settled by the prototype archive.
+
+The user accepted the [navigation design checkpoint](navigation-design.md) and its two implementation increments. It consolidates the behavior, validation requirements and prototype-separation requirements for the pending production work.

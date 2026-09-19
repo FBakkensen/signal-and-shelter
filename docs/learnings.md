@@ -20,6 +20,13 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Evidence: [Official AGENTS.md guidance](https://learn.chatgpt.com/docs/agent-configuration/agents-md) describes loading guidance along the project directory path.
 - Implication: Root guidance should explicitly instruct when to read supporting documents; a Markdown link alone is not an automatic import mechanism.
 
+## 2026-09-19 — Commit prototype boundaries and return before instruction changes
+
+- User requirement: commit pending work on the original wayfinder branch before creating a prototype branch; commit and push the finished prototype archive, then return to the previous branch. Prototype branches must never be merged. Local instruction changes belong on the previous branch.
+- Evidence: navigation design notes were committed on `codex/navigation-design` at `6da9585` before the prototype branch was created. When the user requested an explicit workflow correction, the unfinished experiment was checkpointed and pushed on `codex/navigation-prototype` at `3e02a72`, then the worktree returned to `codex/navigation-design` for the instruction edits.
+- Limitation: that prototype checkpoint is unfinished and has not received automated behavior tests, integrated-browser validation or user playtesting. Its ticket remains open.
+- The enforced sequence lives in [prototype handoff](agents/prototype-handoff.md), reached from AGENTS.md before branch creation, prototype completion and workflow instruction changes.
+
 ## Untested ideas
 
 - Chunk meshes with exposed faces should be a useful approach if we choose dense block terrain. Implemented with exposed terrain quads in experiment 001; no project benchmark exists yet.
@@ -190,3 +197,12 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Implemented one immutable simulation-owned coverage mask. CPU atlas geometry, GPU surface/shadow clipping, picking and deposit discovery share it. Both views preserve partially revealed objects instead of exposing an entire mesh or only its icon.
 - Evidence: 68 tests and full checks pass. Real seed `atlas-92` places a deposit centre about 8.15 m from spawn but its footprint intersects explored ground: its material is identified, the exposed edge can be selected, and the concealed side cannot. Desktop/narrow browser checks exercised zoom, jump, terminal pause/return, restart and replacement seed without warning/error logs. See [validation](testing/active-strategic-atlas.md).
 - Limits: half-metre exploration sampling produces a stepped boundary and sliced object edges; chart terrain remains sampled at 2 m. Discrete browser movement/orbit input did not demonstrate sustained traversal. Full integrated feel and measured rendering costs remain for the next increment.
+
+## 2026-09-19 — Accepted automatic-navigation prototype
+
+- The initial standalone motion code produced inconsistent block-relative takeoffs/landings and broken diagonal input. Replacing the custom scenarios with the existing island was also the wrong response: the user wanted deliberate test courses using the game's existing logic.
+- The revised study executes the shared movement simulation for actual movement and candidate jump validation, reuses input mapping and the third-person camera, and layers experimental routing and setup/recovery on top. The user accepted it after selecting 1 m up/down and timing A; vision owns those selected values.
+- Archive: `codex/navigation-prototype` at `3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544` (playable changes at `09eb483`). Full checks passed, including 18 prototype cases. Browser checks covered diagonal chords, automatic terrace arrival, pause/resume, disabled manual jump, and selected defaults. Sustained feel was subsequently accepted by the user. Hidden-tab scheduling, layered geometry and whole-island routing remain production validation items.
+- Generalized lesson: preserve implementation fidelity where it affects the experiment’s conclusion, while simplifying unrelated work. Custom scenarios and fixtures help isolate a question; separately recreating established behavior can invalidate the answer. The prototype guidance now requires a short question/foundations/controlled-differences plan and gives movement, UI, domain-logic and integration examples. Production readiness is not the completion criterion.
+- An earlier return to the design branch happened before the user had tested the build. The workflow now explicitly gates return on user acceptance/finish, preserves a clean committed branch boundary, and records durable decisions on the return branch. No prototype source was merged or copied into design.
+- Evidence: [archived validation](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md).

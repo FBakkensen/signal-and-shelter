@@ -26,9 +26,25 @@ Robots, gathering, power management, manufacturing, software delivery, and inter
 
 See [experiment 004's validation record](testing/experiment-004.md) for actual checks and limitations. No performance target has been agreed. Procedural footsteps, quiet wind, and interaction sounds remain untested suggestions.
 
-## Open questions
+## Accepted navigation and control direction
+
+### Shared navigation direction — 2026-09-19
+
+The user confirmed that [click-to-move and shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) should proceed through design, a playable prototype, and production implementation with validation. Jumping must be automatic for the humanoid and future robots; there must be no manual player jump action, including during direct keyboard movement. Every jump has a short setup before takeoff and a short recovery after landing. Routing must account for both delays and travel time, so a longer walking route may be faster than a jumping shortcut.
+
+Start with terrain steps and low obstacles, requiring clearance and a valid landing. Gap jumping is outside this initial effort. Calculated routes use explored ground, but requested destinations may be unexplored or unreachable. Each right-click immediately replaces the previous destination. Every recalculation routes toward the requested destination if reachable, otherwise to the reachable point closest to it; newly explored terrain triggers recalculation toward the retained destination. There is no separate speculative exploration mode. If the closest reachable point is the current position, stay there with the destination retained. Direct keyboard movement remains available for exploration. Show only the requested destination marker, with no visible route line.
+
+WASD immediately cancels the destination and takes direct control. Cancel jump preparation when the new movement no longer needs the jump; releasing direct movement during preparation cancels takeoff. An airborne jump finishes with limited steering, and the short landing recovery still applies. The accepted contract is recorded in [Settle route interruption and automatic-jump control rules](https://github.com/FBakkensen/signal-and-shelter/issues/17).
+
+Remove sprint and sneak entirely. Reaching the requested destination within a small tolerance removes its marker; reaching an intermediate closest-reachable point retains the destination and marker. Tune the arrival tolerance in the prototype. Switching windows or tabs leaves the game running. Explicit pause freezes and preserves the state, including the destination and jump setup, flight and recovery, and explicit resume continues from that state. The ship terminal also leaves the game running, with gameplay keyboard controls inactive while using its UI; Escape opens the explicit pause menu. Restarting or changing the seed clears the destination.
+
+The user accepted the navigation prototype on 2026-09-19: one shared maximum elevation change of 1 m for jumping up and down, with timing A (0.12 s setup and 0.12 s recovery). Custom scenarios must reuse the game’s movement, collision, input and camera logic. Steering strength, arrival tolerance and feedback can be refined during production integration. Robot gameplay remains outside this effort. See [accepted prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md). These values are accepted design, implemented only in the archived prototype so far.
+
+These are accepted upcoming requirements, not implemented behavior. They supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Production still implements those earlier behaviors; background execution has not yet been validated.
 
 2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
+
+## Open questions
 
 - Voxel visuals are required. Should blocks also become editable?
 - Does repairing the spaceship and leaving become a goal, or does building a home remain the focus?
@@ -91,3 +107,17 @@ Third-person controls and localized fading are implemented on `codex/third-perso
 ### Consistent exploration — 2026-09-19
 
 During atlas implementation, the user rejected showing unexplored scenery in close play while obscuring it in the strategic view. One 8 m horizontal radius must uncover terrain, objects and deposit identities in both views; this supersedes the checkpoint's separate 4 m surveying rule. Exploration ignores obstructions and camera direction. Explored areas remain visible and active after leaving, with Factorio given as the user's reference for that behavior. Fog conceals unexplored terrain and objects at every zoom, while sky and atmosphere remain visible. Physical interaction ranges remain in force. Objects crossing the exploration boundary are revealed only in their explored portion; a deposit is identified as soon as any part is revealed. Fresh starts and resets reveal only the starting 8 m area, with no exception for the ship or island outline. The opening menu must conceal unexplored scenery too. The user confirmed the complete rule set. It is implemented on `codex/strategic-atlas-integration`; see [the atlas validation record](testing/active-strategic-atlas.md) for checks and remaining playtest limits.
+
+### Shared navigation design accepted — 2026-09-19
+
+The user agreed that humanoid and future robots share navigation, route execution and automatic traversal through shared movement physics; player controls, camera and terminal UI stay outside that module. Navigation must distinguish multiple supported walkable heights at the same horizontal position where existing geometry permits them.
+
+Movement capabilities are individual, potentially determined by actor type and upgrades. Navigation consumes the individual's current capabilities rather than owning robot-type or upgrade rules. The design must accommodate actors unable to jump. Wheeled robots, flying actors and terrain-dependent properties (such as acid) illustrate future variation; implementing those systems is outside this effort. The user confirmed the complete decision in [Choose shared navigation boundaries and capability model](https://github.com/FBakkensen/signal-and-shelter/issues/19). This is accepted design; production implementation remains pending.
+
+A click on known geometry preserves the chosen surface and height; an unexplored click retains a horizontal destination until a surface becomes known. If humanoid route execution fails, stop safely, retain the destination and recalculate from the actual position, excluding the failed transition from that recalculation. Existing nearest-reachable and exploration rules still apply.
+
+Upgrades require movement to be interrupted first; subsequent routing uses the updated individual capabilities. Robot job selection, blocked-job recovery, automatic resumption, retry frequency and any tick scheduler belong to a separate robot-design issue. Navigation reports movement outcomes; it does not decide job policy or scheduling.
+
+### Navigation design checkpoint accepted — 2026-09-19
+
+The user accepted the [consolidated navigation design](navigation-design.md), its acceptance criteria and two sequential playable production increments: automatic keyboard traversal with shared individual capabilities and lifecycle behavior, followed by time-aware click-to-move using the same movement logic. Both require production-code tests and integrated-browser validation. The prototype remains archived; production implementation is pending.
