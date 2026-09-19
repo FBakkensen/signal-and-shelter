@@ -14,7 +14,7 @@
     <canvas
       id="world"
       tabindex="0"
-      aria-label="Signal &amp; Shelter exploration. Mouse or arrow keys to look, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
+      aria-label="Signal &amp; Shelter exploration. Q/E or arrow keys to orbit, scroll to zoom, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
     ></canvas>
     <header>
       <a class="brand" href="/" aria-label="Signal &amp; Shelter home"
@@ -52,11 +52,7 @@
         <small id="seed-help"
           >Same seed, same beginning. Leave blank for a surprise.</small
         >
-        <label for="start-controls">Controls</label>
-        <select id="start-controls">
-          <option value="mouse">Mouse + keyboard</option>
-          <option value="keyboard">Keyboard — WASD + arrow keys</option>
-        </select>
+        <small>WASD moves · Q/E or arrows orbit · Scroll zooms</small>
         <button id="start" class="primary" disabled>
           Preparing your landing…
         </button>
@@ -69,25 +65,11 @@
     <section id="pause-panel" class="panel pause-panel" hidden>
       <span class="eyebrow">TAKE YOUR TIME</span>
       <h2>A moment of quiet.</h2>
-      <p id="capture-message" role="status">
-        Click to capture the mouse. Escape pauses and releases it.
+      <p>
+        WASD moves. Q/E or arrows orbit. Scroll zooms. Home resets heading. F
+        uses a nearby selected object.
       </p>
-      <label class="setting" for="sensitivity"
-        >Mouse sensitivity
-        <input
-          id="sensitivity"
-          type="range"
-          min="0.2"
-          max="3"
-          step="0.1"
-          value="1"
-        />
-      </label>
-      <label class="setting"
-        ><input id="invert-y" type="checkbox" /> Invert vertical look</label
-      >
       <button id="resume" class="primary">Keep wandering →</button
-      ><button id="control-mode" class="subtle">Use keyboard controls</button
       ><button id="reset" class="subtle">Restart this island</button>
       <button id="new-island" class="subtle">Choose another seed</button>
       <label class="seed-label" for="current-seed">World seed</label>
@@ -104,7 +86,7 @@
       <ul id="places"></ul>
       <p id="journal-note">Survey the ceramic shelf for useful materials.</p>
     </aside>
-    <button id="interact" hidden>E · Ship terminal</button>
+    <button id="interact" hidden>F · Ship terminal</button>
     <section
       id="terminal-panel"
       class="panel pause-panel"
@@ -133,7 +115,7 @@
       <div class="controls">
         <span><kbd>W A S D</kbd> walk</span><span><kbd>CTRL</kbd> sprint</span
         ><span><kbd>SPACE</kbd> jump</span><span><kbd>SHIFT</kbd> sneak</span
-        ><span id="look-help">Mouse to look</span
+        ><span id="look-help">Q/E orbit · Scroll zoom · Home heading</span
         ><span><kbd>ESC</kbd> pause</span>
       </div>
       <div class="edition">ISLAND SURVEY<span>EXPERIMENT 004</span></div>
@@ -142,7 +124,11 @@
       UNREGISTERED PLANET <span>Exploration is paused</span
       ><button id="return" class="primary">Return to exploration →</button>
     </div>
-    <div id="crosshair" aria-hidden="true" hidden>+</div>
+    <aside id="selection" class="journal selection" hidden>
+      <h2 id="selection-name"></h2>
+      <p id="selection-help"></p>
+    </aside>
+    <div id="camera-status"></div>
     <script type="module" src="/src/entry.ts"></script>
   </body>
 </html>

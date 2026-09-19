@@ -17,7 +17,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D007 — Try first-person Minecraft-like controls
 
 - Date: 2026-09-19
-- Status: Accepted and implemented; captured-look validation pending
+- Status: Camera/input superseded by D014 on the third-person implementation branch; temporary overview remains until atlas integration
 - Basis: The user requested more Minecraft-like controls, then explicitly requested implementation.
 - Decision: First-person pointer-locked mouse look, WASD, Space jump, Ctrl sprint, and Shift sneak, retaining the island and overview. See [the implementation and validation plan](controls-plan.md).
 - Rationale: The present elevated camera, drag-only horizontal look, and automatic one-block stepping differ substantially from the requested feel.
@@ -131,7 +131,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D014 — Third-person play with active strategic zoom
 
 - Date: 2026-09-19
-- Status: Accepted; implementation pending
+- Status: Accepted; close-play controls and localized fading implemented on `codex/third-person-controls`, atlas integration pending
 - Basis: The user selected camera B, atlas A with true-size footprints, fading treatment B, and confirmed the consolidated controls, defaults and three playable increments.
 - Decision: Implement the [accepted third-person design](third-person-design.md). Zoom remains exclusively manual; active strategic presentation preserves actions and proximity rules. Replace first-person capture/look and retire the paused overview as the atlas lands.
 - Rationale: Support close exploration and readable strategic inspection through one humanoid-anchored view. Smooth, localized fading preserves visibility without moving the camera.

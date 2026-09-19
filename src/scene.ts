@@ -2,7 +2,8 @@ import {
   createOcclusionStudy,
   type OcclusionVariant,
 } from "./occlusion-prototype-model.ts";
-import type { CameraFrame } from "./camera-prototype-model.ts";
+import type { CameraFrame } from "./camera.ts";
+import { createOcclusion } from "./occlusion.ts";
 import { createResourceGroup } from "./resources.ts";
 import { WORLD_PALETTE, ventParts } from "./packages/island/geometry.ts";
 import type { PlayState } from "./packages/play/index.ts";
@@ -23,7 +24,8 @@ export function createScene(
   canvas: HTMLCanvasElement,
   island: Island,
   shipAsset: THREE.Group,
-  occlusionEnabled = false
+  occlusionEnabled = false,
+  productionOcclusion = false
 ) {
   const { heightAt, hash } = island;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -204,6 +206,10 @@ export function createScene(
     import.meta.env.DEV && occlusionEnabled
       ? createOcclusionStudy(scene, avatar)
       : null;
+  const visibility = productionOcclusion
+    ? createOcclusion(scene, avatar)
+    : null;
+  let lastTime = 0;
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -244,6 +250,8 @@ export function createScene(
     grains.position.y = Math.sin(time * 0.25) * 0.15;
     const blockers =
       treatment && occlusion ? occlusion.apply(camera, treatment) : 0;
+    visibility?.update(camera, time - lastTime, Boolean(study));
+    lastTime = time;
     renderer.render(scene, camera);
     occlusion?.restore();
     return blockers;
@@ -251,6 +259,7 @@ export function createScene(
   function dispose() {
     window.removeEventListener("resize", resize);
     occlusion?.dispose();
+    visibility?.dispose();
     // The shared ship template owns its geometry/materials across world rebuilds.
     scene.remove(ship);
     scene.traverse((object) => {

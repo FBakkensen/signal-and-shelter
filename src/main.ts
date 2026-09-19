@@ -1,5 +1,6 @@
 import { GameApplication } from "./packages/play/index.ts";
 import type { ResumeResult } from "./packages/play/index.ts";
+import { ThirdPersonCamera } from "./camera.ts";
 import "./style.css";
 import { createScene, loadShip } from "./scene.ts";
 import {
@@ -20,14 +21,16 @@ const $ = (id: string): HTMLElement => element(id, HTMLElement);
 const startButton = element("start", HTMLButtonElement);
 const canvas = element("world", HTMLCanvasElement);
 const app = new GameApplication(
-  createIsland(new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED)
+  createIsland(
+    new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED
+  ),
+  true
 );
 let world: ReturnType<typeof createScene>,
   shipAsset: Awaited<ReturnType<typeof loadShip>>,
   previous = 0,
   toastUntil = 0;
-const sensitivity = element("sensitivity", HTMLInputElement);
-const invertY = element("invert-y", HTMLInputElement);
+const camera = new ThirdPersonCamera();
 
 const seedInput = element("seed", HTMLInputElement);
 seedInput.value = new URLSearchParams(location.search).get("seed") ?? "";
@@ -50,13 +53,9 @@ function updateWorldUI() {
 }
 function sync() {
   $("welcome").hidden = app.started;
-  $("control-mode").textContent = app.keyboardPreferred
-    ? "Use mouse controls"
-    : "Use keyboard controls";
   $("pause-panel").hidden =
     !app.started || !app.state.paused || app.state.overview || app.terminalOpen;
-  $("crosshair").hidden =
-    !app.started || app.state.paused || app.state.overview;
+
   document.body.classList.toggle("in-menu", !app.started || app.state.paused);
   $("overview").hidden = !app.started;
   $("pause").hidden = !app.started || app.state.paused;
@@ -78,7 +77,7 @@ function sync() {
       ? "Starter resources surveyed. Gathering and building will come in a later experiment."
       : "Explore the island. Walk close to an outcrop to record what you find.";
   $("terminal-panel").hidden = !app.terminalOpen;
-  $("interact").hidden = !app.canUseTerminal;
+  $("interact").hidden = !app.canUseSelection;
   $("link-status").textContent = app.state.linkChecked
     ? "Data link confirmed"
     : "Check the ship’s data link";
@@ -91,67 +90,22 @@ function sync() {
 }
 function release(overview = false) {
   app.pause(overview);
-  $("capture-message").textContent = app.keyboardPreferred
-    ? "WASD to move. Arrow keys to look around. Escape pauses."
-    : "Look with the mouse or arrow keys. WASD to move. Escape pauses.";
-  $("resume").textContent = "Keep wandering →";
-  if (document.pointerLockElement === canvas) {
-    document.exitPointerLock();
-  }
   sync();
   if (app.started) {
     element(overview ? "return" : "resume", HTMLButtonElement).focus();
   }
 }
-function captureFailed() {
-  release();
-  $("capture-message").textContent =
-    "This browser couldn’t start mouse controls. You can use keyboard controls instead.";
-}
-function activatePlay() {
-  $("look-help").textContent = app.keyboardPreferred
-    ? "Arrow keys to look"
-    : "Mouse / arrow keys to look";
-  canvas.setAttribute(
-    "aria-label",
-    app.keyboardPreferred
-      ? "Signal & Shelter exploration. W A S D to move, arrow keys to look, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
-      : "Signal & Shelter exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
-  );
-  previous = performance.now();
-  sync();
-  canvas.focus();
-}
 function applyResume(result: ResumeResult) {
   if (result.kind === "ignored") {
     return;
   }
-  if (result.kind === "keyboard") {
-    activatePlay();
-    return;
-  }
-  $("capture-message").textContent =
-    "Look with the mouse or arrow keys. WASD to move. Escape pauses.";
-  $("resume").textContent = "Keep wandering →";
+  previous = performance.now();
   sync();
-  try {
-    void Promise.resolve(canvas.requestPointerLock()).catch(() => {
-      if (app.captureFailed(result.generation)) {
-        captureFailed();
-      }
-    });
-  } catch {
-    if (app.captureFailed(result.generation)) {
-      captureFailed();
-    }
-  }
+  canvas.focus();
 }
 function resume() {
   applyResume(app.resume());
 }
-$("control-mode").onclick = () => {
-  applyResume(app.switchControls());
-};
 element("start-form", HTMLFormElement).onsubmit = (event) => {
   event.preventDefault();
   const seed = chooseSeed(seedInput.value, () =>
@@ -160,15 +114,12 @@ element("start-form", HTMLFormElement).onsubmit = (event) => {
   try {
     const nextIsland = createIsland(seed);
     world.dispose();
-    world = createScene(canvas, nextIsland, shipAsset);
+    world = createScene(canvas, nextIsland, shipAsset, false, true);
     seedInput.value = seed;
     const url = new URL(location.href);
     url.searchParams.set("seed", seed);
     history.replaceState(null, "", url);
-    const result = app.start(
-      nextIsland,
-      element("start-controls", HTMLSelectElement).value === "keyboard"
-    );
+    const result = app.start(nextIsland, true);
     toastUntil = 0;
     $("toast").hidden = true;
     updateWorldUI();
@@ -207,11 +158,8 @@ $("new-island").onclick = () => {
   seedInput.focus();
 };
 function openTerminal() {
-  if (!app.openTerminal()) {
+  if (!app.useSelection()) {
     return;
-  }
-  if (document.pointerLockElement === canvas) {
-    document.exitPointerLock();
   }
   sync();
   $("check-link").focus();
@@ -224,23 +172,6 @@ $("check-link").onclick = () => {
 $("terminal-return").onclick = () => {
   applyResume(app.resume("terminal"));
 };
-document.addEventListener("pointerlockchange", () => {
-  if (document.pointerLockElement === canvas) {
-    if (!app.captureSucceeded()) {
-      document.exitPointerLock();
-      return;
-    }
-
-    activatePlay();
-  } else if (app.captureLost()) {
-    release();
-  }
-});
-document.addEventListener("pointerlockerror", () => {
-  if (app.captureFailed()) {
-    captureFailed();
-  }
-});
 window.addEventListener("keydown", (e) => {
   if (e.code === "Escape" && app.started) {
     e.preventDefault();
@@ -248,9 +179,9 @@ window.addEventListener("keydown", (e) => {
     return;
   }
   const editing =
-    e.target instanceof HTMLInputElement ||
-    e.target instanceof HTMLSelectElement;
-  if (e.code === "KeyE" && !editing && !e.repeat && !app.state.paused) {
+    e.target instanceof HTMLElement &&
+    Boolean(e.target.closest("input,textarea,select,[contenteditable]"));
+  if (e.code === "KeyF" && !editing && !e.repeat && !app.state.paused) {
     e.preventDefault();
     openTerminal();
     return;
@@ -258,6 +189,9 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "KeyM" && app.started && !e.repeat && !editing) {
     e.preventDefault();
     release(!app.state.overview);
+    return;
+  }
+  if (e.code === "Space" && e.target instanceof HTMLButtonElement) {
     return;
   }
   if (!app.state.paused && !editing && app.press(e.code)) {
@@ -277,26 +211,31 @@ document.addEventListener("visibilitychange", () => {
     release();
   }
 });
-canvas.addEventListener("click", () => {
-  applyResume(app.resume("canvas"));
-});
-document.addEventListener("mousemove", (e) => {
-  if (document.pointerLockElement !== canvas) {
+canvas.addEventListener("click", (e) => {
+  if (!app.started || app.state.paused) {
     return;
   }
-  app.mouseMoved(
-    e.movementX,
-    e.movementY,
-    sensitivity.valueAsNumber,
-    invertY.checked
-  );
+  app.select(world.pick(e.clientX, e.clientY));
+  canvas.focus();
+  sync();
 });
+canvas.addEventListener(
+  "wheel",
+  (e) => {
+    if (!app.started || app.state.paused) {
+      return;
+    }
+    e.preventDefault();
+    camera.scroll(e.deltaY, e.deltaMode);
+  },
+  { passive: false }
+);
 function tick(now: number) {
   const dt = Math.min((now - previous) / 1000, 0.05);
   previous = now;
   const before = app.state.discovered.length;
   app.tick(dt);
-  $("interact").hidden = !app.canUseTerminal;
+  $("interact").hidden = !app.canUseSelection;
   if (before !== app.state.discovered.length) {
     const place = app.island.resources.find(
       (p) => p.id === app.state.discovered.at(-1)
@@ -319,12 +258,43 @@ function tick(now: number) {
     vents: "THE VENT FIELDS",
     crust: "CERAMIC SHELF",
   }[app.island.biomeAt(app.state.x, app.state.z)];
-  world.render(app.state, app.viewPosition, now / 1000, app.started);
+  const selected = app.island.resources.find((r) => r.id === app.selection);
+  $("selection").hidden =
+    !app.started || app.state.paused || app.selection === null;
+  $("selection-name").textContent =
+    app.selection === "ship"
+      ? "Stranded ship"
+      : selected && app.state.discovered.includes(selected.id)
+        ? selected.name
+        : "Unsurveyed deposit";
+  $("selection-help").textContent =
+    app.selection === "ship"
+      ? app.canUseTerminal
+        ? "F · Use terminal"
+        : "Walk closer to the terminal."
+      : "Approach to survey. Gathering is not available yet.";
+  $("camera-status").textContent =
+    `Zoom ${String(Math.round(camera.zoom * 100))}% · Orbit ${String(Math.round((app.state.yaw * 180) / Math.PI))}°`;
+  world.render(
+    app.state,
+    app.viewPosition,
+    now / 1000,
+    app.started,
+    app.started && !app.state.overview
+      ? camera.frame(
+          app.viewPosition,
+          app.state.yaw,
+          app.facing,
+          innerWidth / innerHeight
+        )
+      : undefined
+  );
+
   requestAnimationFrame(tick);
 }
 try {
   shipAsset = await loadShip();
-  world = createScene(canvas, app.island, shipAsset);
+  world = createScene(canvas, app.island, shipAsset, false, true);
   updateWorldUI();
   startButton.disabled = false;
   startButton.textContent = "Begin your landing →";

@@ -43,10 +43,40 @@ export class GameApplication {
   private terminal = false;
   private captureGeneration: number | null = null;
 
-  constructor(island: Island) {
+  private facingAngle = 0;
+  private selected: string | null = null;
+  private readonly orbitSources = new Set<string>();
+  constructor(
+    island: Island,
+    private readonly thirdPerson = false
+  ) {
     this.currentIsland = island;
     this.simulation = createSimulation(island);
     this.currentState = this.simulation.createState();
+  }
+  get facing() {
+    return this.facingAngle;
+  }
+  get selection() {
+    return this.selected;
+  }
+  select(id: string | null) {
+    if (!this.started || this.state.paused) {
+      return;
+    }
+    this.selected =
+      id === "ship" || this.island.resources.some((r) => r.id === id)
+        ? id
+        : null;
+  }
+  get canUseSelection() {
+    return (
+      (this.selected === null || this.selected === "ship") &&
+      this.canUseTerminal
+    );
+  }
+  useSelection() {
+    return this.canUseSelection && this.openTerminal();
   }
   get island() {
     return this.currentIsland;
@@ -78,10 +108,44 @@ export class GameApplication {
     return viewPosition(this.currentState);
   }
   press(code: string) {
+    if (this.thirdPerson) {
+      if (
+        this.session.active &&
+        ["KeyQ", "KeyE", "ArrowLeft", "ArrowRight"].includes(code)
+      ) {
+        this.orbitSources.add(code);
+      }
+      if (code === "Home" && this.session.active) {
+        this.look(-this.state.yaw, 0);
+        return true;
+      }
+      if (code === "ArrowUp" || code === "ArrowDown") {
+        return false;
+      }
+      code =
+        code === "KeyQ" ? "ArrowLeft" : code === "KeyE" ? "ArrowRight" : code;
+    }
     return this.session.press(code);
   }
   release(code: string) {
-    this.session.release(code);
+    if (this.thirdPerson) {
+      this.orbitSources.delete(code);
+      const mapped =
+        code === "KeyQ" ? "ArrowLeft" : code === "KeyE" ? "ArrowRight" : code;
+      if (
+        (mapped === "ArrowLeft" &&
+          (this.orbitSources.has("KeyQ") ||
+            this.orbitSources.has("ArrowLeft"))) ||
+        (mapped === "ArrowRight" &&
+          (this.orbitSources.has("KeyE") ||
+            this.orbitSources.has("ArrowRight")))
+      ) {
+        return;
+      }
+      this.session.release(mapped);
+    } else {
+      this.session.release(code);
+    }
   }
   mouseMoved(dx: number, dy: number, sensitivity: number, invertY: boolean) {
     if (this.session.mode !== "locked") {
@@ -92,6 +156,7 @@ export class GameApplication {
   }
 
   pause(overview = false) {
+    this.orbitSources.clear();
     this.terminal = false;
     this.captureGeneration = null;
     this.session.pause();
@@ -130,27 +195,44 @@ export class GameApplication {
     return { kind: "capture", generation };
   }
   start(island: Island, keyboard: boolean): ResumeResult {
+    const heading = this.state.yaw;
     this.pause();
+    this.selected = null;
+    this.facingAngle = 0;
     this.currentIsland = island;
     this.simulation = createSimulation(island);
     this.currentState = this.simulation.createState();
-    this.session.keyboardPreferred = keyboard;
+    if (this.thirdPerson) {
+      this.currentState = { ...this.currentState, yaw: heading };
+    }
+    this.session.keyboardPreferred = this.thirdPerson || keyboard;
     return this.resume();
   }
   restart(): ResumeResult {
+    const heading = this.state.yaw;
     this.pause();
+    this.selected = null;
+    this.facingAngle = 0;
     this.currentState = this.simulation.createState();
+    if (this.thirdPerson) {
+      this.currentState = { ...this.currentState, yaw: heading };
+    }
     return this.resume();
   }
   chooseSeed() {
+    const heading = this.state.yaw;
     this.pause();
+    this.selected = null;
     this.hasStarted = false;
     this.currentState = this.simulation.createState();
+    if (this.thirdPerson) {
+      this.currentState = { ...this.currentState, yaw: heading };
+    }
   }
   switchControls(): ResumeResult {
     const keyboard = !this.session.keyboardPreferred;
     this.pause();
-    this.session.keyboardPreferred = keyboard;
+    this.session.keyboardPreferred = this.thirdPerson || keyboard;
     return this.resume();
   }
   openTerminal(): boolean {
@@ -200,6 +282,7 @@ export class GameApplication {
     this.currentState = look(this.currentState, yaw, pitch);
   }
   tick(seconds: number) {
+    const previous = this.currentState;
     const rotation = this.session.look(seconds);
     this.look(rotation.yaw, rotation.pitch);
     this.currentState = this.simulation.advance(
@@ -207,5 +290,10 @@ export class GameApplication {
       this.session.readInput(),
       seconds
     );
+    const dx = this.state.x - previous.x,
+      dz = this.state.z - previous.z;
+    if (dx * dx + dz * dz > 0.000001) {
+      this.facingAngle = Math.atan2(-dx, -dz);
+    }
   }
 }

@@ -548,3 +548,37 @@ footer {
     bottom: 130px;
   }
 }
+
+.selection {
+  left: auto;
+  top: 100px;
+  right: 24px;
+  bottom: auto;
+  max-width: 240px;
+}
+#camera-status {
+  position: fixed;
+  left: 24px;
+  bottom: 135px;
+  color: #f5dec6;
+  text-shadow: 0 1px 3px #3e2c35;
+  font: 12px monospace;
+  pointer-events: none;
+}
+.in-menu #camera-status {
+  display: none;
+}
+@media (max-width: 600px) {
+  .selection {
+    top: 75px;
+    right: 12px;
+    max-width: 180px;
+  }
+  .selection p {
+    display: block;
+  }
+  #camera-status {
+    left: 12px;
+    bottom: 125px;
+  }
+}

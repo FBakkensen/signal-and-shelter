@@ -83,3 +83,7 @@ The user selected B: fade scenery that blocks the humanoid. Preserve user-select
 ### Design checkpoint accepted — 2026-09-19
 
 The user confirmed the [consolidated third-person design](third-person-design.md), including tunable zoom/blend defaults, 8 m exploration with existing 4 m surveying, smooth localized fading, and three sequential playable increments. D014 records the accepted replacement for first-person controls; production implementation remains pending.
+
+### First production increment — 2026-09-19
+
+Third-person controls and localized fading are implemented on `codex/third-person-controls`, using the normal game entry. Manual zoom, free-pointer selection, F interaction, keyboard orbit and preserved camera settings replace first-person input. The separate overview remains only until the next atlas increment. Sustained movement/obstruction feel still needs human playtesting; see [evidence](testing/third-person-controls.md).

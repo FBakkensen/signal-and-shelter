@@ -157,3 +157,10 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 ### Occlusion selection — 2026-09-19
 
 The user selected B (fade obstructing scenery) after the comparison. Broad terrain fading, exposed undersides and abrupt opacity changes remain known prototype limitations, not settled production quality. Camera zoom/framing remains entirely independent of obstruction. The next design checkpoint must turn this direction into implementation acceptance checks. No code or browser behavior changed in recording this selection.
+
+## 2026-09-19 — Third-person controls and localized fading
+
+- Implemented on the production entry: manual shoulder camera, keyboard orbit, free-pointer selection/F use and lifecycle preservation. Fade geometry is a tapered local opening with smooth coverage and a release delay; it does not remove whole terrain chunks or adjust the camera.
+- Tests caught heading loss during reset because the old look function ignores paused states; preservation now explicitly updates the new state's heading. Independent orbit aliases remain held until both are released. Browser inspection caught and corrected selection/journal overlap.
+- Evidence: 68 tests and full required checks pass. Browser exercised normal start, ship selection, terminal/check/paused background guard/resume, jumping, manual zoom, UI scroll isolation, restart and new seed. Production fading inspected on real seeded ship, terrain and inside-ship render fixtures. Desktop/narrow inspection passed; browser warning/error logs empty.
+- Limits: fade uses visible stippling and a small local opening, not full-object alpha transparency. Camera-inside views retain surrounding solid surfaces. Continuous traversal/orbit feel and frame-rate targets are unverified; fixtures establish rendering, not route traversal. See [validation](testing/third-person-controls.md).

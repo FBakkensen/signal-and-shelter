@@ -95,3 +95,9 @@ Strategic footprints reuse the island geometry entry point's ship, vent and reso
 ## Occlusion study — 2026-09-19
 
 `codex/occlusion-prototype` adds development-only `?study=occlusion&variant=A|B|C` for silhouette, mesh fading and manual-orbit comparisons. The scene opts into an obstruction adapter only in this study. Materials are cloned for fading and restored after rendering; the silhouette is excluded from pointer picking. Explicit fixture poses render against real seeded geometry without moving the playable humanoid. See [validation and limits](testing/occlusion-prototype.md). The user subsequently selected B (fading); this remains a prototype, with production integration pending the final design checkpoint.
+
+## Third-person production increment — 2026-09-19
+
+On `codex/third-person-controls`, the normal entry uses `GameApplication` in third-person mode. Play owns orbit aliases, facing, selection/reach and lifecycle/reset semantics; legacy capture APIs remain for historical tests and development studies. `camera.ts` owns input-only framing. `occlusion.ts` clones scenery materials, probes obstruction and smoothly fades fragments within a tapered camera-to-humanoid opening. Dithered coverage preserves depth writing and avoids whole-chunk transparency sorting. Camera framing is not passed back from visibility handling. Original materials are restored on scene disposal.
+
+The production DOM removes capture settings and adds selection/zoom feedback. The paused overview remains temporarily; atlas integration is the next increment. Development obstruction poses can exercise the actual production adapter with `production=1`. See [validation](testing/third-person-controls.md).

@@ -6,6 +6,7 @@ import { CameraStudy, scrollZoom } from "./camera-prototype-model.ts";
 import { occlusionVariant } from "./occlusion-prototype-model.ts";
 import { createScene, loadShip } from "./scene.ts";
 const params = new URLSearchParams(location.search);
+const production = params.get("production") === "1";
 const island = createIsland(params.get("seed") ?? DEFAULT_SEED);
 const study = new CameraStudy(island, "B");
 let variant = occlusionVariant(params.get("variant"));
@@ -36,7 +37,9 @@ if (!(canvas instanceof HTMLCanvasElement)) {
   throw new Error("canvas");
 }
 function sync() {
-  el("title").textContent = `${variant} · ${names[variant]}`;
+  el("title").textContent = production
+    ? "Production · Localized fade"
+    : `${variant} · ${names[variant]}`;
   el("label").textContent = variant;
   el("description").textContent =
     variant === "A"
@@ -44,6 +47,10 @@ function sync() {
       : variant === "B"
         ? "Meshes between camera and humanoid become translucent. Terrain chunks may fade broadly; this is deliberately visible for comparison."
         : "Scenery stays opaque. Orbit manually to see around obstructions.";
+  if (production) {
+    el("description").textContent =
+      "Actual production fading on repeatable render-only poses. A localized, stippled opening preserves surrounding geometry; camera framing stays fixed.";
+  }
   const url = new URL(location.href);
   url.searchParams.set("variant", variant);
   url.searchParams.set("seed", island.seed);
@@ -107,7 +114,13 @@ window.addEventListener("keyup", (e) => study.key(e.code, false));
 window.addEventListener("blur", () => {
   study.app.pause();
 });
-const world = createScene(canvas, island, await loadShip(), true);
+const world = createScene(
+  canvas,
+  island,
+  await loadShip(),
+  !production,
+  production
+);
 canvas.onclick = (e) => {
   el("selection").textContent =
     world.pick(e.clientX, e.clientY) ??
@@ -152,10 +165,10 @@ function tick(now: number) {
     now / 1000,
     true,
     frame,
-    variant
+    production ? undefined : variant
   );
   el("status").textContent =
-    `${fixture === "play" ? "LIVE PLAY" : "EXAMPLE POSE: " + fixture} · Treatment ${variant} · Zoom ${String(Math.round(zoom * 100))}% · User distance ${distance.toFixed(1)} m · FOV 55° · Blocking meshes ${String(blockers)}\nNo automatic distance, angle or FOV adjustment. Switch treatments without changing the pose or zoom.`;
+    `${production ? "PRODUCTION FADE VALIDATION · " : ""}${fixture === "play" ? "LIVE PLAY" : "EXAMPLE POSE: " + fixture} · Treatment ${variant} · Zoom ${String(Math.round(zoom * 100))}% · User distance ${distance.toFixed(1)} m · FOV 55°${production ? "" : ` · Blocking meshes ${String(blockers)}`}\nNo automatic distance, angle or FOV adjustment. Switch treatments without changing the pose or zoom.`;
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
