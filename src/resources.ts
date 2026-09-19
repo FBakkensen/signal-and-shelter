@@ -37,7 +37,7 @@ export function createResourceGroup(resource: ResourceDeposit): Group {
   for (const part of resourceParts(resource)) {
     const mesh = new Mesh(
       new BoxGeometry(...part.size),
-      new MeshStandardMaterial({ color: part.color, roughness: 1 }),
+      new MeshStandardMaterial({ color: part.color, roughness: 1 })
     );
     mesh.name = part.name;
     mesh.position.set(...part.position);

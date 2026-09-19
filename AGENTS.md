@@ -31,3 +31,21 @@ After meaningful work, update the document that owns the finding:
 - Experiments, failures, measurements, and limitations belong in learnings.
 
 Record evidence and dates for findings; label untested ideas as hypotheses. Promote a lesson into this file only when it becomes a durable instruction for future work. Correct or remove stale guidance, consolidate repeated findings, and summarize documentation changes in the handoff. Documentation maintenance happens as part of a task, not as an unattended background process.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues using the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Domain documentation uses a single-context layout. See `docs/agents/domain.md`.
+
+### Package modules
+
+Packages are deep modules — see [src/packages/README.md](./src/packages/README.md) before adding or importing one.

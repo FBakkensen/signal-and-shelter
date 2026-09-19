@@ -25,5 +25,5 @@ export default tseslint.config(
       curly: ["error", "all"],
       "no-console": ["error", { allow: ["warn", "error"] }],
     },
-  },
+  }
 );

@@ -47,7 +47,7 @@ export class GameApplication {
     this.session.pause();
     this.currentState = transition(
       this.currentState,
-      overview ? "overview" : "pause",
+      overview ? "overview" : "pause"
     );
   }
   resume(source: "button" | "canvas" | "terminal" = "button"): ResumeResult {
@@ -157,7 +157,7 @@ export class GameApplication {
       seconds,
       this.island.heightAt,
       obstacles,
-      this.island,
+      this.island
     );
   }
 }

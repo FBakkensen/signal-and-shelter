@@ -26,7 +26,6 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Procedural footsteps and ambient wind may suit the visual style. No sounds have been generated or auditioned.
 - GLB/glTF should provide the exchange format for authored Blender assets. The export-and-load path is now verified below; reimport into Blender has not been tested.
 
-
 ## 2026-09-19 — First playable experiment
 
 - Evidence: Strict TypeScript, type-aware ESLint, formatting, automated tests, and the production build passed. See [the test record](testing/experiment-001.md).
@@ -62,7 +61,6 @@ Record durable observations with date, evidence, implications, and limitations. 
 - User requirement: WASD movement and arrow-key look must always work during active play, including when the mouse is locked. Provide keyboard play as the alternative to captured mouse look. Drag-to-look remains rejected.
 - Implemented: keyboard play does not request capture; selected mode survives pause/overview/reset. Keep wandering now resumes keyboard play without hitting the embedded-browser capture failure.
 - Evidence: focused real-browser selection → Escape → Keep wandering → Space entered play and showed Airborne. Automated tests cover arrow-only look, WASD movement, simultaneous locked-session keyboard input, clearing inputs and mode retention. Full checks pass. Sustained keyboard-look feel and real captured input remain unverified by browser tools.
-
 
 ## 2026-09-19 — Seeded arrival experiment
 
@@ -111,3 +109,10 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Resource rendering and collision now consume shared block parts; tests compare actual mesh bounds to every resource collider and verify deposit colors.
 - Evidence: `npm run check` passed all eight test files and required checks. Real browser background click/Space kept the terminal paused; explicit return resumed jumping. Overview, pause, restart and replacement seed worked. Visual inspection passed and error logs were empty. See [validation record](testing/review-fixes.md).
 - Existing captured-mouse and sustained browser traversal limitations remain. The build retains its bundle-size warning.
+
+## 2026-09-19 — Deep-module entry-point checks
+
+- Implemented: dependency-cruiser 18.3.1 scans `src/`, with `src/packages/` as the package root; `npm run lint:boundaries` is included in `npm run check`. The example package exposes reading summaries through its root interface and keeps the implementation in `lib/`.
+- Evidence: scanning all of `src/` passed with 20 modules and 28 dependencies cruised. A temporary `../lib/impl` import from `tests/example.test.ts` failed with the `tests-through-entrypoints` rule; removing it restored a pass.
+- Validation: the final `npm run check` passed typechecking, boundary lint, ESLint, all nine tests, formatting, and the production build.
+- Limitation: existing game systems remain direct modules under `src/`; the package is a starter template, not an extracted game system.

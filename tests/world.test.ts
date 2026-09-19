@@ -22,7 +22,7 @@ function snapshot(seed: string) {
     seed: world.seed,
     version: world.version,
     heights: Array.from({ length: SIZE * SIZE }, (_, i) =>
-      world.heightAt((i % SIZE) - SIZE / 2, Math.floor(i / SIZE) - SIZE / 2),
+      world.heightAt((i % SIZE) - SIZE / 2, Math.floor(i / SIZE) - SIZE / 2)
     ),
     ship: world.ship,
     terminal: world.terminal,
@@ -57,17 +57,17 @@ await test("seed text is normalized, bounded, case-sensitive and blank input cho
   assert.equal(normalizeSeed("a".repeat(81)), "a".repeat(80));
   assert.equal(
     chooseSeed("  ", () => "new-island"),
-    "new-island",
+    "new-island"
   );
   assert.equal(
     chooseSeed("0", () => {
       throw new Error("Must not generate");
     }),
-    "0",
+    "0"
   );
   assert.equal(
     chooseSeed("", () => "  "),
-    DEFAULT_SEED,
+    DEFAULT_SEED
   );
   assert.deepEqual(snapshot(" seed "), snapshot("seed"));
   assert.notDeepEqual(snapshot("Seed").heights, snapshot("seed").heights);
@@ -98,9 +98,9 @@ await test("200 seeded starts have a clear dry spawn, level ship site, and dry d
         world.heightAt(world.spawn.x, world.spawn.z),
         STANDING_HEIGHT,
         world.heightAt,
-        obstacles,
+        obstacles
       ),
-      world.seed,
+      world.seed
     );
     for (const p of world.resources) {
       assert.ok(world.heightAt(p.x, p.z) > HAZE_LEVEL);
@@ -116,8 +116,8 @@ await test("200 seeded starts have a clear dry spawn, level ship site, and dry d
       assert.ok(vent.height >= 2 && vent.height <= 3.5);
       assert.ok(
         world.resources.every(
-          (p) => Math.hypot(vent.x - p.x, vent.z - p.z) >= 4.5,
-        ),
+          (p) => Math.hypot(vent.x - p.x, vent.z - p.z) >= 4.5
+        )
       );
     }
   }
@@ -154,7 +154,7 @@ await test("terrain face winding points outward", () => {
     (x: number, z: number) => (x === 0 && z === 0 ? 1 : 0),
     0,
     0,
-    1,
+    1
   );
   for (const q of quads) {
     const [a, b, c] = q.points;
@@ -193,7 +193,7 @@ await test("half-metre terrain meshes preserve cubic faces and chunk seams", () 
       .normalize();
     assert.equal(
       Math.abs(normal.x) + Math.abs(normal.y) + Math.abs(normal.z),
-      1,
+      1
     );
   }
 });

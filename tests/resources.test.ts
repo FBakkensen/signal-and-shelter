@@ -32,9 +32,9 @@ await test("actual resource render meshes match collision and retain bounds and 
             Math.abs(o.minY - box.min.y) < 1e-6 &&
             Math.abs(o.maxY - box.max.y) < 1e-6 &&
             Math.abs(o.minZ - box.min.z) < 1e-6 &&
-            Math.abs(o.maxZ - box.max.z) < 1e-6,
+            Math.abs(o.maxZ - box.max.z) < 1e-6
         ),
-        child.name,
+        child.name
       );
       assert.ok(child.material instanceof MeshStandardMaterial);
       if (child.name.startsWith("Crystal")) {
@@ -43,11 +43,11 @@ await test("actual resource render meshes match collision and retain bounds and 
     }
     assert.equal(
       fits(resource, floor, STANDING_HEIGHT, island.heightAt, obstacles),
-      false,
+      false
     );
     assert.equal(
       fits(resource, floor + 2, STANDING_HEIGHT, island.heightAt, obstacles),
-      true,
+      true
     );
   }
 });

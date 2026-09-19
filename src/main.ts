@@ -22,9 +22,7 @@ const $ = (id: string): HTMLElement => element(id, HTMLElement);
 const startButton = element("start", HTMLButtonElement);
 const canvas = element("world", HTMLCanvasElement);
 const app = new GameApplication(
-  createIsland(
-    new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED,
-  ),
+  createIsland(new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED)
 );
 let world: ReturnType<typeof createScene>,
   shipAsset: Awaited<ReturnType<typeof loadShip>>,
@@ -45,7 +43,7 @@ function updateWorldUI() {
       name.textContent = resource.name;
       row.append(marker, name);
       return row;
-    }),
+    })
   );
   element("current-seed", HTMLInputElement).value = app.island.seed;
   $("seed-version").textContent =
@@ -121,7 +119,7 @@ function activatePlay() {
     "aria-label",
     app.session.keyboardPreferred
       ? "Signal & Shelter exploration. W A S D to move, arrow keys to look, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
-      : "Signal & Shelter exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause.",
+      : "Signal & Shelter exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
   );
   previous = performance.now();
   sync();
@@ -160,7 +158,7 @@ $("control-mode").onclick = () => {
 element("start-form", HTMLFormElement).onsubmit = (event) => {
   event.preventDefault();
   const seed = chooseSeed(seedInput.value, () =>
-    crypto.randomUUID().slice(0, 12),
+    crypto.randomUUID().slice(0, 12)
   );
   try {
     const nextIsland = createIsland(seed);
@@ -172,7 +170,7 @@ element("start-form", HTMLFormElement).onsubmit = (event) => {
     history.replaceState(null, "", url);
     const result = app.start(
       nextIsland,
-      element("start-controls", HTMLSelectElement).value === "keyboard",
+      element("start-controls", HTMLSelectElement).value === "keyboard"
     );
     toastUntil = 0;
     $("toast").hidden = true;
@@ -293,7 +291,7 @@ document.addEventListener("mousemove", (e) => {
     e.movementX,
     e.movementY,
     sensitivity.valueAsNumber,
-    invertY.checked,
+    invertY.checked
   );
   app.look(delta.yaw, delta.pitch);
 });
@@ -306,7 +304,7 @@ function tick(now: number) {
     !app.started || app.state.paused || !canUseTerminal(app.state, app.island);
   if (before !== app.state.discovered.length) {
     const place = app.island.resources.find(
-      (p) => p.id === app.state.discovered.at(-1),
+      (p) => p.id === app.state.discovered.at(-1)
     );
     if (!place) {
       throw new Error("Unknown discovered landmark");

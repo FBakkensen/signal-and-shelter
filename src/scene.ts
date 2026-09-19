@@ -14,7 +14,7 @@ export async function loadShip() {
 export function createScene(
   canvas: HTMLCanvasElement,
   island: Island,
-  shipAsset: THREE.Group,
+  shipAsset: THREE.Group
 ) {
   const { heightAt, hash } = island;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -52,12 +52,12 @@ export function createScene(
     sx: number,
     sy: number,
     sz: number,
-    color: string,
+    color: string
   ) {
     if (!materials.has(color)) {
       materials.set(
         color,
-        new THREE.MeshStandardMaterial({ color, roughness: 1 }),
+        new THREE.MeshStandardMaterial({ color, roughness: 1 })
       );
     }
     const mesh = new THREE.Mesh(box, materials.get(color));
@@ -83,7 +83,7 @@ export function createScene(
             ? h <= 2
               ? WORLD_PALETTE.rim
               : WORLD_PALETTE.crust
-            : WORLD_PALETTE.strata,
+            : WORLD_PALETTE.strata
         );
         color.multiplyScalar(0.96 + hash(quad.x * 2, quad.z * 2) * 0.08);
         for (const i of [0, 1, 2, 0, 2, 3] as const) {
@@ -94,7 +94,7 @@ export function createScene(
       const geo = new THREE.BufferGeometry();
       geo.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(positions, 3),
+        new THREE.Float32BufferAttribute(positions, 3)
       );
       geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
       geo.computeVertexNormals();
@@ -106,7 +106,7 @@ export function createScene(
   }
   const haze = new THREE.Mesh(
     new THREE.PlaneGeometry(500, 500),
-    new THREE.MeshStandardMaterial({ color: WORLD_PALETTE.sky, roughness: 1 }),
+    new THREE.MeshStandardMaterial({ color: WORLD_PALETTE.sky, roughness: 1 })
   );
   haze.rotation.x = -Math.PI / 2;
   haze.position.y = HAZE_LEVEL;
@@ -128,7 +128,7 @@ export function createScene(
       0.09,
       0.09,
       0.09,
-      WORLD_PALETTE.light,
+      WORLD_PALETTE.light
     );
   }
   for (const vent of island.vents) {
@@ -151,7 +151,7 @@ export function createScene(
         width,
         1.5,
         width * 0.75,
-        WORLD_PALETTE.strata,
+        WORLD_PALETTE.strata
       );
     }
   }
@@ -163,7 +163,7 @@ export function createScene(
   ship.position.set(
     island.ship.x,
     heightAt(island.ship.x, island.ship.z),
-    island.ship.z,
+    island.ship.z
   );
   ship.traverse((o) => {
     if (o instanceof THREE.Mesh) {
@@ -177,7 +177,7 @@ export function createScene(
     group.position.set(
       resource.x,
       heightAt(resource.x, resource.z),
-      resource.z,
+      resource.z
     );
     scene.add(group);
   }

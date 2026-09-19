@@ -66,7 +66,7 @@ export function createGame(island: Island = DEFAULT_ISLAND): GameState {
 }
 export function discover(
   state: GameState,
-  landmarks: readonly ResourceDeposit[],
+  landmarks: readonly ResourceDeposit[]
 ) {
   return [
     ...new Set([
@@ -81,7 +81,7 @@ function simulate(
   state: GameState,
   input: Input,
   sample: HeightSampler,
-  obstacles: readonly Obstacle[],
+  obstacles: readonly Obstacle[]
 ) {
   const s = {
     ...state,
@@ -162,7 +162,7 @@ export function advance(
   seconds: number,
   sample: HeightSampler = DEFAULT_ISLAND.heightAt,
   obstacles: readonly Obstacle[] = [],
-  island: Island = DEFAULT_ISLAND,
+  island: Island = DEFAULT_ISLAND
 ) {
   if (
     state.paused ||

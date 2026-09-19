@@ -122,7 +122,7 @@ export function createIsland(input = DEFAULT_SEED): Island {
     return Math.max(
       0,
       Math.floor(Math.min((coast - radius) * 0.7, 4 + hills) / CELL_SIZE) *
-        CELL_SIZE,
+        CELL_SIZE
     );
   };
   const vents: Vent[] = [];
@@ -165,7 +165,7 @@ export function terrainQuads(
   minX: number,
   minZ: number,
   size: number,
-  cell = 1,
+  cell = 1
 ) {
   const quads: Quad[] = [];
   for (let x = minX; x < minX + size; x += cell) {
