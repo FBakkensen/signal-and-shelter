@@ -1,3 +1,4 @@
+import type { CameraFrame } from "./camera-prototype-model.ts";
 import { createResourceGroup } from "./resources.ts";
 import { WORLD_PALETTE, ventParts } from "./packages/island/geometry.ts";
 import type { PlayState } from "./packages/play/index.ts";
@@ -163,6 +164,7 @@ export function createScene(
     block(scene, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
   }
   const ship = shipAsset.clone(true);
+  ship.name = "select:ship";
   ship.position.set(
     island.ship.x,
     heightAt(island.ship.x, island.ship.z),
@@ -177,6 +179,7 @@ export function createScene(
   scene.add(ship);
   for (const resource of island.resources) {
     const group = createResourceGroup(resource);
+    group.name = `select:${resource.id}`;
     group.position.set(
       resource.x,
       heightAt(resource.x, resource.z),
@@ -203,21 +206,25 @@ export function createScene(
     state: PlayState,
     view: { x: number; y: number; z: number },
     time: number,
-    started: boolean
+    started: boolean,
+    study?: CameraFrame
   ) {
     const y = state.y;
     avatar.position.set(state.x, y, state.z);
-    avatar.rotation.y = state.yaw;
+    avatar.rotation.y = study?.facing ?? state.yaw;
     left.rotation.x = Math.sin(state.distance * 3) * 0.4;
     right.rotation.x = -left.rotation.x;
     const overview = state.overview || !started;
-    avatar.visible = overview;
-    const fov = overview ? 44 : 70;
+    avatar.visible = overview || Boolean(study);
+    const fov = study?.fov ?? (overview ? 44 : 70);
     if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     }
-    if (overview) {
+    if (study) {
+      camera.position.set(study.position.x, study.position.y, study.position.z);
+      camera.lookAt(study.target.x, study.target.y, study.target.z);
+    } else if (overview) {
       camera.position.set(49, 53, 66);
       camera.lookAt(0, 2, 0);
     } else {
@@ -249,5 +256,32 @@ export function createScene(
     sun.shadow.map?.dispose();
     renderer.dispose();
   }
-  return { render, dispose };
+  function pick(clientX: number, clientY: number): string | null {
+    const rect = canvas.getBoundingClientRect();
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(
+      new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        (-(clientY - rect.top) / rect.height) * 2 + 1
+      ),
+      camera
+    );
+    const hit = ray
+      .intersectObjects(scene.children, true)
+      .find((h) => !isAvatar(h.object));
+    let object: THREE.Object3D | null = hit?.object ?? null;
+    while (object) {
+      if (object.name.startsWith("select:")) {
+        return object.name.slice(7);
+      }
+      object = object.parent;
+    }
+    return null;
+  }
+  function isAvatar(object: THREE.Object3D): boolean {
+    return (
+      object === avatar || (object.parent !== null && isAvatar(object.parent))
+    );
+  }
+  return { render, dispose, pick };
 }

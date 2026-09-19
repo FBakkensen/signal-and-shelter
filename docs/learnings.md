@@ -124,3 +124,10 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Browser evidence: seeded entry, jump, terminal pause guard/check/return, restart, overview, seed replacement and keyboard recovery after rejected capture. Screenshots inspected and warning/error logs empty. See [deep-module validation](testing/deep-modules.md).
 - Tooling limitation: sandboxed test execution reported file-level successes; a direct no-isolation run stalled. Individual assertions were verified by the unsandboxed suite. Discrete browser movement presses did not visibly change the HUD position; sustained movement and captured mouse look remain unverified in this run.
 - Documentation: current entry points and asset-authoring import path are recorded in architecture/package guidance; D013 records the ownership choice, and CONTEXT.md defines the existing island/play terms.
+
+## 2026-09-19 — Third-person camera comparison prepared
+
+- Implemented on a throwaway branch: raised and shoulder camera variants, scroll zoom from 3.5 to 70 metres, active humanoid-centered play, movement-facing avatar, free-pointer inspection and sampled camera pull-in. No camera variant has been selected by the user.
+- Evidence: 56 tests and full checks passed; real integrated-browser switching, zooming, ship selection, jumping, terminal use at both zoom extremes, pause, restart and reload were exercised. Desktop and narrow visuals inspected; warning/error logs empty. See [camera-study record](testing/camera-prototype.md).
+- Correction: a fixed shoulder offset clipped the avatar in a 390×844 viewport. Scaling the offset with portrait aspect ratio restored full-avatar framing, with a new regression test.
+- Limits: browser D/R taps did not visibly move/orbit; held-control feel and camera collision during live traversal need user playtesting. The distant view remains detailed 3D; strategic-map readability is the next prototype ticket.

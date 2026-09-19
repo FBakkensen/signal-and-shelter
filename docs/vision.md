@@ -36,7 +36,7 @@ See [experiment 004's validation record](testing/experiment-004.md) for actual c
 - How and when should base infrastructure provide faster charging or battery replacement?
 - What first robot job would make a useful, enjoyable experiment?
 - How should travel, resource differences, and logistics between islands work?
-- How should we tune the new first-person sensitivity, speed, jumping, and sneaking?
+- Which third-person camera and strategic-zoom controls feel best in the agreed prototype comparison?
 - Which visual references best express the friendly atmosphere?
 - Which devices and browsers should define our performance target?
 - How should the seeded terrain evolve beyond the current clear ceramic shelf and stepped outer terrain?
@@ -53,3 +53,11 @@ Three archived visual studies compared different voxel terrain treatments and in
 User correction, 2026-09-19: “you broke the voxels.” Preserve the voxel aesthetic. Less clunky means improving block scale, proportions, materials and composition; it does not authorize smooth or low-poly replacement geometry. The studies now use half-metre terrain cells and finer block-built formations. The exact scale remains experimental.
 
 The seeded island uses half-metre terrain cells, finer stepped vent geometry and matching collision; generator version 2. Exact density, scale, lighting and movement feel still await play feedback. Selecting the console interface did not settle the world name or future manufacturing and power systems.
+
+## Third-person and strategic zoom direction — 2026-09-19
+
+The user agreed to replace first-person play with third-person play anchored to the humanoid: screen-relative WASD, a free mouse pointer for selection and interaction, a humanoid facing its movement direction, and scroll zoom. At sufficient distance, the presentation changes into a simplified strategic map while preserving position and orientation. Zoom does not enable or disable actions; physical proximity still governs nearby interactions. This is accepted direction, not implemented behavior.
+
+Compare raised and over-the-shoulder close-camera prototypes before choosing the camera. Exploration should reveal resource deposit identities, and discovered deposits should remain recognizable across zoom levels. Exact map symbols, exploration coverage, transition behavior and remaining controls will be settled through prototypes and discussion. The strategic view is intended to support active play; the existing separate overview currently pauses it.
+
+The user requested design first, with prototypes, followed by implementation. The canonical [Third-person play and strategic zoom: design through implementation](https://github.com/FBakkensen/signal-and-shelter/issues/5) map tracks that effort and its decision tickets. New robot orders, construction and other future gameplay systems remain separate efforts. D007 records the existing first-person implementation; its replacement control specification is pending this design work.

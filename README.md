@@ -67,3 +67,9 @@ Implemented deep TypeScript modules live in `src/packages/island` and `src/packa
 The game is **Signal & Shelter**. The warm console interface from study B was selected for the current prototype; the study's label was not a game or world name. The playable implementation is on `main`. Generator version 2 uses half-metre terrain cells and stepped vent formations; a seed from version 1 will produce different terrain/decorations.
 
 Three interface and visual studies were captured at commit `8df36f9` on `codex/alien-visual-prototypes`. That branch supports `/?variant=A`, `B` or `C` in development. The playable game removes the comparison route and switcher; open `/` to play. No prototype state is migrated.
+
+## Camera comparison on this throwaway branch
+
+Run `npm run prototype:camera` to open the A/B study, or use the verified development command `npm run dev -- --port 5173` and visit `http://127.0.0.1:5173/?variant=A` (raised) or `?variant=B` (shoulder). The comparison is development-only; `/` and production builds retain the current game. A/B selection and seed survive URL reloads; zoom and play state do not.
+
+WASD moves relative to the view; Q/R temporarily orbit it; the pointer stays free for inspection. Scroll or Close/Far controls zoom, E uses a nearby terminal, Space jumps, Escape pauses, and the bottom arrows (or left/right arrow keys) switch variants. Compare walking around the ship and zooming out. Strategic-map rendering is a separate study. These bindings and camera settings are experimental, pending user feedback. See [camera-study validation and limitations](docs/testing/camera-prototype.md).

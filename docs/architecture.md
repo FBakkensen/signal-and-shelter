@@ -6,16 +6,16 @@ Last updated: 2026-09-19. Experiment 004's seeded island arrival is implemented;
 
 TypeScript, Three.js, and Vite power a local browser application. Dependency versions are pinned in package.json and package-lock.json. The compiler uses strict mode, unchecked-index protection, exact optional properties, unused-code checks, and no implicit returns. ESLint applies its recommended rules plus TypeScript's strict and stylistic type-aware presets, consistent type imports, mandatory braces, and zero-warning validation.
 
-| Entry point | Responsibility |
-| --- | --- |
-| `src/packages/island/index.ts` | Seed selection and complete island generation, including solid geometry |
-| `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering |
-| `src/packages/play/index.ts` | `GameApplication`: input, capture, terminal, pause/overview, restart and island replacement; read-only play observations |
+| Entry point                       | Responsibility                                                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `src/packages/island/index.ts`    | Seed selection and complete island generation, including solid geometry                                                   |
+| `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering                       |
+| `src/packages/play/index.ts`      | `GameApplication`: input, capture, terminal, pause/overview, restart and island replacement; read-only play observations  |
 | `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
-| `src/resources.ts` | Three.js resource mesh adapter using island geometry |
-| `src/scene.ts` | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime |
-| `src/main.ts` | Browser event, DOM, seed URL and rendering adapters |
-| `src/packages/*/tests/`, `tests/` | Public-interface behavior tests and real mesh/GLTFLoader integration tests |
+| `src/resources.ts`                | Three.js resource mesh adapter using island geometry                                                                      |
+| `src/scene.ts`                    | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime                                      |
+| `src/main.ts`                     | Browser event, DOM, seed URL and rendering adapters                                                                       |
+| `src/packages/*/tests/`, `tests/` | Public-interface behavior tests and real mesh/GLTFLoader integration tests                                                |
 
 ## TypeScript package modules
 
@@ -77,3 +77,7 @@ The user selected the warm console interface from study B. `scene.ts` applies th
 `style.css` implements the warm console layout for arrival, pause and the terminal; the resource journal is compact during play and hidden in menus. All existing IDs and session controls remain connected to real game state. There are no prototype statistics or simulation claims in the playable UI.
 
 The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-prototypes`, then removed from the playable implementation. `index.html` again loads `main.ts` directly. The prototype URL parameter no longer changes the game. See [experiment 004](testing/experiment-004.md) for validation and remaining limitations.
+
+## Camera study branch — 2026-09-19
+
+The throwaway `codex/third-person-camera-prototype` branch adds a development-only `?variant=A|B` entry through `src/entry.ts`. `camera-prototype.ts` and its model wrap the existing `GameApplication` and seeded renderer; the optional scene camera frame supplies third-person framing and movement-facing avatar presentation. The study reuses real play/collision/terminal rules and adds pointer selection to the rendering adapter. It does not replace the production first-person control contract. The distant strategic map is not implemented. See [validation](testing/camera-prototype.md); selection and final design remain pending.
