@@ -7,6 +7,7 @@ import {
   look,
   transition,
 } from "./game.ts";
+import { makeObstacles } from "./collision.ts";
 import type { Obstacle } from "./collision.ts";
 import type { Island } from "./world.ts";
 
@@ -17,16 +18,34 @@ export type ResumeResult =
 
 // Owns game/session/menu transitions. Browser adapters only apply DOM and capture effects.
 export class GameApplication {
-  readonly session = new ControlSession();
+  private readonly session = new ControlSession();
   private currentIsland: Island;
+  private obstacles: readonly Obstacle[];
   private currentState: ReturnType<typeof createGame>;
   private hasStarted = false;
   private terminal = false;
   private captureGeneration: number | null = null;
 
   constructor(island: Island) {
+    this.obstacles = makeObstacles(island);
     this.currentIsland = island;
     this.currentState = createGame(island);
+  }
+  get keyboardPreferred() {
+    return this.session.keyboardPreferred;
+  }
+  get terminalAvailable() {
+    return (
+      this.started &&
+      !this.state.paused &&
+      canUseTerminal(this.state, this.island)
+    );
+  }
+  press(code: string) {
+    return this.session.press(code);
+  }
+  release(code: string) {
+    this.session.release(code);
   }
   get island() {
     return this.currentIsland;
@@ -81,6 +100,7 @@ export class GameApplication {
   }
   start(island: Island, keyboard: boolean): ResumeResult {
     this.pause();
+    this.obstacles = makeObstacles(island);
     this.currentIsland = island;
     this.currentState = createGame(island);
     this.session.keyboardPreferred = keyboard;
@@ -103,11 +123,7 @@ export class GameApplication {
     return this.resume();
   }
   openTerminal(): boolean {
-    if (
-      !this.started ||
-      this.state.paused ||
-      !canUseTerminal(this.state, this.island)
-    ) {
+    if (!this.terminalAvailable) {
       return false;
     }
     this.pause();
@@ -148,7 +164,7 @@ export class GameApplication {
   look(yaw: number, pitch: number) {
     this.currentState = look(this.state, yaw, pitch);
   }
-  tick(seconds: number, obstacles: readonly Obstacle[]) {
+  tick(seconds: number) {
     const rotation = this.session.look(seconds);
     this.look(rotation.yaw, rotation.pitch);
     this.currentState = advance(
@@ -156,7 +172,7 @@ export class GameApplication {
       this.session.readInput(),
       seconds,
       this.island.heightAt,
-      obstacles,
+      this.obstacles,
       this.island,
     );
   }

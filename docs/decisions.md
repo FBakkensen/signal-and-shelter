@@ -116,3 +116,14 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Rationale: Apply the project's existing local verification command to changes in the hosted repository.
 - Consequence: The `check` job is required before merging pull requests into `main`, with the rule enforced for administrators.
 - Evidence: The first hosted run passed on 2026-09-19 ([Actions run](https://github.com/FBakkensen/signal-and-shelter/actions/runs/35440373710)); GitHub branch protection requires the `check` status.
+
+
+## D013 — Deepen gameplay ownership and share solid placement
+
+- Date: 2026-09-19
+- Status: Implemented
+- Basis: The user requested a deep TypeScript module refactor and selected every candidate in the architecture report.
+- Decision: Keep input sessions and island-derived collision data behind GameApplication. Share world-space solid placement between collision and the mesh adapter; keep local part definitions and the authored ship source intact.
+- Rationale: Browser code and tests no longer synchronize input internals or renderer-owned colliders. Placement corrections have one home instead of repeated transforms in each consumer.
+- Tradeoff: Retain small internal modules for input and physics rather than merge all implementation into one file. Rendering and collision each derive the same deterministic placement from an island; no shared mutable mesh/physics object or new plug-in framework is introduced.
+- Evidence: [Deep module validation](testing/deep-modules-2026-09-19.md). Gameplay rules, seed generation and visuals retain their existing intent.

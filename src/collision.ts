@@ -1,6 +1,4 @@
-import { resourceParts } from "./resources.ts";
-import { ventParts } from "./world-visuals.ts";
-import { SHIP_PARTS } from "./ship.ts";
+import { placeSolids } from "./solids.ts";
 import { DEFAULT_ISLAND, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
 import type { HeightSampler, Point, Island } from "./world.ts";
 
@@ -122,53 +120,11 @@ export function ledgeSafe(
   );
 }
 export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
-  const { heightAt, ship } = island;
-  const result: Obstacle[] = [];
-  for (const vent of island.vents) {
-    for (const part of ventParts(vent.height)) {
+  return placeSolids(island).flatMap((solid) =>
+    solid.parts.map((part) => {
       const [x, y, z] = part.position;
       const [width, height, depth] = part.size;
-      result.push(
-        boxCollider(
-          vent.x + x,
-          heightAt(vent.x, vent.z) + y - height / 2,
-          vent.z + z,
-          width,
-          height,
-          depth,
-        ),
-      );
-    }
-  }
-  for (const part of SHIP_PARTS) {
-    const [x, y, z] = part.position;
-    const [width, height, depth] = part.size;
-    result.push(
-      boxCollider(
-        ship.x + x,
-        heightAt(ship.x, ship.z) + y - height / 2,
-        ship.z + z,
-        width,
-        height,
-        depth,
-      ),
-    );
-  }
-  for (const resource of island.resources) {
-    for (const part of resourceParts(resource)) {
-      const [x, y, z] = part.position;
-      const [width, height, depth] = part.size;
-      result.push(
-        boxCollider(
-          resource.x + x,
-          heightAt(resource.x, resource.z) + y - height / 2,
-          resource.z + z,
-          width,
-          height,
-          depth,
-        ),
-      );
-    }
-  }
-  return result;
+      return boxCollider(x, y - height / 2, z, width, height, depth);
+    }),
+  );
 }

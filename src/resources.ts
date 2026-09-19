@@ -1,4 +1,3 @@
-import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
 import type { BlockPart } from "./blocks.ts";
 import type { ResourceDeposit } from "./world.ts";
 import { WORLD_PALETTE } from "./world-visuals.ts";
@@ -30,20 +29,4 @@ export function resourceParts(resource: ResourceDeposit): readonly BlockPart[] {
       color: resource.color,
     },
   ];
-}
-
-export function createResourceGroup(resource: ResourceDeposit): Group {
-  const group = new Group();
-  for (const part of resourceParts(resource)) {
-    const mesh = new Mesh(
-      new BoxGeometry(...part.size),
-      new MeshStandardMaterial({ color: part.color, roughness: 1 }),
-    );
-    mesh.name = part.name;
-    mesh.position.set(...part.position);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    group.add(mesh);
-  }
-  return group;
 }

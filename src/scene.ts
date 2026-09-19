@@ -1,8 +1,8 @@
-import { createResourceGroup } from "./resources.ts";
-import { WORLD_PALETTE, ventParts } from "./world-visuals.ts";
+import { createSolidMeshes } from "./solid-mesh.ts";
+import { placeSolids } from "./solids.ts";
+import { WORLD_PALETTE } from "./world-visuals.ts";
 import type { GameState } from "./game.ts";
 import { viewPosition } from "./game.ts";
-import { makeObstacles } from "./collision.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { terrainQuads, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
@@ -131,14 +131,6 @@ export function createScene(
       WORLD_PALETTE.light,
     );
   }
-  for (const vent of island.vents) {
-    const y = heightAt(vent.x, vent.z);
-    for (const part of ventParts(vent.height)) {
-      const [dx, dy, dz] = part.position;
-      const [sx, sy, sz] = part.size;
-      block(scene, vent.x + dx, y + dy, vent.z + dz, sx, sy, sz, part.color);
-    }
-  }
   // Distant voxel shelves and a stepped satellite establish an unfamiliar planet.
   for (let i = 0; i < 5; i++) {
     for (let tier = 0; tier < 5; tier++) {
@@ -159,28 +151,8 @@ export function createScene(
     const width = Math.floor(Math.sqrt(49 - tier * tier)) * 2;
     block(scene, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
   }
-  const ship = shipAsset.clone(true);
-  ship.position.set(
-    island.ship.x,
-    heightAt(island.ship.x, island.ship.z),
-    island.ship.z,
-  );
-  ship.traverse((o) => {
-    if (o instanceof THREE.Mesh) {
-      o.castShadow = true;
-      o.receiveShadow = true;
-    }
-  });
-  scene.add(ship);
-  for (const resource of island.resources) {
-    const group = createResourceGroup(resource);
-    group.position.set(
-      resource.x,
-      heightAt(resource.x, resource.z),
-      resource.z,
-    );
-    scene.add(group);
-  }
+  const solids = createSolidMeshes(placeSolids(island), shipAsset);
+  scene.add(solids.group);
   const avatar = new THREE.Group();
   scene.add(avatar);
   block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#ece7d7");
@@ -189,7 +161,6 @@ export function createScene(
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
-  const obstacles = makeObstacles(island);
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -223,8 +194,8 @@ export function createScene(
   }
   function dispose() {
     window.removeEventListener("resize", resize);
-    // The shared ship template owns its geometry/materials across world rebuilds.
-    scene.remove(ship);
+    scene.remove(solids.group);
+    solids.dispose();
     scene.traverse((object) => {
       if (object instanceof THREE.Mesh) {
         if (object.geometry instanceof THREE.BufferGeometry) {
@@ -243,5 +214,5 @@ export function createScene(
     sun.shadow.map?.dispose();
     renderer.dispose();
   }
-  return { render, obstacles, dispose };
+  return { render, dispose };
 }

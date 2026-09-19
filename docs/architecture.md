@@ -11,11 +11,13 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | `src/world.ts` | Seed normalization, versioned island generation, terrain, regions, vents, resource deposits, and exposed terrain quads |
 | `src/game.ts` | Seed-specific initial/recovery state, movement, resource discovery, terminal proximity/data-link state, and view transitions |
 | `src/collision.ts` | Player footprint, terrain support, ledge protection and finite solid obstacle boxes |
-| `src/application.ts` | Game/session lifecycle: entry, capture outcomes, terminal, pause/overview, reset and seed replacement |
-| `src/session.ts` | Capture request lifecycle, held inputs, quick-jump buffering and keyboard play |
+| `src/application.ts` | Gameplay interface: input, island-owned collision, entry/capture, terminal, pause/overview, reset and seed replacement |
+| `src/session.ts` | Internal gameplay implementation for capture lifecycle, held inputs, quick-jump buffering and keyboard play |
 | `src/controls.ts` | Keyboard-to-intent mapping and relative mouse sensitivity/inversion |
 | `src/blocks.ts` | Common typed block-part definition |
-| `src/resources.ts` | Shared resource parts and their production mesh factory |
+| `src/resources.ts` | Local resource block definitions, independent of Three.js |
+| `src/solids.ts` | Shared world-space placement for all vent, ship and resource blocks |
+| `src/solid-mesh.ts` | Mesh adapter, shared procedural geometry/material ownership and authored ship cloning |
 | `src/ship.ts` | Shared ship block dimensions, colors, and positions for collision and Blender authoring |
 | `src/world-visuals.ts` | World palette and block dimensions shared by vent rendering and collision |
 | `src/scene.ts` | Three.js rendering, geometry, lighting, authored asset loading, avatar and camera |
@@ -39,6 +41,10 @@ The square player footprint is 0.6 metres wide; body height is 1.8 metres standi
 The first-person camera uses a 70-degree vertical FOV, immediate yaw/pitch, and interpolation between simulation positions. Standing eye height is 1.62 metres, crouched eye height is 1.27 metres. Pitch is clamped short of vertical. The local avatar is visible only in overview. No head bob, sprint FOV effect, or trailing camera lag is applied.
 
 In mouse mode, capture is requested only by explicit user action and active play begins after success. Keyboard mode starts directly. Capture failure leaves the game paused and keeps the action labeled Keep wandering. Keyboard play is explicitly selectable and does not request capture. WASD moves and arrows look in both active modes, including while the mouse is locked. Pause/resume, overview return and reset retain the mode until reload. The pause panel can switch modes. Drag-to-look is not supported. Escape, blur, visibility loss, and leaving captured mode clear held keys and queued jumps. Pause/overview freeze physics and clear accumulated time; returning requires a click. Settings live in the pause panel and persist across resets, but not reloads. A proximity check adds unique resource IDs even without movement. Reset clears view, physics, journal and terminal progress.
+
+`GameApplication` privately owns input sessions and builds collisions from its island on construction and replacement. Browser code sends key events to `press`/`release`, calls `tick(seconds)` without supplying colliders, and reads terminal eligibility from the gameplay interface. Rendering no longer constructs or exposes collision data. `ControlSession` remains an internal implementation module; lifecycle and input integration tests cross the same gameplay interface as the browser.
+
+`placeSolids` concentrates local-to-world placement, including terrain height, for rendering and collision. Its mesh adapter shares a unit box and materials across procedural solids, preserves the authored ship, and disposes only its own resources. The ship template remains reusable across island replacements. See [deep-module validation](testing/deep-modules-2026-09-19.md).
 
 `GameApplication` owns lifecycle transitions, with automated coverage for terminal resume guards, capture cancellation, stale failures, seed replacement and input clearing. The DOM adapter applies its results to browser capture and panels. An open terminal rejects canvas and ordinary resume requests; its explicit return closes it before resuming. See [review fixes](testing/review-fixes.md).
 

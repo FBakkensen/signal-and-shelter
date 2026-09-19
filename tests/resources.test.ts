@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Box3, Mesh, MeshStandardMaterial } from "three";
-import { createResourceGroup, resourceParts } from "../src/resources.ts";
+import { Box3, Group, Mesh, MeshStandardMaterial } from "three";
+import { resourceParts } from "../src/resources.ts";
+import { createSolidMeshes } from "../src/solid-mesh.ts";
+import { placeSolids } from "../src/solids.ts";
 import { createIsland } from "../src/world.ts";
 import { fits, makeObstacles, STANDING_HEIGHT } from "../src/collision.ts";
 
@@ -12,9 +14,15 @@ await test("actual resource render meshes match collision and retain bounds and 
     const parts = resourceParts(resource);
     assert.equal(parts.length, 4);
     assert.ok(parts.slice(1).every((part) => part.color === resource.color));
-    const group = createResourceGroup(resource);
+    const solid = placeSolids(island).find(
+      (solid) =>
+        solid.kind === "resource" &&
+        solid.origin[0] === resource.x &&
+        solid.origin[2] === resource.z,
+    );
+    assert.ok(solid);
+    const group = createSolidMeshes([solid], new Group()).group;
     const floor = island.heightAt(resource.x, resource.z);
-    group.position.set(resource.x, floor, resource.z);
     group.updateMatrixWorld(true);
     assert.equal(group.children.length, 4);
     const bounds = new Box3().setFromObject(group);

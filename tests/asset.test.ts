@@ -1,5 +1,7 @@
 import { makeObstacles } from "../src/collision.ts";
 import { DEFAULT_ISLAND } from "../src/world.ts";
+import { createSolidMeshes } from "../src/solid-mesh.ts";
+import { placeSolids } from "../src/solids.ts";
 import { SHIP_PARTS } from "../src/ship.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -13,16 +15,18 @@ await test("Blender ship exports load through the actual Three.js loader at metr
   );
   const array = new Uint8Array(buffer).buffer;
   const asset = await new GLTFLoader().parseAsync(array, "");
-  const { ship: beacon, heightAt } = DEFAULT_ISLAND;
+  const solid = placeSolids(DEFAULT_ISLAND).find(
+    (solid) => solid.kind === "ship",
+  );
+  assert.ok(solid);
+  const placedShip = createSolidMeshes([solid], asset.scene).group;
+  placedShip.updateMatrixWorld(true);
   const colliders = makeObstacles();
   let meshCount = 0;
-  asset.scene.traverse((object) => {
+  placedShip.traverse((object) => {
     if (object instanceof Mesh) {
       meshCount++;
       const box = new Box3().setFromObject(object);
-      box.translate(
-        new Vector3(beacon.x, heightAt(beacon.x, beacon.z), beacon.z),
-      );
       assert.ok(
         colliders.some(
           (c) =>
@@ -38,6 +42,7 @@ await test("Blender ship exports load through the actual Three.js loader at metr
     }
   });
   assert.equal(meshCount, SHIP_PARTS.length);
+  assert.deepEqual(asset.scene.position.toArray(), [0, 0, 0]);
   const bounds = new Box3().setFromObject(asset.scene),
     size = bounds.getSize(new Vector3());
   assert.ok(Math.abs(size.y - 4.09) < 0.001);

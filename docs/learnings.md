@@ -111,3 +111,11 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Resource rendering and collision now consume shared block parts; tests compare actual mesh bounds to every resource collider and verify deposit colors.
 - Evidence: `npm run check` passed all eight test files and required checks. Real browser background click/Space kept the terminal paused; explicit return resumed jumping. Overview, pause, restart and replacement seed worked. Visual inspection passed and error logs were empty. See [validation record](testing/review-fixes.md).
 - Existing captured-mouse and sustained browser traversal limitations remain. The build retains its bundle-size warning.
+
+
+## 2026-09-19 — Gameplay and placed-solid module depth
+
+- Evidence: Browser code previously supplied renderer-owned colliders to every gameplay tick and directly accessed the mutable input session. The refactor removes both obligations; tests exercise input and seed-specific collision through GameApplication.
+- Evidence: Real mesh/collider correspondence passes across three seeds, including the separately loaded authored ship. A resource-lifetime test verifies shared procedural box/material cleanup without disposing ship-template resources.
+- Validation: Normal dependency installation and all project checks passed. Integrated-browser keyboard entry/jump, terminal guard/return, pause, restart, overview and seed replacement were exercised; inspected error/warning logs were empty. See [validation](testing/deep-modules-2026-09-19.md).
+- Limitations: Discrete key presses do not verify sustained movement or held-input clearing. No new captured-look, full browser traversal or performance claim.

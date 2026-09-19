@@ -48,10 +48,11 @@ Runs strict TypeScript checking, type-aware ESLint with zero warnings, automated
 
 GitHub Actions runs the same checks for pushes and pull requests.
 
-Gameplay and UI also require real integrated-browser interaction tests, per [the testing workflow](docs/testing.md). See the [name and UI cleanup check](docs/testing/name-and-ui-2026-09-19.md), [seeded-arrival validation record](docs/testing/experiment-004.md), [arrival history and remaining limitations](docs/testing/experiment-003.md), [controls record](docs/testing/experiment-002.md), and [first experiment record](docs/testing/experiment-001.md).
+Gameplay and UI also require real integrated-browser interaction tests, per [the testing workflow](docs/testing.md). See the [deep module refactor checks](docs/testing/deep-modules-2026-09-19.md), [name and UI cleanup check](docs/testing/name-and-ui-2026-09-19.md), [seeded-arrival validation record](docs/testing/experiment-004.md), [arrival history and remaining limitations](docs/testing/experiment-003.md), [controls record](docs/testing/experiment-002.md), and [first experiment record](docs/testing/experiment-001.md).
 
 ## Project documents
 
+- [Domain language](CONTEXT.md): island, solids, deposits and terminal.
 - [Vision](docs/vision.md): direction and open questions.
 - [Architecture](docs/architecture.md): systems and Blender asset workflow.
 - [Decisions](docs/decisions.md): choices and rationale.
