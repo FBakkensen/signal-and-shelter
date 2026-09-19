@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#163c3b" />
+    <title>Stillwild — an island to get lost in</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8b86b' d='M16 2 30 10 16 18 2 10z'/%3E%3Cpath fill='%235b7950' d='M2 10v14l14 8V18z'/%3E%3Cpath fill='%23345243' d='M30 10v14l-14 8V18z'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <canvas
+      id="world"
+      tabindex="0"
+      aria-label="Island game. W A S D to walk, Shift to run, Q and E to rotate, Escape to pause."
+    ></canvas>
+    <header>
+      <a class="brand" href="/" aria-label="Stillwild home"
+        ><span class="brand-icon">◈</span> stillwild<span class="tag"
+          >FIELD NOTES / 001</span
+        ></a
+      >
+      <div class="top-actions">
+        <span class="live-dot"></span
+        ><span class="island-name">BRAMBLE ISLE</span
+        ><button id="overview" aria-pressed="false" title="Map overview (M)">
+          ↗ <span>Overview</span></button
+        ><button id="pause" aria-label="Pause exploration" hidden>Ⅱ</button>
+      </div>
+    </header>
+    <main id="welcome" class="panel welcome">
+      <span class="eyebrow">A SMALL WORLD. A LITTLE WONDER.</span>
+      <h1>Take the<br />scenic route.</h1>
+      <p>
+        Somewhere between the trees and the tide,<br />there’s a place with
+        nothing on your to-do list.
+      </p>
+      <button id="start" class="primary" disabled>Preparing the island…</button>
+      <div class="welcome-foot">
+        <span>NO RUSH.</span><span>JUST EXPLORE. ↗</span>
+      </div>
+    </main>
+    <section id="pause-panel" class="panel pause-panel" hidden>
+      <span class="eyebrow">TAKE YOUR TIME</span>
+      <h2>A moment of quiet.</h2>
+      <p>Your discoveries are here until you leave the page.</p>
+      <button id="resume" class="primary">Keep wandering →</button
+      ><button id="reset" class="subtle">Start a fresh walk</button>
+    </section>
+    <aside id="journal" class="journal">
+      <div class="journal-heading">
+        <span class="eyebrow">PLACES TO FIND</span><span id="count">0 / 3</span>
+      </div>
+      <h2>A few little detours.</h2>
+      <ul id="places"></ul>
+      <p id="journal-note">
+        Follow your curiosity. Walk close to a landmark to discover it.
+      </p>
+    </aside>
+    <div id="toast" role="status" hidden></div>
+    <footer>
+      <div class="location">
+        <span class="location-icon">✳</span>
+        <div>
+          <span id="biome">THE MEADOW</span
+          ><small id="position">0 m wandered</small>
+        </div>
+      </div>
+      <div class="controls">
+        <span><kbd>W A S D</kbd> walk</span><span><kbd>SHIFT</kbd> run</span
+        ><span><kbd>Q E</kbd> / drag to look</span
+        ><span><kbd>ESC</kbd> pause</span>
+      </div>
+      <div class="edition">
+        AN OPEN-WORLD SKETCH<span>SEED 731 · EARLY EXPLORATION</span>
+      </div>
+    </footer>
+    <div id="overview-label" hidden>
+      BRAMBLE ISLE <span>Press M or Overview to return</span>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
