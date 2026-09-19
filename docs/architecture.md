@@ -10,7 +10,7 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `src/packages/island/index.ts`    | Seed selection and complete island generation, including solid geometry                                                   |
 | `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering                       |
-| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause, exploration, restart and island replacement                 |
+| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause, exploration, restart and island replacement             |
 | `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
 | `src/resources.ts`                | Three.js resource mesh adapter using island geometry                                                                      |
 | `src/scene.ts`                    | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime                                      |
@@ -74,7 +74,7 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 
 ## Current boundaries
 
-Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 648 kB uncompressed JavaScript bundle, which includes Three.js.
+Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 648 kB minified JavaScript bundle, which includes Three.js.
 
 ## Current presentation — 2026-09-19
 
@@ -89,7 +89,7 @@ The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-p
 The comparison source, styles, tests and run commands are preserved on experiment branches, separate from the current implementation:
 
 - `codex/third-person-camera-prototype`: raised/shoulder comparison; the user chose shoulder B and exclusively manual zoom. [Camera evidence](testing/camera-prototype.md).
-- `codex/strategic-map-prototype`: atlas/chart comparison; the user chose atlas A with actual multi-block footprints and gaps. This presentation is accepted but not yet integrated into production. [Map evidence](testing/strategic-map-prototype.md).
+- `codex/strategic-map-prototype`: atlas/chart comparison; the user chose atlas A with actual multi-block footprints and gaps. At the time of this prototype, the presentation was accepted but not yet integrated into production; the current implementation is documented under shared exploration and active atlas below. [Map evidence](testing/strategic-map-prototype.md).
 - `codex/occlusion-prototype`: silhouette/fade/manual-orbit comparison; the user chose fading B. Whole-chunk fading was an experiment limitation, replaced by the localized production adapter. [Occlusion evidence](testing/occlusion-prototype.md).
 - Local archive `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`: exact pre-cleanup snapshot including the production-fade render fixtures used for historical validation.
 
