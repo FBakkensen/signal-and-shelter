@@ -22,6 +22,14 @@ _Avoid_: Landmark (when referring to a resource deposit)
 
 **Movement capabilities**: What an individual humanoid or robot can currently traverse, including its body dimensions, speed and available movement abilities. Capabilities can differ by type and individual, including changes from upgrades; an actor need not be able to jump.
 
+**Actor**: The player-controlled humanoid or an individual robot that occupies space and moves on the island.
+
+**Support footprint**: The area beneath an actor's feet or base that must be supported at a valid standing position. It is distinct from the space occupied by the actor's full body.
+
+**Movement blockage**: A valid situation in which an actor cannot currently make progress toward its destination. It does not by itself mean the actor's position is invalid or its job has been abandoned.
+
+**Yielding**: Temporarily waiting, retreating or detouring to let another actor pass while retaining the original destination.
+
 **Requested destination**: The place the player asks the humanoid to reach. It may lie in unexplored or unreachable terrain and remains the goal when only part of the journey is currently possible.
 
 **Reachable endpoint**: The requested destination when reachable through explored ground, otherwise the reachable place closest to it. Reaching an intermediate endpoint does not mean the requested destination has been reached.
