@@ -28,6 +28,20 @@ See [experiment 004's validation record](testing/experiment-004.md) for actual c
 
 ## Open questions
 
+### Shared navigation direction — 2026-09-19
+
+The user confirmed that [click-to-move and shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) should proceed through design, a playable prototype, and production implementation with validation. Jumping must be automatic for the humanoid and future robots; there must be no manual player jump action, including during direct keyboard movement. Every jump has a short setup before takeoff and a short recovery after landing. Routing must account for both delays and travel time, so a longer walking route may be faster than a jumping shortcut.
+
+Start with terrain steps and low obstacles, requiring clearance and a valid landing. Gap jumping is outside this initial effort. Calculated routes use explored ground, but requested destinations may be unexplored or unreachable. Each right-click immediately replaces the previous destination. Every recalculation routes toward the requested destination if reachable, otherwise to the reachable point closest to it; newly explored terrain triggers recalculation toward the retained destination. There is no separate speculative exploration mode. If the closest reachable point is the current position, stay there with the destination retained. Direct keyboard movement remains available for exploration. Show only the requested destination marker, with no visible route line.
+
+WASD immediately cancels the destination and takes direct control. Cancel jump preparation when the new movement no longer needs the jump; releasing direct movement during preparation cancels takeoff. An airborne jump finishes with limited steering, and the short landing recovery still applies. The accepted contract is recorded in [Settle route interruption and automatic-jump control rules](https://github.com/FBakkensen/signal-and-shelter/issues/17).
+
+Remove sprint and sneak entirely. Reaching the requested destination within a small tolerance removes its marker; reaching an intermediate closest-reachable point retains the destination and marker. Tune the arrival tolerance in the prototype. Switching windows or tabs leaves the game running. Explicit pause freezes and preserves the state, including the destination and jump setup, flight and recovery, and explicit resume continues from that state. The ship terminal also leaves the game running, with gameplay keyboard controls inactive while using its UI; Escape opens the explicit pause menu. Restarting or changing the seed clears the destination.
+
+Exact traversal limits, jump timings, steering strength, arrival tolerance and feedback presentation remain prototype questions. Robot gameplay remains outside this effort.
+
+These are accepted upcoming requirements, not implemented behavior. They supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Production still implements those earlier behaviors; background execution has not yet been validated.
+
 2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
 
 - Voxel visuals are required. Should blocks also become editable?

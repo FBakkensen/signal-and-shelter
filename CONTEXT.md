@@ -20,6 +20,10 @@ _Avoid_: Landmark (when referring to a resource deposit)
 
 **Unexplored area**: Ground not yet uncovered through exploration. Fog conceals its terrain and objects in both close play and strategic view.
 
+**Requested destination**: The place the player asks the humanoid to reach. It may lie in unexplored or unreachable terrain and remains the goal when only part of the journey is currently possible.
+
+**Reachable endpoint**: The requested destination when reachable through explored ground, otherwise the reachable place closest to it. Reaching an intermediate endpoint does not mean the requested destination has been reached.
+
 **Vent**: A stepped, block-built formation on the island. Vents are solid scenery, with no current production or power behavior.
 
 **Ship terminal**: The stranded ship's communications console. Checking its data link records a successful connection without restoring flight or delivering software.
