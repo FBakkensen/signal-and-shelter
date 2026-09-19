@@ -6,25 +6,24 @@ Last updated: 2026-09-19. Experiment 004's seeded island arrival is implemented;
 
 TypeScript, Three.js, and Vite power a local browser application. Dependency versions are pinned in package.json and package-lock.json. The compiler uses strict mode, unchecked-index protection, exact optional properties, unused-code checks, and no implicit returns. ESLint applies its recommended rules plus TypeScript's strict and stylistic type-aware presets, consistent type imports, mandatory braces, and zero-warning validation.
 
-| File                   | Responsibility                                                                                                               |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `src/world.ts`         | Seed normalization, versioned island generation, terrain, regions, vents, resource deposits, and exposed terrain quads       |
-| `src/game.ts`          | Seed-specific initial/recovery state, movement, resource discovery, terminal proximity/data-link state, and view transitions |
-| `src/collision.ts`     | Player footprint, terrain support, ledge protection and finite solid obstacle boxes                                          |
-| `src/application.ts`   | Game/session lifecycle: entry, capture outcomes, terminal, pause/overview, reset and seed replacement                        |
-| `src/session.ts`       | Capture request lifecycle, held inputs, quick-jump buffering and keyboard play                                               |
-| `src/controls.ts`      | Keyboard-to-intent mapping and relative mouse sensitivity/inversion                                                          |
-| `src/blocks.ts`        | Common typed block-part definition                                                                                           |
-| `src/resources.ts`     | Shared resource parts and their production mesh factory                                                                      |
-| `src/ship.ts`          | Shared ship block dimensions, colors, and positions for collision and Blender authoring                                      |
-| `src/world-visuals.ts` | World palette and block dimensions shared by vent rendering and collision                                                    |
-| `src/scene.ts`         | Three.js rendering, geometry, lighting, authored asset loading, avatar and camera                                            |
-| `src/main.ts`          | Seed form/URL, world replacement, DOM/input adapters, terminal panel, journal, and animation loop                            |
-| `tests/`               | Production-logic tests and a real GLTFLoader asset integration test                                                          |
+| Entry point | Responsibility |
+| --- | --- |
+| `src/packages/island/index.ts` | Seed selection and complete island generation, including solid geometry |
+| `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering |
+| `src/packages/play/index.ts` | `GameApplication`: input, capture, terminal, pause/overview, restart and island replacement; read-only play observations |
+| `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
+| `src/resources.ts` | Three.js resource mesh adapter using island geometry |
+| `src/scene.ts` | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime |
+| `src/main.ts` | Browser event, DOM, seed URL and rendering adapters |
+| `src/packages/*/tests/`, `tests/` | Public-interface behavior tests and real mesh/GLTFLoader integration tests |
 
 ## TypeScript package modules
 
-Reusable packages live under `src/packages/<name>/` as deep modules: root files are the package's entry points, while every subfolder is private implementation or test material. `src/packages/example/` is a copy-me starter, not an extracted game system. Dependency-cruiser scans all of `src/`, so it checks app imports into packages as well as package imports, and rejects dependency cycles; `npm run lint:boundaries` is part of `npm run check`. See [the package guide](../src/packages/README.md) for the interface and test conventions.
+The island and play packages are implemented deep modules. Root files are entry points; `lib/` holds private implementation. The browser consumes play actions and observations without accessing `ControlSession`, input mapping or simulation internals. The rendering adapter receives read-only play state and an interpolated view position; it neither builds nor exports gameplay obstacles.
+
+`createIsland` generates terrain/placements and builds `solids` together. One placement function converts the vent, ship and resource block descriptions into world-space obstacles. Pure resource descriptions no longer import Three.js. `GameApplication` binds a simulation to that complete island on construction and replacement; `tick(seconds)` needs no caller-supplied geometry. Restart reuses the current island. The headless simulation entry point also supports explicit terrain/solid scenarios for traversal and physics verification, without browser input or rendering.
+
+Dependency-cruiser scans `src/` and `tests/`, enforcing root-entry imports, private tests and acyclic dependencies. Island/play imports of Three.js or rendering adapters are forbidden. `npm run lint:boundaries` is included in `npm run check`. See [the package guide](../src/packages/README.md); `example/` remains a starter template.
 
 ## World and movement
 
@@ -44,7 +43,7 @@ The first-person camera uses a 70-degree vertical FOV, immediate yaw/pitch, and 
 
 In mouse mode, capture is requested only by explicit user action and active play begins after success. Keyboard mode starts directly. Capture failure leaves the game paused and keeps the action labeled Keep wandering. Keyboard play is explicitly selectable and does not request capture. WASD moves and arrows look in both active modes, including while the mouse is locked. Pause/resume, overview return and reset retain the mode until reload. The pause panel can switch modes. Drag-to-look is not supported. Escape, blur, visibility loss, and leaving captured mode clear held keys and queued jumps. Pause/overview freeze physics and clear accumulated time; returning requires a click. Settings live in the pause panel and persist across resets, but not reloads. A proximity check adds unique resource IDs even without movement. Reset clears view, physics, journal and terminal progress.
 
-`GameApplication` owns lifecycle transitions, with automated coverage for terminal resume guards, capture cancellation, stale failures, seed replacement and input clearing. The DOM adapter applies its results to browser capture and panels. An open terminal rejects canvas and ordinary resume requests; its explicit return closes it before resuming. See [review fixes](testing/review-fixes.md).
+`GameApplication` owns lifecycle transitions and its private control session, with automated coverage for terminal resume guards, capture cancellation, stale failures, seed replacement and input clearing. The DOM adapter applies its results to browser capture and panels. An open terminal rejects canvas and ordinary resume requests; its explicit return closes it before resuming. See [review fixes](testing/review-fixes.md).
 
 Current browser evidence is in [experiment 004](testing/experiment-004.md); control history is in [experiment 002](testing/experiment-002.md). Pointer lock returned an internal Chromium error in the integrated browser, so actual locked relative input and lock-loss behavior remain unverified there; earlier traversal evidence used a now-removed drag mode and does not verify the current capture-only entry flow.
 
@@ -54,13 +53,13 @@ The stranded ship was authored through Blender MCP in a new isolated scene. The 
 
 - `assets/ship.blend`: editable source scene.
 - `public/assets/ship.glb`: runtime GLB with seventeen meshes.
-- `src/ship.ts`: block dimensions/positions/colors shared with production collision.
+- `src/packages/island/geometry.ts`: block dimensions/positions/colors shared with production collision.
 - `scripts/create-ship.py`: asset recipe; currently uses this workspace's absolute path.
 
 To regenerate, first inspect the connected Blender scene. Export the TypeScript block definitions, then execute the Python recipe through Blender MCP:
 
 ```sh
-node --import tsx --input-type=module -e 'import { SHIP_PARTS } from "./src/ship.ts"; import { writeFileSync } from "node:fs"; writeFileSync("/tmp/signal-and-shelter-ship-parts.json", JSON.stringify(SHIP_PARTS))'
+node --import tsx --input-type=module -e 'import { SHIP_PARTS } from "./src/packages/island/geometry.ts"; import { writeFileSync } from "node:fs"; writeFileSync("/tmp/signal-and-shelter-ship-parts.json", JSON.stringify(SHIP_PARTS))'
 ```
 
 The recipe converts the Y-up definitions to Blender Z-up, exports to glTF Y-up, and saves the editable scene separately. Conventions: metre scale, base at zero, applied object scales, named parts, no exported camera/light, and no textures or compression extensions. The asset test uses the actual Three.js GLTFLoader and compares all mesh bounds to collision data. Runtime does not require Blender.

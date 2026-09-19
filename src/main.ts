@@ -1,15 +1,13 @@
-import { mouseLook } from "./controls.ts";
-import { GameApplication } from "./application.ts";
-import type { ResumeResult } from "./application.ts";
+import { GameApplication } from "./packages/play/index.ts";
+import type { ResumeResult } from "./packages/play/index.ts";
 import "./style.css";
 import { createScene, loadShip } from "./scene.ts";
-import { canUseTerminal } from "./game.ts";
 import {
   createIsland,
   chooseSeed,
   DEFAULT_SEED,
   GENERATOR_VERSION,
-} from "./world.ts";
+} from "./packages/island/index.ts";
 
 function element<T extends HTMLElement>(id: string, type: new () => T): T {
   const found = document.getElementById(id);
@@ -52,7 +50,7 @@ function updateWorldUI() {
 }
 function sync() {
   $("welcome").hidden = app.started;
-  $("control-mode").textContent = app.session.keyboardPreferred
+  $("control-mode").textContent = app.keyboardPreferred
     ? "Use mouse controls"
     : "Use keyboard controls";
   $("pause-panel").hidden =
@@ -80,8 +78,7 @@ function sync() {
       ? "Starter resources surveyed. Gathering and building will come in a later experiment."
       : "Explore the island. Walk close to an outcrop to record what you find.";
   $("terminal-panel").hidden = !app.terminalOpen;
-  $("interact").hidden =
-    !app.started || app.state.paused || !canUseTerminal(app.state, app.island);
+  $("interact").hidden = !app.canUseTerminal;
   $("link-status").textContent = app.state.linkChecked
     ? "Data link confirmed"
     : "Check the ship’s data link";
@@ -94,7 +91,7 @@ function sync() {
 }
 function release(overview = false) {
   app.pause(overview);
-  $("capture-message").textContent = app.session.keyboardPreferred
+  $("capture-message").textContent = app.keyboardPreferred
     ? "WASD to move. Arrow keys to look around. Escape pauses."
     : "Look with the mouse or arrow keys. WASD to move. Escape pauses.";
   $("resume").textContent = "Keep wandering →";
@@ -112,12 +109,12 @@ function captureFailed() {
     "This browser couldn’t start mouse controls. You can use keyboard controls instead.";
 }
 function activatePlay() {
-  $("look-help").textContent = app.session.keyboardPreferred
+  $("look-help").textContent = app.keyboardPreferred
     ? "Arrow keys to look"
     : "Mouse / arrow keys to look";
   canvas.setAttribute(
     "aria-label",
-    app.session.keyboardPreferred
+    app.keyboardPreferred
       ? "Signal & Shelter exploration. W A S D to move, arrow keys to look, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
       : "Signal & Shelter exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
   );
@@ -263,12 +260,12 @@ window.addEventListener("keydown", (e) => {
     release(!app.state.overview);
     return;
   }
-  if (!app.state.paused && !editing && app.session.press(e.code)) {
+  if (!app.state.paused && !editing && app.press(e.code)) {
     e.preventDefault();
   }
 });
 window.addEventListener("keyup", (e) => {
-  app.session.release(e.code);
+  app.release(e.code);
 });
 window.addEventListener("blur", () => {
   if (app.started) {
@@ -287,21 +284,19 @@ document.addEventListener("mousemove", (e) => {
   if (document.pointerLockElement !== canvas) {
     return;
   }
-  const delta = mouseLook(
+  app.mouseMoved(
     e.movementX,
     e.movementY,
     sensitivity.valueAsNumber,
     invertY.checked
   );
-  app.look(delta.yaw, delta.pitch);
 });
 function tick(now: number) {
   const dt = Math.min((now - previous) / 1000, 0.05);
   previous = now;
   const before = app.state.discovered.length;
-  app.tick(dt, world.obstacles);
-  $("interact").hidden =
-    !app.started || app.state.paused || !canUseTerminal(app.state, app.island);
+  app.tick(dt);
+  $("interact").hidden = !app.canUseTerminal;
   if (before !== app.state.discovered.length) {
     const place = app.island.resources.find(
       (p) => p.id === app.state.discovered.at(-1)
@@ -324,7 +319,7 @@ function tick(now: number) {
     vents: "THE VENT FIELDS",
     crust: "CERAMIC SHELF",
   }[app.island.biomeAt(app.state.x, app.state.z)];
-  world.render(app.state, now / 1000, app.started);
+  world.render(app.state, app.viewPosition, now / 1000, app.started);
   requestAnimationFrame(tick);
 }
 try {

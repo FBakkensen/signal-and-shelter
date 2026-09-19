@@ -13,3 +13,12 @@ src/packages/<name>/
 2. **Intra-package imports:** A package's implementation may import its own internals freely, but cross-package imports go through the other package's entry points.
 3. **Tests through the interface:** Tests exercise packages through their entry points; they may also use their own package's `tests/` fixtures, but not implementation internals. Tests may integrate several packages through their entry points.
 4. **No cycles:** Keep the dependency graph acyclic.
+
+## Implemented modules
+
+- `island/index.ts`: seeded island generation with matching `solids`.
+- `island/geometry.ts`: pure render/authoring descriptions and terrain geometry.
+- `play/index.ts`: browser-facing play actions and read-only observations.
+- `play/simulation.ts`: deterministic headless simulation bound to one island, also used by the play implementation and traversal scenarios.
+
+`lib/` files are private. Keep Three.js and DOM effects in the application adapters. The simulation entry point deliberately supports controlled terrain and solid geometry without exposing the collision helpers, session, or input mapping. Tests cross those same entry points. Entry-point checks include top-level `tests/` as well as package tests.

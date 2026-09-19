@@ -1,20 +1,20 @@
 import { Vector3 } from "three";
-import type { Quad } from "../src/world.ts";
+import {
+  terrainQuads,
+  HAZE_LEVEL,
+  SIZE,
+} from "../src/packages/island/geometry.ts";
+import type { Quad } from "../src/packages/island/geometry.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  hash,
   createIsland,
   chooseSeed,
   normalizeSeed,
   DEFAULT_ISLAND,
   DEFAULT_SEED,
-  terrainQuads,
-  HAZE_LEVEL,
-  SIZE,
-} from "../src/world.ts";
-import { fits, makeObstacles, STANDING_HEIGHT } from "../src/collision.ts";
-import { createGame } from "../src/game.ts";
+} from "../src/packages/island/index.ts";
+import { createSimulation } from "../src/packages/play/simulation.ts";
 
 function snapshot(seed: string) {
   const world = createIsland(seed);
@@ -29,8 +29,8 @@ function snapshot(seed: string) {
     spawn: world.spawn,
     resources: world.resources,
     vents: world.vents,
-    state: createGame(world),
-    obstacles: makeObstacles(world),
+    state: createSimulation(world).createState(),
+    obstacles: world.solids,
   };
 }
 await test("seeds reproduce the full starting world and different seeds vary terrain and placements", () => {
@@ -77,12 +77,17 @@ await test("terrain is finite, grid-based and bounded; hash varies with seed", (
   const { heightAt } = DEFAULT_ISLAND;
   for (let x = -50; x < 50; x++) {
     for (let z = -50; z < 50; z++) {
-      assert.ok(hash(x, z) >= 0 && hash(x, z) < 1);
+      assert.ok(
+        DEFAULT_ISLAND.hash(x, z) >= 0 && DEFAULT_ISLAND.hash(x, z) < 1
+      );
       assert.ok(Number.isInteger(heightAt(x, z) / 0.5));
       assert.ok(heightAt(x, z) >= 0 && heightAt(x, z) <= 6);
     }
   }
-  assert.notEqual(hash(2, 3, 731), hash(2, 3, 732));
+  assert.notEqual(
+    createIsland("731").hash(2, 3),
+    createIsland("732").hash(2, 3)
+  );
   assert.equal(heightAt(-SIZE, 0), 0);
   assert.equal(heightAt(SIZE, 0), 0);
   assert.equal(heightAt(NaN, 0), 0);
@@ -91,14 +96,10 @@ await test("terrain is finite, grid-based and bounded; hash varies with seed", (
 await test("200 seeded starts have a clear dry spawn, level ship site, and dry deposits", () => {
   for (let i = 0; i < 200; i++) {
     const world = createIsland(String(i));
-    const obstacles = makeObstacles(world);
     assert.ok(
-      fits(
+      createSimulation(world).canStandAt(
         world.spawn,
-        world.heightAt(world.spawn.x, world.spawn.z),
-        STANDING_HEIGHT,
-        world.heightAt,
-        obstacles
+        world.heightAt(world.spawn.x, world.spawn.z)
       ),
       world.seed
     );

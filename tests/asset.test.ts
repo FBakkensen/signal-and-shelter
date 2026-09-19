@@ -1,6 +1,5 @@
-import { makeObstacles } from "../src/collision.ts";
-import { DEFAULT_ISLAND } from "../src/world.ts";
-import { SHIP_PARTS } from "../src/ship.ts";
+import { DEFAULT_ISLAND } from "../src/packages/island/index.ts";
+import { SHIP_PARTS } from "../src/packages/island/geometry.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -14,7 +13,7 @@ await test("Blender ship exports load through the actual Three.js loader at metr
   const array = new Uint8Array(buffer).buffer;
   const asset = await new GLTFLoader().parseAsync(array, "");
   const { ship: beacon, heightAt } = DEFAULT_ISLAND;
-  const colliders = makeObstacles();
+  const colliders = DEFAULT_ISLAND.solids;
   let meshCount = 0;
   asset.scene.traverse((object) => {
     if (object instanceof Mesh) {

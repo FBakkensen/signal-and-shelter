@@ -116,3 +116,14 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Rationale: Apply the project's existing local verification command to changes in the hosted repository.
 - Consequence: The `check` job is required before merging pull requests into `main`, with the rule enforced for administrators.
 - Evidence: The first hosted run passed on 2026-09-19 ([Actions run](https://github.com/FBakkensen/signal-and-shelter/actions/runs/35440373710)); GitHub branch protection requires the `check` status.
+
+## D013 — Deep island and play modules
+
+- Date: 2026-09-19
+- Status: Implemented
+- Basis: The user selected both opportunities from the architecture review and requested deep TypeScript modules.
+- Decision: The island package owns generated terrain, placements, block descriptions and solid geometry. The play package owns input/session lifecycle and simulation bound to that island. Rendering consumes read-only play observations and pure island geometry; it no longer owns gameplay obstacles.
+- Rationale: Concentrate the rules that must change together, and test them through the same entry points used by callers. Merely moving the existing files would retain the exposed mutable session and caller-supplied per-frame collision data.
+- Tradeoff: Keep a separate headless simulation entry point for deterministic physics and traversal scenarios, while the browser uses the narrower play entry point. Keep geometry/authoring descriptions separate from seed selection rather than exporting every implementation helper in one barrel.
+- Consequence: Generator version 2, controls, and authored assets are retained. Package internals and renderer independence are enforced by dependency-cruiser, including top-level integration tests.
+- Evidence: [Deep-module validation](testing/deep-modules.md).
