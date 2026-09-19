@@ -1,5 +1,7 @@
 # Navigation design checkpoint
 
+Current gate — 2026-09-19: the user withdrew the first implementation attempt. The experience agreements below remain inputs, but production implementation must wait for the [shared simulation foundation](https://github.com/FBakkensen/signal-and-shelter/issues/26) and its migration gate. Historical acceptance below does not authorize bypassing this new prerequisite.
+
 Status: accepted by the user, 2026-09-19, including both sequential playable increments and their acceptance criteria. Production implementation remains pending.
 
 ## Decision sources

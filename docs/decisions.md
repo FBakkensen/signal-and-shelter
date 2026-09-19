@@ -144,3 +144,12 @@ Record significant choices with date, status, rationale, and consequences. Use p
 The user rejected inconsistent knowledge across close and strategic views and explicitly removed the separate 4 m surveying rule. The confirmed interview specifies one 8 m horizontal reveal radius, permanent visible/active explored areas, obstacle-independent reveal, and concealment of unexplored terrain and objects at every zoom and in the menu. Partly explored objects stay partly revealed; any exposed deposit part identifies its material. Starts/resets grant only the starting area, with no ship or island-outline exception. Physical use distances remain unchanged.
 
 Implemented with one simulation-owned half-metre coverage grid shared by discovery, CPU atlas clipping, GPU surface/shadow clipping and picking. This trades a mathematically smooth circle for a stepped boundary matching the voxel scale; the 2 m chart grid does not determine exploration. The previous atlas-only concealment and 4 m identity gate are superseded. See [accepted design](third-person-design.md) and [evidence](testing/active-strategic-atlas.md).
+
+## D015 — Establish shared simulation fundamentals before navigation implementation
+
+- Date: 2026-09-19
+- Status: Accepted direction; detailed design pending
+- Basis: Repeated blocked movement exposed insufficient confidence in the general rules. The user explicitly withdrew the current implementation and chose fundamentals first.
+- Decision: Chart the [shared simulation foundation](https://github.com/FBakkensen/signal-and-shelter/issues/26), carrying forward confirmed requirements in its [contract ticket](https://github.com/FBakkensen/signal-and-shelter/issues/27). Keep physics authoritative for direct input, planning and execution, with presentation and host integration separate.
+- Consequence: Gameplay returns to baseline `3929c5b`. Archive the withdrawn implementation and diagnostics at `f09a795` on `codex/automatic-keyboard-traversal`; do not merge it. Its centre-support relaxation is not accepted. The old navigation implementation tickets remain incomplete and depend on the new foundation.
+- Scope: This map produces an accepted contract and migration plan, not a production implementation. Job policy remains separate from movement coordination. No performance or cross-runtime determinism claim is established.

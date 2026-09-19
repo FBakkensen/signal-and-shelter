@@ -121,3 +121,9 @@ Upgrades require movement to be interrupted first; subsequent routing uses the u
 ### Navigation design checkpoint accepted — 2026-09-19
 
 The user accepted the [consolidated navigation design](navigation-design.md), its acceptance criteria and two sequential playable production increments: automatic keyboard traversal with shared individual capabilities and lifecycle behavior, followed by time-aware click-to-move using the same movement logic. Both require production-code tests and integrated-browser validation. The prototype remains archived; production implementation is pending.
+
+### Fundamentals first — 2026-09-19
+
+The user withdrew the automatic-traversal implementation and requested a new shared [deterministic simulation foundation map](https://github.com/FBakkensen/signal-and-shelter/issues/26) before further navigation or robot-job implementation. Confirmed project-wide requirements are consolidated in [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27): cross-runtime replay determinism, integer sub-voxel coordinates, shared physics, explicit support footprints, actor blocking and safe yielding, and 1,000 active simulated robots at normal game speed. Visible robot count is independent of simulated population.
+
+The game remains on its pre-implementation behavior while this design is settled. Navigation experience decisions remain inputs, but the prior implementation checkpoint is reopened. The withdrawn code is archived, not accepted or eligible for merging. Robot job selection remains a separate consumer of the foundation. Browser-first packaging continues with a separate simulation/presentation/host boundary; Electron remains an option if browser constraints warrant it.
