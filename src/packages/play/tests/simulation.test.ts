@@ -1,33 +1,56 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { GameState, Input } from "../src/game.ts";
-import type { HeightSampler, Island } from "../src/world.ts";
-import type { Obstacle } from "../src/collision.ts";
 import {
-  viewPosition,
-  advance,
-  createGame,
-  canUseTerminal,
-  checkDataLink,
-  discover,
-  eyeHeight,
+  createSimulation,
   look,
   transition,
-  MAX_PITCH,
-  RUN_SPEED,
-  SNEAK_SPEED,
-  STEP,
-  WALK_SPEED,
-} from "../src/game.ts";
-import {
-  boxCollider,
-  fits,
-  makeObstacles,
-  RADIUS,
-  STANDING_HEIGHT,
-  terrainHeights,
-} from "../src/collision.ts";
-import { DEFAULT_ISLAND, createIsland } from "../src/world.ts";
+  viewPosition,
+} from "../simulation.ts";
+import type { GameState, Input } from "../simulation.ts";
+import type { HeightSampler, Island, Point } from "../../island/index.ts";
+import { DEFAULT_ISLAND, createIsland } from "../../island/index.ts";
+import { boxCollider } from "../../island/geometry.ts";
+import type { Obstacle } from "../../island/geometry.ts";
+// Physical expectations are specifications, not imports of private implementation constants.
+const WALK_SPEED = 4.3,
+  RUN_SPEED = 5.6,
+  SNEAK_SPEED = 1.3;
+const STEP = 1 / 120,
+  RADIUS = 0.3,
+  STANDING_HEIGHT = 1.8,
+  MAX_PITCH = Math.PI / 2 - 0.01;
+const createGame = (island = DEFAULT_ISLAND) =>
+  createSimulation(island).createState();
+const makeObstacles = (island = DEFAULT_ISLAND) => island.solids;
+// Scenarios supply one coherent island through the same headless seam used by play.
+function advance(
+  state: GameState,
+  input: Input,
+  seconds: number,
+  heightAt: HeightSampler = DEFAULT_ISLAND.heightAt,
+  solids: readonly Obstacle[] = [],
+  island = DEFAULT_ISLAND
+) {
+  return createSimulation({ ...island, heightAt, solids }).advance(
+    state,
+    input,
+    seconds
+  );
+}
+function fits(
+  point: Point,
+  y: number,
+  _height: number,
+  heightAt: HeightSampler,
+  solids: readonly Obstacle[]
+) {
+  return createSimulation({ ...DEFAULT_ISLAND, heightAt, solids }).canStandAt(
+    point,
+    y
+  );
+}
+const eyeHeight = (state: GameState) =>
+  viewPosition({ ...state, paused: true }).y - state.y;
 const { resources: RESOURCES, spawn: SPAWN } = DEFAULT_ISLAND;
 const flat = () => 3;
 const active = (): GameState => ({
@@ -266,18 +289,29 @@ await test("stationary discovery respects four-metre boundary, persists and neve
   const p = RESOURCES[0];
   assert.ok(p);
   const s = { ...active(), x: p.x, z: p.z + 4 };
-  assert.deepEqual(discover(s, RESOURCES), [p.id]);
-  assert.deepEqual(discover({ ...s, z: p.z + 4.01 }, RESOURCES), []);
+  assert.deepEqual(advance(s, {}, STEP, flat).discovered, [p.id]);
+  assert.deepEqual(
+    advance({ ...s, z: p.z + 4.01 }, {}, STEP, flat).discovered,
+    []
+  );
   const found = advance(s, {}, STEP, flat);
   assert.deepEqual(found.discovered, [p.id]);
   assert.deepEqual(s.discovered, []);
-  assert.deepEqual(discover({ ...found, x: 100 }, RESOURCES), [p.id]);
+  assert.deepEqual(
+    advance({ ...found, x: 20, z: 20 }, {}, STEP, flat).discovered,
+    [p.id]
+  );
+  assert.deepEqual(advance(found, {}, STEP, flat).discovered, [p.id]);
 });
 await test("terrain footprint includes diagonal cells and box collision uses vertical bounds", () => {
-  assert.deepEqual(
-    terrainHeights({ x: 1, z: 1 }, (x, z) => Math.floor(x) * 2 + Math.floor(z)),
-    [0, 1, 2, 3]
-  );
+  const diagonal = (x: number, z: number) => (x >= 1 && z >= 1 ? 4 : 3);
+  const simulation = createSimulation({
+    ...DEFAULT_ISLAND,
+    heightAt: diagonal,
+    solids: [],
+  });
+  assert.equal(simulation.canStandAt({ x: 0.75, z: 0.75 }, 3), false);
+  assert.equal(simulation.canStandAt({ x: 0.65, z: 0.75 }, 3), true);
   const box = boxCollider(0.5, 5, 0.5, 1, 1, 1);
   assert.equal(fits(active(), 3, STANDING_HEIGHT, flat, [box]), true);
   assert.equal(fits(active(), 4, STANDING_HEIGHT, flat, [box]), false);
@@ -378,33 +412,6 @@ await test("camera interpolates fixed-step positions but pauses and resets witho
   near(viewPosition(createGame()).x, SPAWN.x);
 });
 
-await test("terminal interaction is proximity-limited, remembers connection and resets with the current seed", () => {
-  const island = createIsland("robot-home");
-  const state = createGame(island);
-  assert.equal(canUseTerminal(state, island), true);
-  const checked = checkDataLink(state, island);
-  assert.equal(state.linkChecked, false);
-  assert.equal(checked.linkChecked, true);
-  assert.deepEqual(checkDataLink(checked, island), checked);
-  const far = { ...state, x: 40 };
-  assert.equal(checkDataLink(far, island), far);
-  assert.equal(canUseTerminal({ ...state, y: state.y + 2 }, island), false);
-  assert.equal(canUseTerminal(transition(state, "overview"), island), false);
-  const recovered = advance(
-    { ...checked, x: NaN, paused: false, discovered: ["copper"] },
-    {},
-    STEP,
-    island.heightAt,
-    makeObstacles(island),
-    island
-  );
-  assert.equal(recovered.x, island.spawn.x);
-  assert.equal(recovered.z, island.spawn.z);
-  assert.equal(recovered.linkChecked, true);
-  assert.deepEqual(recovered.discovered, ["copper"]);
-  assert.deepEqual(createGame(island), state);
-});
-
 await test("footprint catches a raised half-cell between old one-metre sample points", () => {
   const halfCell = (x: number) => (x >= 0.5 && x < 1 ? 3.5 : 3);
   assert.equal(
@@ -416,4 +423,21 @@ await test("footprint catches a raised half-cell between old one-metre sample po
   assert.ok(stopped.x <= 0.2 + 1e-7);
   const jumped = move(stopped, { right: true, jump: true }, 25, STEP, halfCell);
   assert.ok(jumped.x > 0.5);
+});
+
+await test("recovery uses the bound island spawn and preserves discoveries and connection progress", () => {
+  const island = createIsland("robot-home");
+  const simulation = createSimulation(island);
+  const state = {
+    ...simulation.createState(),
+    paused: false,
+    x: NaN,
+    linkChecked: true,
+    discovered: ["copper"],
+  };
+  const recovered = simulation.advance(state, {}, STEP);
+  near(recovered.x, island.spawn.x);
+  near(recovered.z, island.spawn.z);
+  assert.equal(recovered.linkChecked, true);
+  assert.deepEqual(recovered.discovered, ["copper"]);
 });

@@ -46,7 +46,7 @@ export function hash(x: number, z: number, seed = 731) {
   n = Math.imul(n ^ (n >>> 13), 1274126177);
   return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
 }
-export interface Island {
+export interface IslandDefinition {
   readonly seed: string;
   readonly version: number;
   readonly spawn: Point;
@@ -58,7 +58,7 @@ export interface Island {
   readonly hash: (x: number, z: number) => number;
   readonly biomeAt: (x: number, z: number) => "haze" | "vents" | "crust";
 }
-export function createIsland(input = DEFAULT_SEED): Island {
+export function createIsland(input = DEFAULT_SEED): IslandDefinition {
   const seed = normalizeSeed(input) || DEFAULT_SEED;
   const numeric = seedNumber(seed);
   const random = (x: number, z: number) => hash(x, z, numeric);
@@ -158,7 +158,7 @@ export function createIsland(input = DEFAULT_SEED): Island {
       heightAt(x, z) <= 2 ? "haze" : x > 10 && z < 0 ? "vents" : "crust",
   };
 }
-export const DEFAULT_ISLAND = createIsland();
+
 // Exposed quads only; the caller can request adjacent chunks without seams.
 export function terrainQuads(
   sample: HeightSampler,

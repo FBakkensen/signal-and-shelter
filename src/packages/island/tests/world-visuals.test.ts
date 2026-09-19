@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ventParts } from "../src/world-visuals.ts";
-import { createIsland } from "../src/world.ts";
-import { boxCollider, makeObstacles } from "../src/collision.ts";
+import { ventParts } from "../geometry.ts";
+import { createIsland } from "../index.ts";
+import { boxCollider } from "../geometry.ts";
 
 await test("vent tiers retain block geometry, a square open rim and finite bounds", () => {
   for (const height of [2, 2.5, 3, 3.5]) {
@@ -51,5 +51,5 @@ await test("all rendered vent block definitions have matching production collide
       );
     })
   );
-  assert.deepEqual(makeObstacles(island).slice(0, expected.length), expected);
+  assert.deepEqual(island.solids.slice(0, expected.length), expected);
 });

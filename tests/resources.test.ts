@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Box3, Mesh, MeshStandardMaterial } from "three";
-import { createResourceGroup, resourceParts } from "../src/resources.ts";
-import { createIsland } from "../src/world.ts";
-import { fits, makeObstacles, STANDING_HEIGHT } from "../src/collision.ts";
+import { createResourceGroup } from "../src/resources.ts";
+import { resourceParts } from "../src/packages/island/geometry.ts";
+import { createIsland } from "../src/packages/island/index.ts";
+import { createSimulation } from "../src/packages/play/simulation.ts";
 
 await test("actual resource render meshes match collision and retain bounds and individual colors", () => {
   const island = createIsland("resource-bounds");
-  const obstacles = makeObstacles(island);
+  const obstacles = island.solids;
   for (const resource of island.resources) {
     const parts = resourceParts(resource);
     assert.equal(parts.length, 4);
@@ -41,12 +42,9 @@ await test("actual resource render meshes match collision and retain bounds and 
         assert.equal(`#${child.material.color.getHexString()}`, resource.color);
       }
     }
+    assert.equal(createSimulation(island).canStandAt(resource, floor), false);
     assert.equal(
-      fits(resource, floor, STANDING_HEIGHT, island.heightAt, obstacles),
-      false
-    );
-    assert.equal(
-      fits(resource, floor + 2, STANDING_HEIGHT, island.heightAt, obstacles),
+      createSimulation(island).canStandAt(resource, floor + 2),
       true
     );
   }

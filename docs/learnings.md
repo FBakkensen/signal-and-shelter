@@ -116,3 +116,11 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Evidence: scanning all of `src/` passed with 20 modules and 28 dependencies cruised. A temporary `../lib/impl` import from `tests/example.test.ts` failed with the `tests-through-entrypoints` rule; removing it restored a pass.
 - Validation: the final `npm run check` passed typechecking, boundary lint, ESLint, all nine tests, formatting, and the production build.
 - Limitation: existing game systems remain direct modules under `src/`; the package is a starter template, not an extracted game system.
+
+## 2026-09-19 — Deep island and play modules
+
+- Implemented: island generation now returns matching solid geometry. A single placement implementation handles ship, vents and deposits; resource descriptions no longer import Three.js. Play binds physics to the current island and hides its mutable control session. Rendering consumes read-only observations and no longer supplies obstacles to play.
+- Evidence: the pre/post geometry digest matched across four seeds, all 192×192 terrain samples per seed, placements, solids and sampled quads. The final unsandboxed `npm run check` passed 49 tests plus all other checks. Negative import probes confirmed private-entry and renderer-dependency enforcement.
+- Browser evidence: seeded entry, jump, terminal pause guard/check/return, restart, overview, seed replacement and keyboard recovery after rejected capture. Screenshots inspected and warning/error logs empty. See [deep-module validation](testing/deep-modules.md).
+- Tooling limitation: sandboxed test execution reported file-level successes; a direct no-isolation run stalled. Individual assertions were verified by the unsandboxed suite. Discrete browser movement presses did not visibly change the HUD position; sustained movement and captured mouse look remain unverified in this run.
+- Documentation: current entry points and asset-authoring import path are recorded in architecture/package guidance; D013 records the ownership choice, and CONTEXT.md defines the existing island/play terms.

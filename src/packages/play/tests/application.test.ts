@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { GameApplication } from "../src/application.ts";
-import { createIsland } from "../src/world.ts";
-import { makeObstacles } from "../src/collision.ts";
+import { GameApplication } from "../index.ts";
+import { createIsland } from "../../island/index.ts";
 
 await test("terminal background clicks cannot resume physics or request capture in either control mode", () => {
   for (const keyboard of [true, false]) {
@@ -17,11 +16,11 @@ await test("terminal background clicks cannot resume physics or request capture 
     const paused = app.state;
     assert.equal(app.resume("canvas").kind, "ignored");
     assert.equal(app.resume().kind, "ignored");
-    assert.equal(app.session.press("Space"), false);
-    app.tick(0.1, makeObstacles(island));
+    assert.equal(app.press("Space"), false);
+    app.tick(0.1);
     assert.equal(app.state, paused);
     assert.equal(app.terminalOpen, true);
-    assert.equal(app.session.mode, "paused");
+    assert.equal(app.controlMode, "paused");
     assert.equal(app.captureSucceeded(), false);
     app.checkLink();
     assert.equal(app.state.linkChecked, true);
@@ -32,8 +31,8 @@ await test("terminal background clicks cannot resume physics or request capture 
       assert.equal(app.state.paused, true);
       app.captureSucceeded();
     }
-    app.session.press("Space");
-    app.tick(0.1, makeObstacles(island));
+    app.press("Space");
+    app.tick(0.1);
     assert.ok(app.state.y > paused.y);
   }
 });
@@ -49,18 +48,18 @@ await test("welcome and overview canvas clicks do not start play; explicit overv
   assert.equal(app.state, initial);
   assert.equal(app.started, false);
   app.start(island, true);
-  app.session.press("KeyW");
-  app.session.press("ArrowRight");
-  app.session.press("Space");
+  app.press("KeyW");
+  app.press("ArrowRight");
+  app.press("Space");
   app.pause(true);
   const overview = app.state;
-  app.tick(0.1, makeObstacles(island));
+  app.tick(0.1);
   assert.equal(app.state, overview);
   assert.equal(app.resume("canvas").kind, "ignored");
   assert.equal(app.captureLost(), false);
   assert.equal(app.resume().kind, "keyboard");
   assert.equal(app.state.overview, false);
-  app.tick(0.1, makeObstacles(island));
+  app.tick(0.1);
   assert.equal(app.state.distance, 0);
   assert.equal(app.state.yaw, 0);
   assert.equal(app.state.grounded, true);
@@ -71,35 +70,39 @@ await test("capture cancellation and rejection cannot activate or cancel a newer
   assert.equal(first.kind, "capture");
   assert.equal(app.state.paused, true);
   assert.equal(app.resume().kind, "ignored");
-  assert.equal(app.session.press("KeyW"), false);
+  assert.equal(app.press("KeyW"), false);
   app.pause();
   assert.equal(app.captureSucceeded(), false);
   const second = app.resume();
   assert.equal(second.kind, "capture");
   assert.equal(app.captureFailed(first.generation), false);
-  assert.equal(app.session.mode, "capturing");
+  assert.equal(app.controlMode, "capturing");
   assert.equal(app.captureFailed(second.generation), true);
   assert.equal(app.state.paused, true);
-  assert.equal(app.session.mode, "paused");
+  assert.equal(app.controlMode, "paused");
   assert.equal(app.captureFailed(), false);
   assert.equal(app.resume().kind, "capture");
   assert.equal(app.captureSucceeded(), true);
   assert.equal(app.state.paused, false);
-  app.session.press("KeyW");
+  app.press("KeyW");
   assert.equal(app.captureLost(), true);
   assert.equal(app.state.paused, true);
-  assert.equal(app.session.readInput().forward, false);
+  const beforeInputCheck = app.state;
+  app.tick(0.05);
+  assert.equal(app.state.distance, beforeInputCheck.distance);
 });
 await test("expected capture loss preserves a terminal; only explicit return requests capture", () => {
   const app = new GameApplication(createIsland());
   app.start(app.island, false);
   app.captureSucceeded();
-  app.session.press("KeyW");
+  app.press("KeyW");
   app.openTerminal();
   const terminal = app.state;
   assert.equal(app.captureLost(), false);
   assert.equal(app.terminalOpen, true);
-  assert.equal(app.session.readInput().forward, false);
+  const beforeInputCheck = app.state;
+  app.tick(0.05);
+  assert.equal(app.state.distance, beforeInputCheck.distance);
   assert.equal(app.captureFailed(), false);
   assert.equal(app.state, terminal);
   const returned = app.resume("terminal");
@@ -120,8 +123,8 @@ await test("seed replacement clears the old terminal, progress and queued inputs
   assert.equal(app.state.linkChecked, true);
   app.resume("terminal");
   app.captureSucceeded();
-  app.session.press("Space");
-  app.session.press("KeyW");
+  app.press("Space");
+  app.press("KeyW");
   assert.equal(app.start(nextIsland, true).kind, "keyboard");
   assert.equal(app.island, nextIsland);
   assert.equal(app.state.x, nextIsland.spawn.x);
@@ -131,7 +134,7 @@ await test("seed replacement clears the old terminal, progress and queued inputs
   assert.equal(app.terminalOpen, false);
   assert.equal(app.captureSucceeded(), false);
   assert.equal(app.captureFailed(oldCapture.generation), false);
-  app.tick(0.1, makeObstacles(nextIsland));
+  app.tick(0.1);
   assert.equal(app.state.distance, 0);
   assert.equal(app.state.grounded, true);
 });
@@ -144,43 +147,47 @@ await test("restart and seed chooser reset progress while retaining keyboard pre
   assert.equal(app.state.linkChecked, false);
   assert.equal(app.terminalOpen, false);
   assert.equal(app.started, true);
-  app.session.press("Space");
+  app.press("Space");
   app.chooseSeed();
   assert.equal(app.started, false);
   assert.equal(app.state.paused, true);
-  assert.equal(app.session.keyboardPreferred, true);
-  assert.equal(app.session.readInput().jump, false);
+  assert.equal(app.keyboardPreferred, true);
+  const beforeInputCheck = app.state;
+  app.tick(0.05);
+  assert.equal(app.state.distance, beforeInputCheck.distance);
   assert.equal(app.resume("canvas").kind, "ignored");
 });
 await test("control switching and pause clear input and integrate real keyboard look and movement", () => {
   const app = new GameApplication(createIsland());
   app.start(app.island, true);
-  app.session.press("KeyD");
-  app.session.press("ArrowRight");
-  app.tick(0.1, makeObstacles(app.island));
+  app.press("KeyD");
+  app.press("ArrowRight");
+  app.tick(0.1);
   assert.ok(app.state.distance > 0);
   assert.ok(app.state.yaw < 0);
   app.pause();
   const paused = app.state;
-  app.look(1, 1);
-  app.tick(0.1, []);
+  app.mouseMoved(100, 100, 1, false);
+  app.tick(0.1);
   assert.equal(app.state, paused);
   assert.equal(app.resume("canvas").kind, "keyboard");
   assert.equal(app.captureLost(), false);
   assert.equal(app.switchControls().kind, "capture");
-  assert.equal(app.session.keyboardPreferred, false);
+  assert.equal(app.keyboardPreferred, false);
   assert.equal(app.state.paused, true);
   app.captureSucceeded();
   app.pause();
   assert.equal(app.switchControls().kind, "keyboard");
-  assert.equal(app.session.readInput().right, false);
+  const beforeInputCheck = app.state;
+  app.tick(0.05);
+  assert.equal(app.state.distance, beforeInputCheck.distance);
 });
 await test("terminal cannot open out of range or while paused", () => {
   const app = new GameApplication(createIsland());
   app.start(app.island, true);
-  app.session.press("KeyS");
+  app.press("KeyS");
   for (let i = 0; i < 20; i++) {
-    app.tick(0.1, []);
+    app.tick(0.1);
   }
   assert.equal(app.openTerminal(), false);
   app.checkLink();

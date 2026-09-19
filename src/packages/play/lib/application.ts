@@ -1,14 +1,32 @@
 import { ControlSession } from "./session.ts";
 import {
-  advance,
   canUseTerminal,
   checkDataLink,
-  createGame,
   look,
   transition,
+  viewPosition,
 } from "./game.ts";
-import type { Obstacle } from "./collision.ts";
-import type { Island } from "./world.ts";
+import { createSimulation } from "../simulation.ts";
+import { mouseLook } from "./controls.ts";
+import type { GameState } from "./game.ts";
+import type { Island } from "../../island/index.ts";
+
+export type PlayState = Readonly<
+  Pick<
+    GameState,
+    | "x"
+    | "y"
+    | "z"
+    | "yaw"
+    | "pitch"
+    | "distance"
+    | "grounded"
+    | "crouching"
+    | "paused"
+    | "overview"
+    | "linkChecked"
+  >
+> & { readonly discovered: readonly string[] };
 
 export type ResumeResult =
   | { kind: "ignored" }
@@ -17,21 +35,23 @@ export type ResumeResult =
 
 // Owns game/session/menu transitions. Browser adapters only apply DOM and capture effects.
 export class GameApplication {
-  readonly session = new ControlSession();
+  private readonly session = new ControlSession();
+  private simulation: ReturnType<typeof createSimulation>;
   private currentIsland: Island;
-  private currentState: ReturnType<typeof createGame>;
+  private currentState: GameState;
   private hasStarted = false;
   private terminal = false;
   private captureGeneration: number | null = null;
 
   constructor(island: Island) {
     this.currentIsland = island;
-    this.currentState = createGame(island);
+    this.simulation = createSimulation(island);
+    this.currentState = this.simulation.createState();
   }
   get island() {
     return this.currentIsland;
   }
-  get state() {
+  get state(): PlayState {
     return this.currentState;
   }
   get started() {
@@ -39,6 +59,36 @@ export class GameApplication {
   }
   get terminalOpen() {
     return this.terminal;
+  }
+
+  get keyboardPreferred() {
+    return this.session.keyboardPreferred;
+  }
+  get controlMode() {
+    return this.session.mode;
+  }
+  get canUseTerminal() {
+    return (
+      this.started &&
+      !this.currentState.paused &&
+      canUseTerminal(this.currentState, this.island)
+    );
+  }
+  get viewPosition() {
+    return viewPosition(this.currentState);
+  }
+  press(code: string) {
+    return this.session.press(code);
+  }
+  release(code: string) {
+    this.session.release(code);
+  }
+  mouseMoved(dx: number, dy: number, sensitivity: number, invertY: boolean) {
+    if (this.session.mode !== "locked") {
+      return;
+    }
+    const delta = mouseLook(dx, dy, sensitivity, invertY);
+    this.look(delta.yaw, delta.pitch);
   }
 
   pause(overview = false) {
@@ -53,7 +103,7 @@ export class GameApplication {
   resume(source: "button" | "canvas" | "terminal" = "button"): ResumeResult {
     if (
       source === "canvas" &&
-      (!this.started || !this.state.paused || this.state.overview)
+      (!this.started || !this.currentState.paused || this.currentState.overview)
     ) {
       return { kind: "ignored" };
     }
@@ -82,19 +132,20 @@ export class GameApplication {
   start(island: Island, keyboard: boolean): ResumeResult {
     this.pause();
     this.currentIsland = island;
-    this.currentState = createGame(island);
+    this.simulation = createSimulation(island);
+    this.currentState = this.simulation.createState();
     this.session.keyboardPreferred = keyboard;
     return this.resume();
   }
   restart(): ResumeResult {
     this.pause();
-    this.currentState = createGame(this.island);
+    this.currentState = this.simulation.createState();
     return this.resume();
   }
   chooseSeed() {
     this.pause();
     this.hasStarted = false;
-    this.currentState = createGame(this.island);
+    this.currentState = this.simulation.createState();
   }
   switchControls(): ResumeResult {
     const keyboard = !this.session.keyboardPreferred;
@@ -105,8 +156,8 @@ export class GameApplication {
   openTerminal(): boolean {
     if (
       !this.started ||
-      this.state.paused ||
-      !canUseTerminal(this.state, this.island)
+      this.currentState.paused ||
+      !canUseTerminal(this.currentState, this.island)
     ) {
       return false;
     }
@@ -116,7 +167,7 @@ export class GameApplication {
   }
   checkLink() {
     if (this.terminal) {
-      this.currentState = checkDataLink(this.state, this.island);
+      this.currentState = checkDataLink(this.currentState, this.island);
     }
   }
   captureSucceeded(): boolean {
@@ -124,7 +175,7 @@ export class GameApplication {
       return false;
     }
     this.captureGeneration = null;
-    this.currentState = transition(this.state, "capture");
+    this.currentState = transition(this.currentState, "capture");
     return true;
   }
   captureFailed(generation = this.captureGeneration): boolean {
@@ -136,7 +187,7 @@ export class GameApplication {
   }
   captureLost(): boolean {
     if (
-      this.state.overview ||
+      this.currentState.overview ||
       this.terminal ||
       this.session.mode === "keyboard"
     ) {
@@ -145,19 +196,16 @@ export class GameApplication {
     this.pause();
     return true;
   }
-  look(yaw: number, pitch: number) {
-    this.currentState = look(this.state, yaw, pitch);
+  private look(yaw: number, pitch: number) {
+    this.currentState = look(this.currentState, yaw, pitch);
   }
-  tick(seconds: number, obstacles: readonly Obstacle[]) {
+  tick(seconds: number) {
     const rotation = this.session.look(seconds);
     this.look(rotation.yaw, rotation.pitch);
-    this.currentState = advance(
-      this.state,
+    this.currentState = this.simulation.advance(
+      this.currentState,
       this.session.readInput(),
-      seconds,
-      this.island.heightAt,
-      obstacles,
-      this.island
+      seconds
     );
   }
 }

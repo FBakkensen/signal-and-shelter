@@ -1,5 +1,10 @@
-import type { HeightSampler, ResourceDeposit, Point, Island } from "./world.ts";
-import { DEFAULT_ISLAND } from "./world.ts";
+import type {
+  HeightSampler,
+  ResourceDeposit,
+  Point,
+  Island,
+} from "../../island/index.ts";
+import { DEFAULT_ISLAND } from "../../island/index.ts";
 import {
   CROUCH_HEIGHT,
   STANDING_HEIGHT,
@@ -10,7 +15,7 @@ import {
   overlaps,
   support,
 } from "./collision.ts";
-import type { Obstacle } from "./collision.ts";
+import type { Obstacle } from "../../island/geometry.ts";
 
 export interface GameState extends Point {
   y: number;

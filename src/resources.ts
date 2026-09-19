@@ -1,36 +1,6 @@
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
-import type { BlockPart } from "./blocks.ts";
-import type { ResourceDeposit } from "./world.ts";
-import { WORLD_PALETTE } from "./world-visuals.ts";
-
-export function resourceParts(resource: ResourceDeposit): readonly BlockPart[] {
-  return [
-    {
-      name: "Resource_base",
-      position: [0, 0.55, 0],
-      size: [1.8, 1.1, 1.8],
-      color: WORLD_PALETTE.strata,
-    },
-    {
-      name: "Crystal_left",
-      position: [-0.45, 1.05, 0.3],
-      size: [0.45, 0.7, 0.45],
-      color: resource.color,
-    },
-    {
-      name: "Crystal_tall",
-      position: [0.35, 1.2, -0.25],
-      size: [0.45, 1, 0.45],
-      color: resource.color,
-    },
-    {
-      name: "Crystal_right",
-      position: [0.5, 0.95, 0.5],
-      size: [0.45, 0.5, 0.45],
-      color: resource.color,
-    },
-  ];
-}
+import type { ResourceDeposit } from "./packages/island/index.ts";
+import { resourceParts } from "./packages/island/geometry.ts";
 
 export function createResourceGroup(resource: ResourceDeposit): Group {
   const group = new Group();

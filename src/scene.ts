@@ -1,12 +1,15 @@
 import { createResourceGroup } from "./resources.ts";
-import { WORLD_PALETTE, ventParts } from "./world-visuals.ts";
-import type { GameState } from "./game.ts";
-import { viewPosition } from "./game.ts";
-import { makeObstacles } from "./collision.ts";
+import { WORLD_PALETTE, ventParts } from "./packages/island/geometry.ts";
+import type { PlayState } from "./packages/play/index.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { terrainQuads, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
-import type { Island } from "./world.ts";
+import {
+  terrainQuads,
+  SIZE,
+  HAZE_LEVEL,
+  CELL_SIZE,
+} from "./packages/island/geometry.ts";
+import type { Island } from "./packages/island/index.ts";
 
 export async function loadShip() {
   return (await new GLTFLoader().loadAsync("/assets/ship.glb")).scene;
@@ -189,7 +192,6 @@ export function createScene(
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
-  const obstacles = makeObstacles(island);
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -197,7 +199,12 @@ export function createScene(
   }
   resize();
   window.addEventListener("resize", resize);
-  function render(state: GameState, time: number, started: boolean) {
+  function render(
+    state: PlayState,
+    view: { x: number; y: number; z: number },
+    time: number,
+    started: boolean
+  ) {
     const y = state.y;
     avatar.position.set(state.x, y, state.z);
     avatar.rotation.y = state.yaw;
@@ -214,7 +221,6 @@ export function createScene(
       camera.position.set(49, 53, 66);
       camera.lookAt(0, 2, 0);
     } else {
-      const view = viewPosition(state);
       camera.position.set(view.x, view.y, view.z);
       camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
     }
@@ -243,5 +249,5 @@ export function createScene(
     sun.shadow.map?.dispose();
     renderer.dispose();
   }
-  return { render, obstacles, dispose };
+  return { render, dispose };
 }
