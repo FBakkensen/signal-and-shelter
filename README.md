@@ -55,3 +55,9 @@ Gameplay and UI also require real integrated-browser interaction tests, per [the
 - [Decisions](docs/decisions.md): choices and rationale.
 - [Learnings](docs/learnings.md): observations and limitations.
 - [Agent guidance](AGENTS.md): project rules and context reading instructions.
+
+## Alien visual prototypes
+
+On branch `codex/alien-visual-prototypes`, run the same development command above and open `/?variant=A` on Vite's printed URL. Use `A` (Porcelain Expanse), `B` (Ember Fold), or `C` (Violet Relay). The bottom comparison bar or left/right arrow keys switch studies; buttons provide closer view, rotation, and hide/show of the illustrative interface. Expand the study details to see materials, geometry and current view state. The Current game link returns to the playable experiment.
+
+These are throwaway 3D art/UI studies, with no walking or gameplay mutations. They are available only in development and excluded from the production build. Camera/interface state resets on reload; the variant remains in the URL. See [validation and limitations](docs/testing/visual-prototypes.md). No final visual direction has been selected.

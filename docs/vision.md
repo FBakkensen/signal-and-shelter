@@ -28,7 +28,7 @@ See [experiment 003's validation record](testing/experiment-003.md) for actual c
 
 2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
 
-- Does voxel mean a blocky visual style, editable blocks, or both?
+- Voxel visuals are required. Should blocks also become editable?
 - Does repairing the spaceship and leaving become a goal, or does building a home remain the focus?
 - How should backup charging work for the player and robots, and what can they do while recovering power?
 - How and when should base infrastructure provide faster charging or battery replacement?
@@ -41,3 +41,11 @@ See [experiment 003's validation record](testing/experiment-003.md) for actual c
 - What interactions make exploration interesting?
 
 Resolve questions when an experiment depends on them. Robot companions, power systems, manufacturing, logistics, and inter-island travel are intended directions, not implemented features. Multiplayer, infinite terrain, and persistent world editing have no current commitment; combat is excluded from the agreed vision.
+
+## Visual direction revision — 2026-09-19
+
+User feedback: the metre-block appearance is too clunky, and the Earth-like island and UI do not fit being stranded on an unfamiliar planet. Explore unfamiliar terrain and materials in place of recognizable trees, ordinary water, grass and sand. The specific replacements and final UI remain open; compare several prototypes before committing.
+
+Three development-only visual studies now explore Porcelain Expanse (pale crust, hollow arches, mineral haze, field-note UI), Ember Fold (stepped ceramic terrain, vents, warm instrument console), and Violet Relay (shallow violet strata, levitating luminous minerals, minimal visor). These are inspectable 3D sketches with illustrative interface text, not implemented gameplay or an approved art direction. The existing playable experiment still uses the earlier Earth-like world.
+
+User correction, 2026-09-19: “you broke the voxels.” Preserve the voxel aesthetic. Less clunky means improving block scale, proportions, materials and composition; it does not authorize smooth or low-poly replacement geometry. The studies now use half-metre terrain cells and finer block-built formations. The exact scale remains experimental.

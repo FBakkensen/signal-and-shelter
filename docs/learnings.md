@@ -73,3 +73,18 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Tradeoff: a connected level starter meadow simplifies safe placement and access while coastline, outer hills, foliage, ship and resources vary. More varied interior terrain is an untested future direction.
 - Limitation: the browser tool exposes discrete key presses without held input; full browser resource traversal remains unverified. Captured mouse look retains the documented host limitation. Automated reachability does not establish movement feel.
 - Next: user feedback on arrival, the ship's scale and resource surveying should guide the next small experiment. Robots and power remain future work.
+
+## 2026-09-19 — Alien visual studies
+
+- User evidence: The current metre-block terrain looks clunky; recognizable Earth-like environments and UI do not convey the intended unfamiliar planet.
+- Initial experiment (subsequently corrected): Three actual Three.js scenes compared shallow porcelain facets and arches, continuous ceramic folds and vents, and violet strata with suspended luminous stones. Each has a different UI composition. See [the validation record](testing/visual-prototypes.md).
+- Observed: All three rendered at desktop and 390×844. Button/keyboard switching, wraparound, URL reload, closer view, rotation, hide/show and return to the current game were exercised. A narrow-layout missing word space was fixed and rechecked.
+- Hypothesis: Gentler terrain transitions and fewer persistent interface elements may improve the sense of exploration. No user preference or gameplay conclusion has been established yet.
+- Limitations: Static art studies; haze, vents and floating stones imply materials and motion but have no physical simulation. No authored Blender assets were changed. Collision, traversal, performance and the existing pointer-lock issue were not retested by this work.
+
+## 2026-09-19 — Preserve voxels when reducing clunkiness
+
+- User correction: “you broke the voxels.” The smooth/triangulated study geometry contradicted the requested voxel style. The initial visual proposal was rejected on that basis; browser rendering success did not validate the design choice.
+- Correction: Half-metre cubic terrain with exposed square faces; block-built arches, vents, stones and celestial silhouettes; crisp ship and humanoid boxes. Alien palettes and UI comparisons remain available.
+- Evidence: A new half-metre-level regression failed before the correction and passed afterward. Geometry tests cover face counts, hidden-face removal, empty volumes, grid alignment, axis normals, triangle winding and invalid dimensions. `npm run check` passed. Integrated-browser close-up inspection and real variant switching checked A/B/C; no application errors in inspected logs.
+- Limit: These are still visual studies, not production collision or editing systems. User feedback on the finer voxel scale is pending.

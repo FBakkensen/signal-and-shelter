@@ -60,3 +60,11 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 ## Current boundaries
 
 Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. Non-solid foliage can intersect the first-person view when approached closely; foliage fading is not implemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 631 kB uncompressed JavaScript bundle, which includes Three.js.
+
+## Development-only visual studies — 2026-09-19
+
+`src/entry.ts` dispatches to the current game normally, or to `src/visual-prototype.ts` in Vite development mode when the URL contains `variant`. Values A/B/C select three visual directions; unknown values default to A. The prototype and its styles are excluded from production output by the development gate.
+
+`visual-prototype-model.ts` owns study definitions, URL selection, cycling and procedural surface heights. `visual-prototype-scene.ts` renders half-metre voxel terrain, finer voxel formations and crisp block ship/robot silhouettes. `visual-prototype-voxels.ts` samples occupied cubic cells and emits only their exposed, axis-aligned faces; it is used by terrain and curved formation silhouettes. These do not replace the authored Blender assets or modify the playable world's generation, physics or collisions. `visual-prototype.css` explores three UI compositions and narrow layouts. Camera controls offer overview, close-up and 45-degree rotation; this is not a walking mode. Selection persists in the URL; camera and interface state reset on reload. No gameplay state is shared or saved.
+
+The experiment lives on `codex/alien-visual-prototypes`. Keep it available for comparison until the user chooses; then capture the study on that throwaway branch and implement the selected direction in production with its own gameplay validation.
