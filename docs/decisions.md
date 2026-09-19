@@ -157,3 +157,9 @@ Implemented with one simulation-owned half-metre coverage grid shared by discove
 ### D015 contract accepted — 2026-09-19
 
 The user accepted the consolidated [shared simulation contract](simulation-contract.md), including authoritative gameplay state, ordered tick-addressed commands, seeded randomness, invalid-state halt/diagnostics, deterministic island generation and per-run replay boundaries. The migration scope includes generation, movement, exploration/discovery, interactions and host lifecycle handling. [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27) owns the resolution. Numeric/tick semantics, physics/coordination, validation acceptance and the final migration checkpoint remain open; no production implementation is authorized by this contract approval.
+
+### D015 numeric and tick semantics accepted — 2026-09-19
+
+The user accepted [numeric and tick semantics](numeric-design.md), resolving [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28). The design fixes 60 Hz, integer millimetres in bounded regions, 4.2 m/s walking, seven-tick preparation/recovery, Q24 direction tables and centered residues, stable command ordering, versioned random streams/generation and canonical replay comparison. Direction normalization has a bounded approximation error; it does not provide mathematically exact equal Euclidean displacement each tick. The conservative host fallback can treat a long ordinary stall like suspension, slowing game time without skipping authoritative ticks.
+
+Reference arithmetic checks support the numeric bounds and residue identities only. Production arithmetic/contact tests, direction-table generation and validation, cross-runtime replay, normal-speed scale evidence, shared physics and the migration checkpoint remain pending. This acceptance does not authorize production implementation.

@@ -1,20 +1,20 @@
-# Numeric and tick semantics — working design
+# Numeric and tick semantics — accepted design
 
-Status: in progress, 2026-09-19. [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28) owns the decision. This document separates accepted choices from a candidate under evaluation. No production implementation changed.
+Status: accepted by the user, 2026-09-19. [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28) owns the decision. The consolidated rules below are accepted design. Production implementation and its validation remain pending.
 
 ## Confirmed choices
 
-- 1 millimetre integer position units; integer region coordinates plus bounded local positions. Region dimensions, storage types and cross-region arithmetic remain open.
+- 1 millimetre integer position units; integer region coordinates plus bounded local positions. Region dimensions, storage types and cross-region arithmetic are specified below.
 - 60 simulation ticks per simulation second, independent of rendering.
 - Walking speed is 4.2 m/s, exactly 70 mm per tick along an axis. Divisibility is a constraint on authored time-based tuning, not merely a convenience.
 - Preparation and recovery are each exactly 7 ticks (7/60 second); this supersedes the earlier 120 ms durations.
 - Whole-tick schedules and integer quotient/remainder handling for derived quantities. Remainders affecting future state must be reproducible.
 
-## Direction candidate agreed for evaluation
+## Direction representation and its limits
 
-Scale direction components by S = 2^24 = 16,777,216. The cardinal vector is (S, 0); a 45-degree candidate is (D, D), where D = 11,863,283. Combine each component with the 70 mm travel budget and retained integer residue before extracting whole millimetres.
+Scale direction components by S = 2^24 = 16,777,216. The cardinal vector is (S, 0); the 45-degree vector is (D, D), where D = 11,863,283. Combine each component with the 70 mm travel budget and retained integer residue before extracting whole millimetres.
 
-This is a finite approximation to normalization. A perfect 45-degree displacement of length 70 mm requires a component a with 2a² = 4900; no integer-millimetre a exists. Neither this candidate nor a finer finite fixed-point representation provides literal equal Euclidean displacement on every tick. The user agreed to evaluate this explicitly qualified candidate, not to a claim of mathematical exactness or completed validation.
+This is a finite approximation to normalization. A perfect 45-degree displacement of length 70 mm requires a component a with 2a² = 4900; no integer-millimetre a exists. Neither this representation nor a finer finite fixed-point representation provides literal equal Euclidean displacement on every tick. The user accepted this explicitly qualified approximation; mathematical exactness and completed validation are not claimed.
 
 ## Arithmetic evidence
 
@@ -34,20 +34,15 @@ The diagonal vector's relative length error is approximately −1.7114271 × 10^
 
 For a fixed direction and no collision, retained remainders can avoid additional cumulative step-rounding drift. For example, after 216,000 ticks (one simulation hour), each diagonal axis numerator divided by S yields quotient 10,691,454 mm and remainder 5,847,936. That reference identity does not select the production signed-rounding convention. Positional quantization is separate from direction normalization error.
 
-## Rules still to settle and validate
+## Validation and downstream obligations
 
-- Direction set and deterministic conversion of camera-relative input; arbitrary directions need their own precision/error contract.
-- Signed quotient/remainder convention and canonical rounding, including exact half-unit ties.
-- Turning and stopping must not create displacement; collisions must not bank blocked movement for a later burst. Region normalization must preserve the same position and residue. These are required checks, not demonstrated behavior.
-- Coordinate ranges, region size and intermediate bounds for every arithmetic family; explicit failure on unsupported inputs or bounds violations.
-- Tick/command ordering, seeded random algorithms, generation migration, host pacing and suspension behavior.
-- Identical outputs across supported runtimes, planner/execution agreement, generated-sequence tests and the 1,000-active-robot normal-speed benchmark.
+The numeric rules below are settled at design level. Production tests must still demonstrate turning/stopping behavior, blocked-residue handling, region normalization, arithmetic bounds and overflow rejection. The shared-physics decision owns contact classification, planner heading conversion and trajectory rules; the acceptance decision owns the supported-runtime matrix and normal-speed scale evidence.
 
-A performant implementation may reuse direction data while intent is unchanged. No particular cache, lookup-table size, normalization algorithm or performance gain is selected by this arithmetic check.
+The arithmetic reference checks do not establish production correctness, cross-runtime replay or capacity for 1,000 active robots. Reusing direction data while intent is unchanged is permitted only when it preserves the accepted authoritative behavior.
 
-## Consolidated proposal for review
+## Accepted numeric and tick rules
 
-The following closes the engineering choices at design level. It is proposed, not yet accepted or implemented. The remaining physics and scale tickets still own their detailed algorithms and validation.
+The user accepted this consolidated design on 2026-09-19, including the explicit host fallback limitation. The remaining physics and scale tickets still own their detailed algorithms and validation.
 
 ### Regions and arithmetic bounds
 
@@ -82,7 +77,7 @@ The following closes the engineering choices at design level. It is proposed, no
 
 - Keep seed normalization explicit and versioned. A blank seed may be selected using host randomness; record the resolved seed before initialization.
 - Use named, versioned integer random streams keyed by seed, purpose and stable entity identity, with a per-stream integer draw counter included in state. Adding visual effects or another actor must not consume a shared gameplay stream.
-- Proposed first algorithm: fixed-order seed/purpose/entity/counter fields, with unsigned-32 little-endian byte lengths for UTF-8 string fields and fixed-width little-endian integer fields (including 6-byte counters), FNV-1a over the encoded bytes followed by the existing unsigned-32 avalanche mix (xor right-shift 13, multiply modulo 2^32 by 1,274,126,177, xor right-shift 16). Version the exact encoding and algorithm; publish golden vectors. Use explicit low/high words for wider integer fields. This is a non-cryptographic gameplay hash, not an entity-identity mechanism or a security primitive.
+- Selected first algorithm: fixed-order seed/purpose/entity/counter fields, with unsigned-32 little-endian byte lengths for UTF-8 string fields and fixed-width little-endian integer fields (including 6-byte counters), FNV-1a over the encoded bytes followed by the existing unsigned-32 avalanche mix (xor right-shift 13, multiply modulo 2^32 by 1,274,126,177, xor right-shift 16). Version the exact encoding and algorithm; publish golden vectors. Use explicit low/high words for wider integer fields. This is a non-cryptographic gameplay hash, not an entity-identity mechanism or a security primitive.
 - Map random words to integer ranges with rejection sampling, not an intermediate floating value in [0,1). Rejected samples advance the stream counter deterministically. Coordinate-addressed generation uses explicit integer coordinates/purpose keys, so querying cells in a different order cannot change the island.
 - Migrate generation to a new generator version using integer/fixed-point expressions and versioned tables where needed. Current v2 uses runtime trigonometric functions; its old seed geometry is not silently promised to remain bit-for-bit identical. Preserve the accepted island experience and test the new generator. Record game, generator, numeric/table and replay-schema versions in each run.
 
@@ -90,7 +85,7 @@ The following closes the engineering choices at design level. It is proposed, no
 
 Browser lifecycle signals do not provide a portable, complete explanation of every elapsed-time gap. A long gap alone cannot prove whether the cause was sleep, freezing, blocking work or scheduling delay. Therefore the host needs an explicit conservative policy; it cannot guarantee perfect cause detection.
 
-Proposed policy:
+Accepted policy:
 
 - Use a simulation driver independent of rendering, with integer wall-time credit solely for pacing. Completed ticks and recorded commands are authoritative; wall-clock timestamps never enter gameplay calculations.
 - Schedule 60 ticks per second. Cap admitted pacing credit at six ticks (100 ms); process a bounded batch before yielding. If processing cannot keep up, discard excess wall-clock debt and run slower without skipping or partially executing simulation ticks.
@@ -98,21 +93,21 @@ Proposed policy:
 - Hidden does not itself mean paused. Keep requesting background work while allowed, but do not promise that a browser will keep a hidden page running at 60 Hz. A discarded page has lost in-memory state; resuming after discard would require persistence, which is outside this map.
 - Focus loss clears held player input via the command boundary; it does not pause robots. Explicit pause freezes simulation and clears held player input. Terminal UI remains live with gameplay keyboard input disabled. Reject gameplay commands received during explicit pause rather than queueing them for later execution; presentation and resume controls remain usable. Pause preserves already-established traversal state under the accepted lifecycle contract; clearing host held keys must not silently cancel a prepared jump. The shared-physics decision must define that resumption transition explicitly.
 
-The user must accept this fallback limitation or choose a narrower host guarantee before the numeric/tick ticket is resolved. It does not weaken same-recorded-command tick determinism.
+The user accepted this fallback limitation on 2026-09-19. It does not weaken same-recorded-command tick determinism.
 
 ### Replay comparison and verification gates
 
 Use a versioned canonical state encoding with fixed field order, integer values, stable entity ordering and explicit residual/random/command-work state. Compare exact fields/bytes and identify the first differing tick. A digest may accelerate comparison but is not proof of equality by itself. Exclude presentation state and caches only under the accepted contract's reconstructability condition.
 
-Require reference arithmetic and production-interface tests for signed ties, reversals, stops, all headings, region crossings, overflow rejection and contact projection; identical replay across the runtime matrix chosen by the acceptance ticket; and normal-speed scale measurements. This proposal does not claim those production/cross-runtime/performance gates have passed.
+Require reference arithmetic and production-interface tests for signed ties, reversals, stops, all headings, region crossings, overflow rejection and contact projection; identical replay across the runtime matrix chosen by the acceptance ticket; and normal-speed scale measurements. This design does not claim those production/cross-runtime/performance gates have passed.
 
 ## Independent arithmetic audit — 2026-09-19
 
 A read-only audit exercised ephemeral integer reference calculations: one million seeded eight-direction/stop steps checked the cumulative displacement identity and centered residue bounds; 126 signed region-boundary cases checked floor normalization; a separate Node Number calculation matched a BigInt accumulated identity over one million steps. Stops and reversals preserved the identity. No repository implementation, collision solver, arbitrary-heading table, browser replay or performance benchmark was tested.
 
-The audit identified the need to validate every direction's norm, specify half ties, discard only genuinely blocked residues, and bound local geometry before forming products. Those refinements are incorporated in the proposal above.
+The audit identified the need to validate every direction's norm, specify half ties, discard only genuinely blocked residues, and bound local geometry before forming products. Those refinements are incorporated in the accepted design above.
 
 ## Primary-source constraints
 
 - [ECMAScript numeric and Math semantics](https://tc39.es/ecma262/2025/multipage/numbers-and-dates.html): safe integer bounds, modular `Math.imul`, and implementation-approximated trigonometric functions motivate explicit arithmetic and versioned tables.
-- [Chrome page lifecycle](https://developer.chrome.com/docs/web-platform/page-lifecycle-api): hidden, frozen and discarded states differ; freezing suspends tasks and discard may occur without an event. The host proposal must not equate hidden with paused or promise recovery of discarded in-memory state.
+- [Chrome page lifecycle](https://developer.chrome.com/docs/web-platform/page-lifecycle-api): hidden, frozen and discarded states differ; freezing suspends tasks and discard may occur without an event. The host policy must not equate hidden with paused or promise recovery of discarded in-memory state.
