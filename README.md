@@ -1,5 +1,15 @@
 # Signal & Shelter
 
+## Navigation prototype archive
+
+This branch is a throwaway navigation study and must never be merged. Its normal entry opens four controlled voxel courses. Run `npm ci`, then `npm run dev -- --port 5173`; run `npm run check` for validation. The production README below describes the baseline, not this experiment.
+
+Right-click requests a destination, including unknown ground. WASD cancels it; Q/E orbit and the mouse wheel zooms. Jumping is automatic; Space, Ctrl and Shift have no gameplay action. Compare A/B/C setup and recovery timings, try the 0.5/1.0 m climb limits, and use the terminal near spawn to check running versus explicit pause.
+
+Start with **Terraces**, then **Jump or detour**. Brisk timing can jump the low bar while weighty timing makes the walking detour cheaper. **Explore toward a target** includes a wall and an uncrossable gap; **Low ceiling** exercises body clearance. Only the requested destination is marked.
+
+The study uses production body-clearance and exploration checks with a simplified four-direction graph and jump arc. It does not establish final physics or production navigation architecture. See [validation and limitations](docs/testing/navigation-prototype.md). Return branch: `codex/navigation-design`.
+
 Experiment 004 — seeded island arrival: arrive beside a broken spaceship on a ceramic voxel shelf, surrounded by stepped vents and amber haze. Check the ship's data link and survey conductive seams, ferric nodules and prismatic silica (copper, iron and silica). This is the first small step toward the [friendly robot-companion vision](docs/vision.md); gathering, robots and power systems come later.
 
 Enter a text seed at the start, or leave it blank for a generated one. The same seed and generator version recreate the same terrain, placements and starting state. Copy the seed from the pause menu or share the game's URL. Restart begins the same island again; Choose another seed returns to the start screen. Seeds are case-sensitive, trimmed and limited to 80 characters in the form. Future generator versions may produce different islands. Progress is not saved.
