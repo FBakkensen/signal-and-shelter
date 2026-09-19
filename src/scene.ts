@@ -1,3 +1,6 @@
+import type { CameraFrame, Position3 } from "./camera.ts";
+import { createPicker } from "./picking.ts";
+import { createOcclusion } from "./occlusion.ts";
 import { createResourceGroup } from "./resources.ts";
 import { WORLD_PALETTE, ventParts } from "./packages/island/geometry.ts";
 import type { PlayState } from "./packages/play/index.ts";
@@ -163,6 +166,7 @@ export function createScene(
     block(scene, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
   }
   const ship = shipAsset.clone(true);
+  ship.name = "select:ship";
   ship.position.set(
     island.ship.x,
     heightAt(island.ship.x, island.ship.z),
@@ -177,6 +181,7 @@ export function createScene(
   scene.add(ship);
   for (const resource of island.resources) {
     const group = createResourceGroup(resource);
+    group.name = `select:${resource.id}`;
     group.position.set(
       resource.x,
       heightAt(resource.x, resource.z),
@@ -192,6 +197,8 @@ export function createScene(
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
+  const visibility = createOcclusion(scene, avatar);
+  let lastTime = 0;
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -201,34 +208,40 @@ export function createScene(
   window.addEventListener("resize", resize);
   function render(
     state: PlayState,
-    view: { x: number; y: number; z: number },
+    pose: { ground: Position3; eye: Position3 },
     time: number,
-    started: boolean
+    started: boolean,
+    frame?: CameraFrame
   ) {
-    const y = state.y;
-    avatar.position.set(state.x, y, state.z);
-    avatar.rotation.y = state.yaw;
+    avatar.position.set(pose.ground.x, pose.ground.y, pose.ground.z);
+    avatar.rotation.y = frame?.facing ?? state.yaw;
     left.rotation.x = Math.sin(state.distance * 3) * 0.4;
     right.rotation.x = -left.rotation.x;
     const overview = state.overview || !started;
-    avatar.visible = overview;
-    const fov = overview ? 44 : 70;
+    avatar.visible = overview || Boolean(frame);
+    const fov = frame?.fov ?? (overview ? 44 : 70);
     if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     }
-    if (overview) {
+    if (frame) {
+      camera.position.set(frame.position.x, frame.position.y, frame.position.z);
+      camera.lookAt(frame.target.x, frame.target.y, frame.target.z);
+    } else if (overview) {
       camera.position.set(49, 53, 66);
       camera.lookAt(0, 2, 0);
     } else {
-      camera.position.set(view.x, view.y, view.z);
+      camera.position.set(pose.eye.x, pose.eye.y, pose.eye.z);
       camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
     }
     grains.position.y = Math.sin(time * 0.25) * 0.15;
+    visibility.update(camera, time - lastTime, Boolean(frame));
+    lastTime = time;
     renderer.render(scene, camera);
   }
   function dispose() {
     window.removeEventListener("resize", resize);
+    visibility.dispose();
     // The shared ship template owns its geometry/materials across world rebuilds.
     scene.remove(ship);
     scene.traverse((object) => {
@@ -249,5 +262,9 @@ export function createScene(
     sun.shadow.map?.dispose();
     renderer.dispose();
   }
-  return { render, dispose };
+  const pickObject = createPicker(scene, camera, avatar);
+  function pick(clientX: number, clientY: number): string | null {
+    return pickObject(clientX, clientY, canvas.getBoundingClientRect());
+  }
+  return { render, dispose, pick };
 }

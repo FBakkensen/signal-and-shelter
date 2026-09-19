@@ -17,24 +17,23 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 
 ## Controls
 
-| Input                               | Action                                                            |
-| ----------------------------------- | ----------------------------------------------------------------- |
-| Begin your landing / Keep wandering | Enter first-person play with the selected controls                |
-| Mouse                               | Look horizontally and vertically                                  |
-| W A S D                             | Walk / strafe relative to your view                               |
-| Arrow keys                          | Look left/right/up/down, including while mouse look is active     |
-| Ctrl + forward movement             | Sprint                                                            |
-| Space                               | Jump; hold to jump again after landing                            |
-| Shift                               | Sneak, lower your viewpoint, and avoid walking off ledges         |
-| M or Overview                       | Pause in the island overview                                      |
-| Escape or pause button              | Pause and release the mouse                                       |
-| E near the ship console             | Open the terminal; gameplay pauses while it is open               |
-| Restart this island                 | Reset this seed's position, view, discoveries and data-link check |
-| Choose another seed                 | Return to the seed-entry screen                                   |
+| Input                               | Action                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| Begin your landing / Keep wandering | Enter third-person play with a free pointer                            |
+| WASD                                | Move relative to camera heading; humanoid faces movement               |
+| Q/E or Left/Right arrows            | Orbit                                                                  |
+| Home                                | Restore starting heading without changing zoom                         |
+| Scroll over world                   | Manual zoom; UI scrolling never zooms the world                        |
+| Left-click                          | Select/inspect; empty ground clears selection                          |
+| F / terminal button                 | Use selected ship within reach; with no selection, use nearby terminal |
+| Ctrl / Space / Shift                | Sprint / jump / sneak with existing physics                            |
+| Escape / pause / focus loss         | Pause; explicit resume required                                        |
+| M / Overview                        | Temporary paused overview, retained until atlas integration            |
+| Restart / new seed                  | Reset progress and selection; preserve camera heading and zoom         |
 
-Mouse sensitivity and invert-Y are available in the pause panel. **Use keyboard controls** starts play without mouse capture; WASD moves and arrow keys look around. Keyboard controls remain active while the mouse is locked too. The pause panel can switch back to mouse controls. Keep wandering, overview return, and reset preserve the selected mode until reload. Escape pauses either mode. The integrated browser currently rejects mouse capture; keyboard play and its resume flow have been checked there. Captured mouse look still needs a standalone-browser playtest. Drag-to-look is not supported.
+No mouse capture or drag-to-look. Scenery fades locally around an obstructed humanoid; it never changes camera zoom or FOV. The active strategic atlas is the next implementation increment; current distant play remains 3D. See [third-person increment validation](docs/testing/third-person-controls.md).
 
-Walk within four metres of each resource deposit to survey it. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and look settings last until page reload; a restart clears progress while preserving settings.
+Walk within four metres of each resource deposit to survey it. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and camera settings last until page reload; a restart clears progress while preserving settings.
 
 This experiment targets keyboard-and-mouse play. Narrow layouts are supported visually; touch movement, sound, terrain editing, swimming, and saved progress are not implemented.
 
@@ -67,3 +66,11 @@ Implemented deep TypeScript modules live in `src/packages/island` and `src/packa
 The game is **Signal & Shelter**. The warm console interface from study B was selected for the current prototype; the study's label was not a game or world name. The playable implementation is on `main`. Generator version 2 uses half-metre terrain cells and stepped vent formations; a seed from version 1 will produce different terrain/decorations.
 
 Three interface and visual studies were captured at commit `8df36f9` on `codex/alien-visual-prototypes`. That branch supports `/?variant=A`, `B` or `C` in development. The playable game removes the comparison route and switcher; open `/` to play. No prototype state is migrated.
+
+## Archived design prototypes
+
+This is the production implementation branch. `npm run dev` opens normal third-person play; old `variant`, `study` and `production` query parameters do not select experiments.
+
+The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
+
+The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play camera and controls are implemented; strategic atlas integration remains pending.

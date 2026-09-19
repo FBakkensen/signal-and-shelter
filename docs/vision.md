@@ -36,7 +36,7 @@ See [experiment 004's validation record](testing/experiment-004.md) for actual c
 - How and when should base infrastructure provide faster charging or battery replacement?
 - What first robot job would make a useful, enjoyable experiment?
 - How should travel, resource differences, and logistics between islands work?
-- How should we tune the new first-person sensitivity, speed, jumping, and sneaking?
+- Which third-person camera and strategic-zoom controls feel best in the agreed prototype comparison?
 - Which visual references best express the friendly atmosphere?
 - Which devices and browsers should define our performance target?
 - How should the seeded terrain evolve beyond the current clear ceramic shelf and stepped outer terrain?
@@ -53,3 +53,37 @@ Three archived visual studies compared different voxel terrain treatments and in
 User correction, 2026-09-19: “you broke the voxels.” Preserve the voxel aesthetic. Less clunky means improving block scale, proportions, materials and composition; it does not authorize smooth or low-poly replacement geometry. The studies now use half-metre terrain cells and finer block-built formations. The exact scale remains experimental.
 
 The seeded island uses half-metre terrain cells, finer stepped vent geometry and matching collision; generator version 2. Exact density, scale, lighting and movement feel still await play feedback. Selecting the console interface did not settle the world name or future manufacturing and power systems.
+
+## Third-person and strategic zoom direction — 2026-09-19
+
+The user agreed to replace first-person play with third-person play anchored to the humanoid: screen-relative WASD, a free mouse pointer for selection and interaction, a humanoid facing its movement direction, and scroll zoom. At sufficient distance, the presentation changes into a simplified strategic map while preserving position and orientation. Zoom does not enable or disable actions; physical proximity still governs nearby interactions. This is accepted direction, not implemented behavior.
+
+Compare raised and over-the-shoulder close-camera prototypes before choosing the camera. Exploration should reveal resource deposit identities, and discovered deposits should remain recognizable across zoom levels. Exact map symbols, exploration coverage, transition behavior and remaining controls will be settled through prototypes and discussion. The strategic view is intended to support active play; the existing separate overview currently pauses it.
+
+The user requested design first, with prototypes, followed by implementation. The canonical [Third-person play and strategic zoom: design through implementation](https://github.com/FBakkensen/signal-and-shelter/issues/5) map tracks that effort and its decision tickets. New robot orders, construction and other future gameplay systems remain separate efforts. D007 records the existing first-person implementation; its replacement control specification is pending this design work.
+
+### Camera feedback — 2026-09-19
+
+The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
+
+### Strategic map feedback — 2026-09-19
+
+The user selected A, the exploration atlas, with a required correction: multi-block objects must occupy their matching world footprint on the visible terrain grid. Symbols and labels identify objects but must not replace their size. The prototype now projects all ship, vent and deposit block parts at their actual horizontal bounds. Exact exploration distance and transition thresholds remain tuning values for the design checkpoint.
+
+### Controls agreed — 2026-09-19
+
+The user accepted the [third-person control contract](https://github.com/FBakkensen/signal-and-shelter/issues/8): keyboard orbit, free-pointer selection and explicit use, movement at every zoom, explicit pause/resume, and retirement of the separate paused overview. This is a design decision; production and prototype bindings have not yet been migrated.
+
+[Click-to-move and shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) is the agreed next effort after camera/map delivery. Right-click terrain requests a route; WASD cancels it immediately; unreachable destinations show feedback. Humanoid and future robots should share pathfinding with appropriate movement capabilities. Robot gameplay remains separate.
+
+### Occlusion feedback — 2026-09-19
+
+The user selected B: fade scenery that blocks the humanoid. Preserve user-selected zoom and camera framing; obstruction must never trigger camera pull-in, zoom-out or FOV compensation. This chooses the treatment direction. The prototype's abrupt 18% opacity and whole-terrain-chunk fading remain rough implementation details to refine at the final design checkpoint. See the [occlusion decision](https://github.com/FBakkensen/signal-and-shelter/issues/10).
+
+### Design checkpoint accepted — 2026-09-19
+
+The user confirmed the [consolidated third-person design](third-person-design.md), including tunable zoom/blend defaults, 8 m exploration with existing 4 m surveying, smooth localized fading, and three sequential playable increments. D014 records the accepted replacement for first-person controls; production implementation remains pending.
+
+### First production increment — 2026-09-19
+
+Third-person controls and localized fading are implemented on `codex/third-person-controls`, using the normal game entry. Manual zoom, free-pointer selection, F interaction, keyboard orbit and preserved camera settings replace first-person input. The separate overview remains only until the next atlas increment. Sustained movement/obstruction feel still needs human playtesting; see [evidence](testing/third-person-controls.md).

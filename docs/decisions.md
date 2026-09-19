@@ -17,7 +17,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D007 — Try first-person Minecraft-like controls
 
 - Date: 2026-09-19
-- Status: Accepted and implemented; captured-look validation pending
+- Status: Camera/input superseded by D014 on the third-person implementation branch; temporary overview remains until atlas integration
 - Basis: The user requested more Minecraft-like controls, then explicitly requested implementation.
 - Decision: First-person pointer-locked mouse look, WASD, Space jump, Ctrl sprint, and Shift sneak, retaining the island and overview. See [the implementation and validation plan](controls-plan.md).
 - Rationale: The present elevated camera, drag-only horizontal look, and automatic one-block stepping differ substantially from the requested feel.
@@ -127,3 +127,14 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Tradeoff: Keep a separate headless simulation entry point for deterministic physics and traversal scenarios, while the browser uses the narrower play entry point. Keep geometry/authoring descriptions separate from seed selection rather than exporting every implementation helper in one barrel.
 - Consequence: Generator version 2, controls, and authored assets are retained. Package internals and renderer independence are enforced by dependency-cruiser, including top-level integration tests.
 - Evidence: [Deep-module validation](testing/deep-modules.md).
+
+## D014 — Third-person play with active strategic zoom
+
+- Date: 2026-09-19
+- Status: Accepted; close-play controls and localized fading implemented on `codex/third-person-controls`, atlas integration pending
+- Basis: The user selected camera B, atlas A with true-size footprints, fading treatment B, and confirmed the consolidated controls, defaults and three playable increments.
+- Decision: Implement the [accepted third-person design](third-person-design.md). Zoom remains exclusively manual; active strategic presentation preserves actions and proximity rules. Replace first-person capture/look and retire the paused overview as the atlas lands.
+- Rationale: Support close exploration and readable strategic inspection through one humanoid-anchored view. Smooth, localized fading preserves visibility without moving the camera.
+- Tradeoff: Requires new presentation and input integration; prototype whole-chunk fading is insufficient. Shared click-to-move navigation follows separately.
+- Consequence: This is the accepted replacement for D007's camera/input/overview contract; D007 remains the implemented baseline until migration. Existing movement physics remain unless explicitly changed.
+- Evidence: [Design checkpoint](https://github.com/FBakkensen/signal-and-shelter/issues/9) and its linked prototype decisions. Production integration is not yet validated.

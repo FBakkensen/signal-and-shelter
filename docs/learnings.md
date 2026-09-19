@@ -124,3 +124,61 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Browser evidence: seeded entry, jump, terminal pause guard/check/return, restart, overview, seed replacement and keyboard recovery after rejected capture. Screenshots inspected and warning/error logs empty. See [deep-module validation](testing/deep-modules.md).
 - Tooling limitation: sandboxed test execution reported file-level successes; a direct no-isolation run stalled. Individual assertions were verified by the unsandboxed suite. Discrete browser movement presses did not visibly change the HUD position; sustained movement and captured mouse look remain unverified in this run.
 - Documentation: current entry points and asset-authoring import path are recorded in architecture/package guidance; D013 records the ownership choice, and CONTEXT.md defines the existing island/play terms.
+
+## 2026-09-19 — Third-person camera comparison prepared
+
+- Implemented on a throwaway branch: raised and shoulder camera variants, scroll zoom from 3.5 to 70 metres, active humanoid-centered play, movement-facing avatar, free-pointer inspection and sampled camera pull-in. No camera variant has been selected by the user.
+- Evidence: 56 tests and full checks passed; real integrated-browser switching, zooming, ship selection, jumping, terminal use at both zoom extremes, pause, restart and reload were exercised. Desktop and narrow visuals inspected; warning/error logs empty. See [camera-study record](testing/camera-prototype.md).
+- Correction: a fixed shoulder offset clipped the avatar in a 390×844 viewport. Scaling the offset with portrait aspect ratio restored full-avatar framing, with a new regression test.
+- Limits: browser D/R taps did not visibly move/orbit; held-control feel and camera collision during live traversal need user playtesting. The distant view remains detailed 3D; strategic-map readability is the next prototype ticket.
+
+### Camera feedback — 2026-09-19
+
+The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
+
+## 2026-09-19 — Strategic map comparison prepared
+
+- Implemented on a throwaway branch: an explored-area atlas and a terrain chart, blending from camera B without changing zoom or FOV. Fixed-size symbols and optional labels expose known deposits; an explicit example mode previews explored content without changing gameplay discoveries.
+- Evidence: all 61 tests and full checks passed. Browser inspection covered two seeds, desktop/narrow visuals, map switching, deposit selection, manual zoom blend, example/actual modes, active jumping and terminal use/pause guard in map view. See [record](testing/strategic-map-prototype.md).
+- Hypotheses awaiting user feedback: 62–80% transition range, 8 m exploration coverage, unvisited-terrain disclosure, and persistent labels versus compact glyphs.
+- Limits: rough 2 m chart terrain and simple vent marks do not establish precise route safety. Narrow views crop the island and guide panels can cover markers; no automatic fit is applied. Held-key traversal and dense future-base marker layout remain unverified.
+
+## 2026-09-19 — Atlas selected; object scale corrected
+
+- User selected map A and required multi-block objects to match their size on the terrain grid. Replaced fixed vent marks and icon-only objects with footprints from actual block definitions; identity callouts remain separate.
+- Evidence: full checks passed with 62 tests, including exact footprint bounds against every production collider on two seeds and polygon selection inside/outside an object. Browser inspection verified full-map footprints, ship selection away from its icon, manual scroll blend and narrow rendering. Browser warnings/errors were empty.
+- Limits: terrain still uses the prototype's rough 2 m sampling; object footprints are dimensionally accurate in the horizontal plane, not a height-aware navigation map. Narrow views retain existing clipping and panel overlap.
+
+## 2026-09-19 — Occlusion treatments prepared
+
+- Compared through-wall silhouette, obstructing-mesh fading and manual orbit with fixed user zoom. A silhouette preserves scenery but cannot restore surrounding context when the camera is inside it; whole-mesh fading can reveal large terrain interiors. These are observed prototype tradeoffs, not accepted design decisions.
+- All 63 tests and required checks passed; integrated-browser ship/vent/inside-geometry comparisons and narrow inspection are recorded in [validation](testing/occlusion-prototype.md). Clear-view silhouette tint was found and corrected. Continuous traversal and performance remain unmeasured.
+
+### Occlusion selection — 2026-09-19
+
+The user selected B (fade obstructing scenery) after the comparison. Broad terrain fading, exposed undersides and abrupt opacity changes remain known prototype limitations, not settled production quality. Camera zoom/framing remains entirely independent of obstruction. The next design checkpoint must turn this direction into implementation acceptance checks. No code or browser behavior changed in recording this selection.
+
+## 2026-09-19 — Third-person controls and localized fading
+
+- Implemented on the production entry: manual shoulder camera, keyboard orbit, free-pointer selection/F use and lifecycle preservation. Fade geometry is a tapered local opening with smooth coverage and a release delay; it does not remove whole terrain chunks or adjust the camera.
+- Tests caught heading loss during reset because the old look function ignores paused states; preservation now explicitly updates the new state's heading. Independent orbit aliases remain held until both are released. Browser inspection caught and corrected selection/journal overlap.
+- Evidence: 68 tests and full required checks pass. Browser exercised normal start, ship selection, terminal/check/paused background guard/resume, jumping, manual zoom, UI scroll isolation, restart and new seed. Production fading inspected on real seeded ship, terrain and inside-ship render fixtures. Desktop/narrow inspection passed; browser warning/error logs empty.
+- Limits: fade uses visible stippling and a small local opening, not full-object alpha transparency. Camera-inside views retain surrounding solid surfaces. Continuous traversal/orbit feel and frame-rate targets are unverified; fixtures establish rendering, not route traversal. See [validation](testing/third-person-controls.md).
+
+## 2026-09-19 — Separate wayfinder experiments before implementation
+
+- The first third-person implementation incorrectly inherited throwaway study routes, source and renderer hooks. Development guards hid the comparisons from builds but left production adapters coupled to experiments.
+- Preserved the original prototype branches and the exact pre-cleanup fixture snapshot, then removed the comparison code, styles, tests, scripts and dispatch. Normal play now loads directly in development and builds.
+- Durable workflow: AGENTS.md points to the prototype handoff instructions before prototype tickets, implementation transitions and increment handoffs. Separation is required at each increment rather than deferred to final polish.
+- Evidence: production checks and all 54 production tests passed; old study URLs loaded normal play and zoom/terminal integration passed browser checks. See [cleanup validation](testing/prototype-cleanup.md).
+
+## 2026-09-19 — Pointer selection review findings resolved
+
+- Extracted the production raycast into `picking.ts`; the scene delegates to this same implementation. Real geometry tests now cover nested ship/resource identifiers, offset canvas projection, avatar exclusion, nearest-hit ordering, faded scenery blocking and no-selection cases.
+- Replaced obsolete active-control descriptions in architecture and consolidated prototype details into archived evidence links.
+- Evidence: full checks and all 58 tests passed. Integrated-browser ship selection, F use, explicit return and ground deselection passed; visual inspection and browser logs were clear. See [review-fix validation](testing/picking-review-fixes.md).
+
+## 2026-09-19 — Share interpolation between camera and avatar
+
+- Codex review found the visible avatar used the newest physics sample while the camera interpolated between samples. The renderer now consumes one play-owned ground/eye pose, also positioning the avatar before occlusion probing.
+- Regression coverage checks fractional-step positions and lifecycle/crouch boundaries. Full checks and focused browser jump/landing/pause inspection passed; high-refresh smoothness is not inferred from screenshots. See [validation](testing/avatar-interpolation.md).
