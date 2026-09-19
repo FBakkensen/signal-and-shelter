@@ -8,7 +8,7 @@ Status: accepted by the user, 2026-09-19, including both sequential playable inc
 - [Prototype automatic jumps and time-aware click-to-move](https://github.com/FBakkensen/signal-and-shelter/issues/18#issuecomment-5744511185): accepted traversal limit and timings.
 - [Choose shared navigation boundaries and capability model](https://github.com/FBakkensen/signal-and-shelter/issues/19#issuecomment-5744590115): shared movement/navigation, individual capabilities, supported surfaces and recovery.
 
-This checkpoint consolidates those decisions for implementation; it does not reopen them.
+Review reopened, 2026-09-19: user feedback requires project-wide deterministic simulation and validation for hundreds or thousands of robots. Previously accepted controls remain recorded below; support semantics and the implementation architecture are under review. The local centre-support relaxation is provisional, not an accepted design decision.
 
 ## Accepted experience
 

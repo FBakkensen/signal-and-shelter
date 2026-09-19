@@ -1,6 +1,6 @@
 # Automatic keyboard traversal — 2026-09-19
 
-Status: implemented on `codex/automatic-keyboard-traversal`; automated checks passed. Browser UI checks completed with the traversal/background limitations below. The implementation ticket remains open for those checks.
+Status: implemented on `codex/automatic-keyboard-traversal`; automated checks passed. Browser UI checks completed with the traversal/background limitations below. The implementation ticket remains open for those checks and the reopened project-wide simulation design. The local centre-support change is provisional and disputed; passing these tests does not settle its correctness.
 
 ## Validation plan
 
