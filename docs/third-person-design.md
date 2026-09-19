@@ -1,6 +1,6 @@
 # Third-person play and strategic zoom
 
-Status: design checkpoint draft, 2026-09-19. Accepted choices are distinguished from proposals below. Production remains first-person; the camera, atlas and occlusion studies are throwaway evidence, not the production implementation.
+Status: accepted design, 2026-09-19. The user confirmed the defaults, fading refinements and delivery sequence. Production remains first-person; the camera, atlas and occlusion studies are throwaway evidence, not the production implementation.
 
 Owning checkpoint: [Settle the design and define playable implementation increments](https://github.com/FBakkensen/signal-and-shelter/issues/9). The [wayfinder map](https://github.com/FBakkensen/signal-and-shelter/issues/5) indexes decision rationale.
 
@@ -31,15 +31,15 @@ Terminal opening and focus loss pause play and clear held inputs. Resume is expl
 
 [Click-to-move/shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) follows this effort. Reserve right-click terrain for that feature; do not ship a misleading movement affordance before it exists. Its accepted direction is immediate WASD route cancellation, unreachable-target feedback and shared navigation for humanoid/future robots. No robot gameplay here.
 
-## Proposed defaults for checkpoint confirmation
+## Accepted starting defaults
 
-These are implementation starting values and visual refinements, not yet accepted decisions.
+These are accepted implementation starting values and visual requirements; numeric tuning remains subject to playtest evidence.
 
 1. Keep the tested camera range (3.5–70 m), fixed 55° FOV and camera B framing. Blend into the atlas over 62–80% of scroll range. One continuous zoom value drives both views; crossing the blend does not change position, heading, selection or simulation. Tune numbers through playtests without changing the agreed behavior.
 2. Exploration reveals an 8 m neighborhood during active play. Located but unsurveyed deposits show an unknown marker and neutral footprint; existing 4 m surveying reveals identity. Unvisited ground stays dark, ship and humanoid remain known, and zooming out never reveals new knowledge. Exploration freezes while paused and resets with the island. Keep the prototype's readable 2 m chart grid initially, but derive object bounds from real geometry. It is a strategic chart, not a precise navigation/reachability guarantee.
 3. Fade over roughly 150–200 ms, with a short release delay to avoid flicker. Localize terrain fading to the obstruction region instead of fading an entire chunk. Preserve surrounding terrain and solid object identity. Camera-inside cases require a readable local opening without changing camera framing; exposed broad terrain undersides from the prototype are not a shippable outcome. Start from the prototype's 18% opacity and tune for legibility. This refinement is untested.
 
-## Proposed playable increments
+## Accepted playable increments
 
 ### 1. Third-person controls and usable close play
 
@@ -59,7 +59,11 @@ Exercise the combined camera, atlas and occlusion behavior on representative see
 
 Acceptance: all changed logic covered by real production-code tests; `npm run check` passes; integrated-browser input and visual checks recorded. Human sustained traversal validates feel where browser automation cannot hold controls faithfully. Document any remaining blockers rather than declaring completion from screenshots or unit tests alone.
 
-Execution tickets will be created and linked in this order after checkpoint confirmation. These are proposed increments, not work already performed.
+Implementation follows these increments in order. Design acceptance does not mean they have been implemented.
+
+- [Implement third-person controls and localized obstruction fading](https://github.com/FBakkensen/signal-and-shelter/issues/12)
+- [Implement the active strategic atlas and exploration](https://github.com/FBakkensen/signal-and-shelter/issues/13)
+- [Validate and refine the integrated third-person experience](https://github.com/FBakkensen/signal-and-shelter/issues/14)
 
 ## Implementation boundaries and migration
 
@@ -69,4 +73,4 @@ D007 remains the implemented first-person baseline until migration. On acceptanc
 
 ## Evidence and unresolved limits
 
-See [camera](testing/camera-prototype.md), [atlas](testing/strategic-map-prototype.md) and [occlusion](testing/occlusion-prototype.md) records. Prototype checks passed 63 tests; this is not validation of the integrated design. Browser sustained traversal, dense future-base labels and production performance remain unverified. Occlusion transition/terrain localization proposed here still requires implementation and validation.
+See [camera](testing/camera-prototype.md), [atlas](testing/strategic-map-prototype.md) and [occlusion](testing/occlusion-prototype.md) records. Prototype checks passed 63 tests; this is not validation of the integrated design. Browser sustained traversal, dense future-base labels and production performance remain unverified. Occlusion transition/terrain localization accepted here still requires implementation and validation.

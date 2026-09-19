@@ -79,3 +79,7 @@ The user accepted the [third-person control contract](https://github.com/FBakken
 ### Occlusion feedback — 2026-09-19
 
 The user selected B: fade scenery that blocks the humanoid. Preserve user-selected zoom and camera framing; obstruction must never trigger camera pull-in, zoom-out or FOV compensation. This chooses the treatment direction. The prototype's abrupt 18% opacity and whole-terrain-chunk fading remain rough implementation details to refine at the final design checkpoint. See the [occlusion decision](https://github.com/FBakkensen/signal-and-shelter/issues/10).
+
+### Design checkpoint accepted — 2026-09-19
+
+The user confirmed the [consolidated third-person design](third-person-design.md), including tunable zoom/blend defaults, 8 m exploration with existing 4 m surveying, smooth localized fading, and three sequential playable increments. D014 records the accepted replacement for first-person controls; production implementation remains pending.
