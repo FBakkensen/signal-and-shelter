@@ -88,3 +88,26 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Correction: Half-metre cubic terrain with exposed square faces; block-built arches, vents, stones and celestial silhouettes; crisp ship and humanoid boxes. Alien palettes and UI comparisons remain available.
 - Evidence: A new half-metre-level regression failed before the correction and passed afterward. Geometry tests cover face counts, hidden-face removal, empty volumes, grid alignment, axis normals, triangle winding and invalid dimensions. `npm run check` passed. Integrated-browser close-up inspection and real variant switching checked A/B/C; no application errors in inspected logs.
 - Limit: These are still visual studies, not production collision or editing systems. User feedback on the finer voxel scale is pending.
+
+## 2026-09-19 — Ember Fold selected and implemented
+
+- User decision: B, Ember Fold. The approved direction preserves voxels and uses warm ceramic terrain, stepped vents, haze and a console-style interface.
+- Implemented: generator version 2 with half-metre terrain; cell-aware footprint collision; vent parts shared by rendering and obstacles; updated materials, regions, resource display names and UI. Existing seeded arrival, terminal and exploration mechanics remain.
+- Evidence: `npm run check` passed. Automated checks verify half-cell walls, seam-free meshes, axis normals, vent/collider correspondence, 200 clear starts and 15 real-controller resource routes across five seeds. Integrated-browser seed entry, keyboard start, short movement, jump, terminal check/return, pause/resume, restart and overview were exercised. Desktop and 390×844 start/pause/terminal layouts were inspected; application error logs were empty.
+- Limitations: Browser movement tools provide discrete presses; a short movement from x=6.0 to x=6.1 and an Airborne indicator establish basic integration, not sustained movement feel or full resource traversal. No new pointer-lock or performance claim. The original ship asset is preserved.
+- Prototype capture: `codex/alien-visual-prototypes` at `8df36f9`; playable implementation lives on `codex/ember-fold-world`. See [experiment 004](testing/experiment-004.md).
+
+## 2026-09-19 — Whole-codebase review: terminal pause defect
+
+- Scope: Entire current implementation including uncommitted Ember Fold work, reviewed independently for standards and spec. See [review record](testing/code-review-2026-09-19.md).
+- Confirmed browser defect at review time (resolved in the follow-up below): with keyboard controls, E opens the terminal; clicking the exposed world resumes the game without closing the terminal. Space then shows Airborne while the terminal is still visible. The canvas resume handler lacks a terminal-open guard.
+- Coverage gap: Existing game/session unit tests pass but do not execute the main module's actual lifecycle orchestration. Add coverage at that production integration boundary when correcting it.
+- Maintenance observation: Resource rendering/collision dimensions are duplicated; current values match. Sharing their definitions would reduce drift risk.
+- Validation: `npm run check` passed. No implementation changes were made as part of the review.
+
+## 2026-09-19 — Review findings resolved
+
+- Moved lifecycle coordination into the production `GameApplication` controller and tested terminal guards, control entry/cancellation, seed replacement, reset and input clearing. The terminal background regression failed before its fix and passed afterward.
+- Resource rendering and collision now consume shared block parts; tests compare actual mesh bounds to every resource collider and verify deposit colors.
+- Evidence: `npm run check` passed all eight test files and required checks. Real browser background click/Space kept the terminal paused; explicit return resumed jumping. Overview, pause, restart and replacement seed worked. Visual inspection passed and error logs were empty. See [validation record](testing/review-fixes.md).
+- Existing captured-mouse and sustained browser traversal limitations remain. The build retains its bundle-size warning.

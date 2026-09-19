@@ -10,7 +10,7 @@ import {
   DEFAULT_ISLAND,
   DEFAULT_SEED,
   terrainQuads,
-  WATER,
+  HAZE_LEVEL,
   SIZE,
 } from "../src/world.ts";
 import { fits, makeObstacles, STANDING_HEIGHT } from "../src/collision.ts";
@@ -28,7 +28,7 @@ function snapshot(seed: string) {
     terminal: world.terminal,
     spawn: world.spawn,
     resources: world.resources,
-    trees: world.trees,
+    vents: world.vents,
     state: createGame(world),
     obstacles: makeObstacles(world),
   };
@@ -42,7 +42,7 @@ await test("seeds reproduce the full starting world and different seeds vary ter
   assert.notDeepEqual(a.heights, b.heights);
   assert.notDeepEqual(a.resources, b.resources);
   assert.notDeepEqual(a.ship, b.ship);
-  assert.notDeepEqual(a.trees, b.trees);
+  assert.notDeepEqual(a.vents, b.vents);
 });
 await test("seed text is normalized, bounded, case-sensitive and blank input chooses a reusable seed", () => {
   assert.equal(normalizeSeed("  robot  "), "robot");
@@ -71,7 +71,7 @@ await test("terrain is finite, grid-based and bounded; hash varies with seed", (
   for (let x = -50; x < 50; x++) {
     for (let z = -50; z < 50; z++) {
       assert.ok(hash(x, z) >= 0 && hash(x, z) < 1);
-      assert.ok(Number.isInteger(heightAt(x, z)));
+      assert.ok(Number.isInteger(heightAt(x, z) / 0.5));
       assert.ok(heightAt(x, z) >= 0 && heightAt(x, z) <= 6);
     }
   }
@@ -79,7 +79,7 @@ await test("terrain is finite, grid-based and bounded; hash varies with seed", (
   assert.equal(heightAt(-SIZE, 0), 0);
   assert.equal(heightAt(SIZE, 0), 0);
   assert.equal(heightAt(NaN, 0), 0);
-  assert.equal(heightAt(0.1, 0.9), heightAt(0.9, 0.1));
+  assert.equal(heightAt(0.1, 0.4), heightAt(0.4, 0.1));
 });
 await test("200 seeded starts have a clear dry spawn, level ship site, and dry deposits", () => {
   for (let i = 0; i < 200; i++) {
@@ -96,29 +96,29 @@ await test("200 seeded starts have a clear dry spawn, level ship site, and dry d
       world.seed,
     );
     for (const p of world.resources) {
-      assert.ok(world.heightAt(p.x, p.z) > WATER);
+      assert.ok(world.heightAt(p.x, p.z) > HAZE_LEVEL);
     }
     for (let dx = -6; dx <= 5; dx++) {
       for (let dz = -4; dz <= 4; dz++) {
         assert.equal(world.heightAt(world.ship.x + dx, world.ship.z + dz), 4);
       }
     }
-    for (const tree of world.trees) {
-      assert.ok(world.heightAt(tree.x, tree.z) >= 3);
-      assert.ok(Math.hypot(tree.x - world.ship.x, tree.z - world.ship.z) >= 9);
-      assert.ok(tree.height >= 3 && tree.height < 5);
+    for (const vent of world.vents) {
+      assert.ok(world.heightAt(vent.x, vent.z) >= 3);
+      assert.ok(Math.hypot(vent.x - world.ship.x, vent.z - world.ship.z) >= 9);
+      assert.ok(vent.height >= 2 && vent.height <= 3.5);
       assert.ok(
         world.resources.every(
-          (p) => Math.hypot(tree.x - p.x, tree.z - p.z) >= 4.5,
+          (p) => Math.hypot(vent.x - p.x, vent.z - p.z) >= 4.5,
         ),
       );
     }
   }
 });
-await test("biomes distinguish shoreline, grove and meadow", () => {
-  assert.equal(DEFAULT_ISLAND.biomeAt(47, 47), "shore");
-  assert.equal(DEFAULT_ISLAND.biomeAt(20, -12), "grove");
-  assert.equal(DEFAULT_ISLAND.biomeAt(0, 0), "meadow");
+await test("regions distinguish haze edge, vent fields and ceramic shelf", () => {
+  assert.equal(DEFAULT_ISLAND.biomeAt(47, 47), "haze");
+  assert.equal(DEFAULT_ISLAND.biomeAt(20, -12), "vents");
+  assert.equal(DEFAULT_ISLAND.biomeAt(0, 0), "crust");
 });
 await test("meshing omits empty and internal faces", () => {
   assert.equal(terrainQuads(() => 0, 0, 0, 2).length, 0);
@@ -159,5 +159,34 @@ await test("terrain face winding points outward", () => {
       .divideScalar(4)
       .subScalar(0.5);
     assert.ok(normal.dot(center) > 0);
+  }
+});
+
+await test("half-metre terrain meshes preserve cubic faces and chunk seams", () => {
+  const sample = (x: number, z: number) =>
+    x >= 0 && x < 1 && z >= 0 && z < 1 ? (x < 0.5 ? 2 : 2.5) : 0;
+  const whole = terrainQuads(sample, 0, 0, 1, 0.5);
+  const split = [
+    ...terrainQuads(sample, 0, 0, 0.5, 0.5),
+    ...terrainQuads(sample, 0.5, 0, 0.5, 0.5),
+    ...terrainQuads(sample, 0, 0.5, 0.5, 0.5),
+    ...terrainQuads(sample, 0.5, 0.5, 0.5, 0.5),
+  ];
+  const normalize = (quads: Quad[]) =>
+    quads.map((q) => JSON.stringify(q)).sort();
+  assert.deepEqual(normalize(whole), normalize(split));
+  for (const q of whole) {
+    for (const p of q.points) {
+      assert.ok(p.every((v) => Number.isInteger(v / 0.5)));
+    }
+    const [a, b, c] = q.points;
+    const normal = new Vector3()
+      .subVectors(new Vector3(...b), new Vector3(...a))
+      .cross(new Vector3().subVectors(new Vector3(...c), new Vector3(...a)))
+      .normalize();
+    assert.equal(
+      Math.abs(normal.x) + Math.abs(normal.y) + Math.abs(normal.z),
+      1,
+    );
   }
 });

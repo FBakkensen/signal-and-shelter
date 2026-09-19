@@ -80,11 +80,20 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D009 — Compare alien art directions before replacing the world
 
 - Date: 2026-09-19
-- Status: Comparison implemented; final art direction proposed, awaiting user feedback
+- Status: Accepted — user selected B (Ember Fold); implemented in experiment 004
 - Basis: The user finds the current voxel forms clunky and rejects recognizable Earth-like trees, water and sand as the visual premise.
 - Decision: Build three development-only 3D/UI studies on the existing route, selected with `?variant=A`, `B` or `C`, to compare alien materials, block-built formations and UI layouts while preserving voxel geometry. Keep illustrative UI clearly labeled and provide overview/close-up inspection.
 - Tradeoff: The studies can answer questions about shapes, materials and visual hierarchy; they cannot establish walking feel, collision fit or the final production terrain representation. They are handcrafted scenes, not seed-based world generation.
 - Evidence: [Visual study validation](testing/visual-prototypes.md).
-- Next: Pick or combine the promising elements with user feedback, then validate them in a small playable scene. No winner has been approved.
+- Outcome: User selected B. Preserve its ceramic palette, vents, haze and warm console UI in the playable arrival. Prototype source is captured at `8df36f9` on `codex/alien-visual-prototypes`; comparison code is removed from the implementation branch.
 
 - D009 correction, 2026-09-19: The first implementation incorrectly interpreted “less clunky” as permission to abandon voxels. The user rejected that change. Voxel visuals are a retained constraint; the comparison now uses finer cubic terrain and voxelized formations. Half-metre terrain and quarter-metre formation cells are experimental scale choices, not an approved final resolution.
+
+## D010 — Use finer voxel terrain for Ember Fold
+
+- Date: 2026-09-19
+- Status: Implemented scale experiment within the selected B direction
+- Decision: Use half-metre horizontal/vertical terrain cells and matching player-footprint sampling. Replace trees with narrower-at-the-top stepped vents, sharing every render block's dimensions with collision. Keep the connected level arrival shelf and existing controls.
+- Rationale: Reduce the metre-block clunkiness while retaining unmistakable voxels and keeping first-person collision consistent with the rendered terrain.
+- Consequence: Generator version increases from 1 to 2; earlier seeds remain reusable text but produce different terrain and decorations. New terrain steps still require jumping. No old-world compatibility is promised.
+- Evidence: Seed/mesh/collision tests, 200 clear seeded starts, 15 production-controller resource routes, and focused browser interaction/layout checks in [experiment 004](testing/experiment-004.md). Full browser traversal and captured-look remain unverified.

@@ -1,5 +1,7 @@
+import { resourceParts } from "./resources.ts";
+import { ventParts } from "./ember.ts";
 import { SHIP_PARTS } from "./ship.ts";
-import { DEFAULT_ISLAND, SIZE, WATER, RESOURCE_CRYSTALS } from "./world.ts";
+import { DEFAULT_ISLAND, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
 import type { HeightSampler, Point, Island } from "./world.ts";
 
 export interface Obstacle {
@@ -43,16 +45,16 @@ export function overlaps(p: Point, box: Obstacle) {
 export function terrainHeights(p: Point, sample: HeightSampler): number[] {
   const heights: number[] = [];
   for (
-    let x = Math.floor(p.x - RADIUS + EPSILON);
-    x <= Math.floor(p.x + RADIUS - EPSILON);
+    let x = Math.floor((p.x - RADIUS + EPSILON) / CELL_SIZE);
+    x <= Math.floor((p.x + RADIUS - EPSILON) / CELL_SIZE);
     x++
   ) {
     for (
-      let z = Math.floor(p.z - RADIUS + EPSILON);
-      z <= Math.floor(p.z + RADIUS - EPSILON);
+      let z = Math.floor((p.z - RADIUS + EPSILON) / CELL_SIZE);
+      z <= Math.floor((p.z + RADIUS - EPSILON) / CELL_SIZE);
       z++
     ) {
-      heights.push(sample(x + 0.5, z + 0.5));
+      heights.push(sample((x + 0.5) * CELL_SIZE, (z + 0.5) * CELL_SIZE));
     }
   }
   return heights;
@@ -61,7 +63,7 @@ export function onIsland(p: Point, sample: HeightSampler) {
   return (
     Math.abs(p.x) + RADIUS <= SIZE / 2 &&
     Math.abs(p.z) + RADIUS <= SIZE / 2 &&
-    terrainHeights(p, sample).every((h) => Number.isFinite(h) && h > WATER)
+    terrainHeights(p, sample).every((h) => Number.isFinite(h) && h > HAZE_LEVEL)
   );
 }
 export function fits(
@@ -121,9 +123,23 @@ export function ledgeSafe(
 }
 export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
   const { heightAt, ship } = island;
-  const result = island.trees.map((t) =>
-    boxCollider(t.x, heightAt(t.x, t.z), t.z, 0.48, t.height * 0.9, 0.48),
-  );
+  const result: Obstacle[] = [];
+  for (const vent of island.vents) {
+    for (const part of ventParts(vent.height)) {
+      const [x, y, z] = part.position;
+      const [width, height, depth] = part.size;
+      result.push(
+        boxCollider(
+          vent.x + x,
+          heightAt(vent.x, vent.z) + y - height / 2,
+          vent.z + z,
+          width,
+          height,
+          depth,
+        ),
+      );
+    }
+  }
   for (const part of SHIP_PARTS) {
     const [x, y, z] = part.position;
     const [width, height, depth] = part.size;
@@ -139,25 +155,17 @@ export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
     );
   }
   for (const resource of island.resources) {
-    result.push(
-      boxCollider(
-        resource.x,
-        heightAt(resource.x, resource.z),
-        resource.z,
-        1.8,
-        1.1,
-        1.8,
-      ),
-    );
-    for (const [dx, dz, h] of RESOURCE_CRYSTALS) {
+    for (const part of resourceParts(resource)) {
+      const [x, y, z] = part.position;
+      const [width, height, depth] = part.size;
       result.push(
         boxCollider(
-          resource.x + dx,
-          heightAt(resource.x, resource.z) + 0.7,
-          resource.z + dz,
-          0.45,
-          h,
-          0.45,
+          resource.x + x,
+          heightAt(resource.x, resource.z) + y - height / 2,
+          resource.z + z,
+          width,
+          height,
+          depth,
         ),
       );
     }

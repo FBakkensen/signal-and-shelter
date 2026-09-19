@@ -9,7 +9,7 @@ export interface ResourceDeposit extends Point {
   note: string;
   color: string;
 }
-export interface Tree extends Point {
+export interface Vent extends Point {
   height: number;
 }
 export type HeightSampler = (x: number, z: number) => number;
@@ -18,17 +18,12 @@ export interface Quad extends Point {
   top: boolean;
   points: readonly [Vertex, Vertex, Vertex, Vertex];
 }
-export const GENERATOR_VERSION = 1;
+export const GENERATOR_VERSION = 2;
 export const DEFAULT_SEED = "stillwild";
 export const SIZE = 96;
-export const WATER = 1.2;
+export const HAZE_LEVEL = 1.2;
+export const CELL_SIZE = 0.5;
 export const MAX_SEED_LENGTH = 80;
-export const RESOURCE_CRYSTALS = [
-  [-0.45, 0.3, 0.7],
-  [0.35, -0.25, 1],
-  [0.5, 0.5, 0.5],
-] as const;
-
 // Case-sensitive text seeds; surrounding whitespace is not part of the seed.
 export function normalizeSeed(value: string): string {
   return value
@@ -58,10 +53,10 @@ export interface Island {
   readonly ship: Point;
   readonly terminal: Point;
   readonly resources: readonly ResourceDeposit[];
-  readonly trees: readonly Tree[];
+  readonly vents: readonly Vent[];
   readonly heightAt: HeightSampler;
   readonly hash: (x: number, z: number) => number;
-  readonly biomeAt: (x: number, z: number) => "shore" | "grove" | "meadow";
+  readonly biomeAt: (x: number, z: number) => "haze" | "vents" | "crust";
 }
 export function createIsland(input = DEFAULT_SEED): Island {
   const seed = normalizeSeed(input) || DEFAULT_SEED;
@@ -79,32 +74,32 @@ export function createIsland(input = DEFAULT_SEED): Island {
   const resources: ResourceDeposit[] = [
     {
       id: "copper",
-      name: "Copper outcrop",
+      name: "Conductive seams",
       note: "Copper-bearing rock. A promising material for future wiring.",
-      color: "#c27a4d",
+      color: "#efb076",
       x: -14.5 + Math.floor(random(6, 0) * 5),
       z: -7.5 + Math.floor(random(7, 0) * 5),
     },
     {
       id: "silica",
-      name: "Silica crystals",
+      name: "Prismatic silica",
       note: "Pale silica crystals. Something to remember when we can manufacture parts.",
-      color: "#a8dbd6",
+      color: "#ebc4e3",
       x: 10.5 + Math.floor(random(8, 0) * 5),
       z: -11.5 + Math.floor(random(9, 0) * 5),
     },
     {
       id: "iron",
-      name: "Iron outcrop",
+      name: "Ferric nodules",
       note: "Iron-bearing stone. A possible source for future robot frames.",
-      color: "#7d8794",
+      color: "#7c5068",
       x: -10.5 + Math.floor(random(10, 0) * 4),
       z: 14.5 + Math.floor(random(11, 0) * 4),
     },
   ];
   const heightAt: HeightSampler = (px, pz) => {
-    const x = Math.floor(px),
-      z = Math.floor(pz);
+    const x = Math.floor(px / CELL_SIZE) * CELL_SIZE,
+      z = Math.floor(pz / CELL_SIZE) * CELL_SIZE;
     if (
       !Number.isFinite(x) ||
       !Number.isFinite(z) ||
@@ -120,16 +115,20 @@ export function createIsland(input = DEFAULT_SEED): Island {
       coastSize +
       Math.sin(x * 0.15 + phase) * 2 +
       Math.cos(z * 0.18 - phase) * 2;
-    // A connected low meadow guarantees room for arrival and all starter deposits.
+    // A connected ceramic shelf guarantees room for arrival and all starter deposits.
     const hills =
       Math.min(1, Math.max(0, (radius - 22) / 5)) *
       (1 + Math.sin(x * 0.13 + phase));
-    return Math.max(0, Math.floor(Math.min((coast - radius) * 0.7, 4 + hills)));
+    return Math.max(
+      0,
+      Math.floor(Math.min((coast - radius) * 0.7, 4 + hills) / CELL_SIZE) *
+        CELL_SIZE,
+    );
   };
-  const trees: Tree[] = [];
+  const vents: Vent[] = [];
   for (let x = -33.5; x < 34; x += 3) {
     for (let z = -33.5; z < 34; z += 3) {
-      if (heightAt(x, z) < 3 || random(x * 2, z * 2) < 0.68) {
+      if (heightAt(x, z) < 3 || random(x * 2, z * 2) < 0.8) {
         continue;
       }
       if (
@@ -138,7 +137,11 @@ export function createIsland(input = DEFAULT_SEED): Island {
       ) {
         continue;
       }
-      trees.push({ x, z, height: 3 + random(z * 2, x * 2) * 2 });
+      vents.push({
+        x,
+        z,
+        height: 2 + Math.floor(random(z * 2, x * 2) * 4) * 0.5,
+      });
     }
   }
   return {
@@ -148,11 +151,11 @@ export function createIsland(input = DEFAULT_SEED): Island {
     ship,
     terminal,
     resources,
-    trees,
+    vents,
     heightAt,
     hash: random,
     biomeAt: (x, z) =>
-      heightAt(x, z) <= 2 ? "shore" : x > 10 && z < 0 ? "grove" : "meadow",
+      heightAt(x, z) <= 2 ? "haze" : x > 10 && z < 0 ? "vents" : "crust",
   };
 }
 export const DEFAULT_ISLAND = createIsland();
@@ -162,10 +165,11 @@ export function terrainQuads(
   minX: number,
   minZ: number,
   size: number,
+  cell = 1,
 ) {
   const quads: Quad[] = [];
-  for (let x = minX; x < minX + size; x++) {
-    for (let z = minZ; z < minZ + size; z++) {
+  for (let x = minX; x < minX + size; x += cell) {
+    for (let z = minZ; z < minZ + size; z += cell) {
       const y = sample(x, z);
       if (y <= 0) {
         continue;
@@ -176,9 +180,9 @@ export function terrainQuads(
         top: true,
         points: [
           [x, y, z],
-          [x, y, z + 1],
-          [x + 1, y, z + 1],
-          [x + 1, y, z],
+          [x, y, z + cell],
+          [x + cell, y, z + cell],
+          [x + cell, y, z],
         ],
       });
       for (const [dx, dz] of [
@@ -187,37 +191,37 @@ export function terrainQuads(
         [0, 1],
         [0, -1],
       ] as const) {
-        const low = sample(x + dx, z + dz);
+        const low = sample(x + dx * cell, z + dz * cell);
         if (low >= y) {
           continue;
         }
         const points: Quad["points"] =
           dx === 1
             ? [
-                [x + 1, low, z],
-                [x + 1, y, z],
-                [x + 1, y, z + 1],
-                [x + 1, low, z + 1],
+                [x + cell, low, z],
+                [x + cell, y, z],
+                [x + cell, y, z + cell],
+                [x + cell, low, z + cell],
               ]
             : dx === -1
               ? [
-                  [x, low, z + 1],
-                  [x, y, z + 1],
+                  [x, low, z + cell],
+                  [x, y, z + cell],
                   [x, y, z],
                   [x, low, z],
                 ]
               : dz === 1
                 ? [
-                    [x + 1, low, z + 1],
-                    [x + 1, y, z + 1],
-                    [x, y, z + 1],
-                    [x, low, z + 1],
+                    [x + cell, low, z + cell],
+                    [x + cell, y, z + cell],
+                    [x, y, z + cell],
+                    [x, low, z + cell],
                   ]
                 : [
                     [x, low, z],
                     [x, y, z],
-                    [x + 1, y, z],
-                    [x + 1, low, z],
+                    [x + cell, y, z],
+                    [x + cell, low, z],
                   ];
         quads.push({ x, z, top: false, points });
       }

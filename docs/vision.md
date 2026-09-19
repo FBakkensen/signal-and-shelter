@@ -14,15 +14,15 @@ This direction was agreed with the user on 2026-09-19. It is an overall vision, 
 
 Keep project knowledge in separate documents, with a compact AGENTS.md directing future work to the relevant context. Improve that guidance as evidence accumulates.
 
-## Current experiment: seeded arrival
+## Current experiment: Ember Fold arrival
 
-Experiment 003 implements the first small step toward this vision: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover copper, iron, and silica deposits. These resource types are experimental choices, not a settled manufacturing design. First-person movement and the island overview remain available.
+Experiment 004 carries the selected Ember Fold visual direction into the seeded arrival: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover conductive seams (copper), ferric nodules (iron), and prismatic silica. These resource types are experimental choices, not a settled manufacturing design. First-person movement and the island overview remain available.
 
 The same seed and world-generation version reproduce terrain, decorations, resources, ship placement, and the initial player state. The chosen seed appears in the game, in a selectable pause-menu field, and in the URL. Restarting recreates the beginning; it does not load saved progress. Generator changes in future experiments may change a seed's island.
 
 Robots, gathering, power management, manufacturing, software delivery, and inter-island travel are not implemented. The terminal currently provides an in-game connection check. Evaluate whether arriving beside the ship and surveying the island feels like the beginning of the intended game before expanding those systems.
 
-See [experiment 003's validation record](testing/experiment-003.md) for actual checks and limitations. No performance target has been agreed. Procedural footsteps, quiet wind, and interaction sounds remain untested suggestions.
+See [experiment 004's validation record](testing/experiment-004.md) for actual checks and limitations. No performance target has been agreed. Procedural footsteps, quiet wind, and interaction sounds remain untested suggestions.
 
 ## Open questions
 
@@ -37,7 +37,7 @@ See [experiment 003's validation record](testing/experiment-003.md) for actual c
 - How should we tune the new first-person sensitivity, speed, jumping, and sneaking?
 - Which visual references best express the friendly atmosphere?
 - Which devices and browsers should define our performance target?
-- How should the seeded terrain evolve beyond the current clear starter meadow and varied shoreline?
+- How should the seeded terrain evolve beyond the current clear ceramic shelf and stepped outer terrain?
 - What interactions make exploration interesting?
 
 Resolve questions when an experiment depends on them. Robot companions, power systems, manufacturing, logistics, and inter-island travel are intended directions, not implemented features. Multiplayer, infinite terrain, and persistent world editing have no current commitment; combat is excluded from the agreed vision.
@@ -46,6 +46,8 @@ Resolve questions when an experiment depends on them. Robot companions, power sy
 
 User feedback: the metre-block appearance is too clunky, and the Earth-like island and UI do not fit being stranded on an unfamiliar planet. Explore unfamiliar terrain and materials in place of recognizable trees, ordinary water, grass and sand. The specific replacements and final UI remain open; compare several prototypes before committing.
 
-Three development-only visual studies now explore Porcelain Expanse (pale crust, hollow arches, mineral haze, field-note UI), Ember Fold (stepped ceramic terrain, vents, warm instrument console), and Violet Relay (shallow violet strata, levitating luminous minerals, minimal visor). These are inspectable 3D sketches with illustrative interface text, not implemented gameplay or an approved art direction. The existing playable experiment still uses the earlier Earth-like world.
+Three archived visual studies explored Porcelain Expanse (pale crust, hollow arches, mineral haze, field-note UI), Ember Fold (stepped ceramic terrain, vents, warm instrument console), and Violet Relay (shallow violet strata, levitating luminous minerals, minimal visor). These were illustrative art studies. The user selected B, Ember Fold, on 2026-09-19. Its warm ceramic palette, stepped vents, amber haze and console UI are now implemented in the playable experiment; trees, grass, sand and water visuals have been removed. The full comparison is preserved on `codex/alien-visual-prototypes` at commit `8df36f9`.
 
 User correction, 2026-09-19: “you broke the voxels.” Preserve the voxel aesthetic. Less clunky means improving block scale, proportions, materials and composition; it does not authorize smooth or low-poly replacement geometry. The studies now use half-metre terrain cells and finer block-built formations. The exact scale remains experimental.
+
+Ember Fold implementation: half-metre terrain cells, finer stepped vent geometry and matching collision; generator version 2. Exact density, scale, lighting and movement feel still await play feedback. The selection approves the visual direction, not future manufacturing or power systems.

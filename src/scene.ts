@@ -1,9 +1,11 @@
+import { createResourceGroup } from "./resources.ts";
+import { EMBER, ventParts } from "./ember.ts";
 import type { GameState } from "./game.ts";
 import { viewPosition } from "./game.ts";
 import { makeObstacles } from "./collision.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { terrainQuads, SIZE, WATER, RESOURCE_CRYSTALS } from "./world.ts";
+import { terrainQuads, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
 import type { Island } from "./world.ts";
 
 export async function loadShip() {
@@ -22,11 +24,11 @@ export function createScene(
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#accfc7");
-  scene.fog = new THREE.Fog("#accfc7", 65, 160);
+  scene.background = new THREE.Color(EMBER.sky);
+  scene.fog = new THREE.Fog(EMBER.sky, 65, 160);
   const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 300);
-  scene.add(new THREE.HemisphereLight("#f4f2d2", "#66846a", 2.8));
-  const sun = new THREE.DirectionalLight("#ffe1a3", 3.3);
+  scene.add(new THREE.HemisphereLight("#f9e9e4", EMBER.strata, 2.8));
+  const sun = new THREE.DirectionalLight("#ffe1b0", 3.3);
   sun.position.set(-25, 55, 25);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -74,12 +76,12 @@ export function createScene(
     for (let cz = -SIZE / 2; cz < SIZE / 2; cz += 16) {
       const positions: number[] = [],
         colors: number[] = [];
-      for (const quad of terrainQuads(heightAt, cx, cz, 16)) {
+      for (const quad of terrainQuads(heightAt, cx, cz, 16, CELL_SIZE)) {
         const h = heightAt(quad.x, quad.z);
         const color = new THREE.Color(
-          quad.top ? (h <= 2 ? "#d8c494" : "#809650") : "#877a56",
+          quad.top ? (h <= 2 ? EMBER.rim : EMBER.crust) : EMBER.strata,
         );
-        color.multiplyScalar(0.92 + hash(quad.x, quad.z) * 0.16);
+        color.multiplyScalar(0.96 + hash(quad.x * 2, quad.z * 2) * 0.08);
         for (const i of [0, 1, 2, 0, 2, 3] as const) {
           positions.push(...quad.points[i]);
           colors.push(color.r, color.g, color.b);
@@ -98,64 +100,60 @@ export function createScene(
       scene.add(mesh);
     }
   }
-  const sea = new THREE.Mesh(
+  const haze = new THREE.Mesh(
     new THREE.PlaneGeometry(500, 500),
-    new THREE.MeshStandardMaterial({
-      color: "#5aaba7",
-      roughness: 0.5,
-      metalness: 0.1,
-    }),
+    new THREE.MeshStandardMaterial({ color: EMBER.sky, roughness: 1 }),
   );
-  sea.rotation.x = -Math.PI / 2;
-  sea.position.y = WATER;
-  scene.add(sea);
-  // Sparse, pale water glints keep the surface quiet and graphic.
-  const glints = new THREE.Group();
-  scene.add(glints);
-  for (let i = 0; i < 100; i++) {
-    const x = (hash(i, 19) - 0.5) * 160,
-      z = (hash(i, 27) - 0.5) * 160;
-    if (heightAt(x, z) > 1) {
+  haze.rotation.x = -Math.PI / 2;
+  haze.position.y = HAZE_LEVEL;
+  scene.add(haze);
+  // Suspended luminous grains suggest a mineral atmosphere, without water glints.
+  const grains = new THREE.Group();
+  scene.add(grains);
+  for (let i = 0; i < 90; i++) {
+    const x = (hash(i, 19) - 0.5) * 150,
+      z = (hash(i, 27) - 0.5) * 150;
+    if (heightAt(x, z) > HAZE_LEVEL) {
       continue;
     }
     block(
-      glints,
+      grains,
       x,
-      WATER + 0.015,
+      HAZE_LEVEL + 0.5 + hash(i, 33) * 3,
       z,
-      1 + hash(i, 32) * 2,
-      0.015,
       0.09,
-      "#9bc9bb",
+      0.09,
+      0.09,
+      EMBER.light,
     );
   }
-  const trees = island.trees;
-  for (const tree of trees) {
-    const { x, z, height: h } = tree,
-      y = heightAt(x, z);
-    block(scene, x, y + h * 0.45, z, 0.48, h * 0.9, 0.48, "#6a6042");
-    const shade = hash(x * 2, z * 2) > 0.5 ? "#4d714f" : "#64834c";
-    block(scene, x, y + h * 0.8, z, 2.4, 1.5, 2.4, shade);
-    block(scene, x, y + h * 0.8 + 1, z, 1.65, 1.2, 1.65, shade);
-    block(scene, x, y + h * 0.8 + 1.8, z, 1, 0.75, 1, "#789151");
-  }
-  for (let i = 0; i < 240; i++) {
-    const x = Math.floor(hash(i, 88) * 64 - 32) + 0.5,
-      z = Math.floor(hash(i, 99) * 64 - 32) + 0.5,
-      y = heightAt(x, z);
-    if (y < 3 || Math.hypot(x - island.ship.x, z - island.ship.z) < 8) {
-      continue;
+  for (const vent of island.vents) {
+    const y = heightAt(vent.x, vent.z);
+    for (const part of ventParts(vent.height)) {
+      const [dx, dy, dz] = part.position;
+      const [sx, sy, sz] = part.size;
+      block(scene, vent.x + dx, y + dy, vent.z + dz, sx, sy, sz, part.color);
     }
-    block(
-      scene,
-      x,
-      y + 0.13,
-      z,
-      0.13,
-      0.26,
-      0.13,
-      i % 3 === 0 ? "#e6bc71" : "#aeb571",
-    );
+  }
+  // Distant voxel shelves and a stepped satellite establish an unfamiliar planet.
+  for (let i = 0; i < 5; i++) {
+    for (let tier = 0; tier < 5; tier++) {
+      const width = 12 - tier * 2;
+      block(
+        scene,
+        -70 + i * 32,
+        HAZE_LEVEL + tier * 1.5,
+        -75 - (i % 2) * 12,
+        width,
+        1.5,
+        width * 0.75,
+        EMBER.strata,
+      );
+    }
+  }
+  for (let tier = -6; tier <= 6; tier++) {
+    const width = Math.floor(Math.sqrt(49 - tier * tier)) * 2;
+    block(scene, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
   }
   const ship = shipAsset.clone(true);
   ship.position.set(
@@ -171,29 +169,22 @@ export function createScene(
   });
   scene.add(ship);
   for (const resource of island.resources) {
-    const y = heightAt(resource.x, resource.z);
-    block(scene, resource.x, y + 0.55, resource.z, 1.8, 1.1, 1.8, "#626e66");
-    for (const [dx, dz, h] of RESOURCE_CRYSTALS) {
-      block(
-        scene,
-        resource.x + dx,
-        y + 0.7 + h / 2,
-        resource.z + dz,
-        0.45,
-        h,
-        0.45,
-        resource.color,
-      );
-    }
+    const group = createResourceGroup(resource);
+    group.position.set(
+      resource.x,
+      heightAt(resource.x, resource.z),
+      resource.z,
+    );
+    scene.add(group);
   }
   const avatar = new THREE.Group();
   scene.add(avatar);
-  block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#d9decb");
-  block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#537d87");
+  block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#ece7d7");
+  block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#424c62");
   block(avatar, 0, 1.25, -0.22, 0.3, 0.13, 0.03, "#8ce6bd");
-  block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, "#495e4d");
-  const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
-  const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
+  block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, EMBER.strata);
+  const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
+  const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const obstacles = makeObstacles(island);
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
@@ -223,7 +214,7 @@ export function createScene(
       camera.position.set(view.x, view.y, view.z);
       camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
     }
-    glints.position.y = Math.sin(time * 0.4) * 0.015;
+    grains.position.y = Math.sin(time * 0.25) * 0.15;
     renderer.render(scene, camera);
   }
   function dispose() {

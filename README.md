@@ -1,6 +1,6 @@
 # Stillwild — My First Game
 
-Experiment 003: arrive beside a broken spaceship on a small seeded island. Check the ship's data link and survey copper, iron and silica deposits. This is the first small step toward the [friendly robot-companion vision](docs/vision.md); gathering, robots and power systems come later.
+Experiment 004 — Ember Fold: arrive beside a broken spaceship on a ceramic voxel shelf, surrounded by stepped vents and amber haze. Check the ship's data link and survey conductive seams, ferric nodules and prismatic silica (copper, iron and silica). This is the first small step toward the [friendly robot-companion vision](docs/vision.md); gathering, robots and power systems come later.
 
 Enter a text seed at the start, or leave it blank for a generated one. The same seed and generator version recreate the same terrain, placements and starting state. Copy the seed from the pause menu or share the game's URL. Restart begins the same island again; Choose another seed returns to the start screen. Seeds are case-sensitive, trimmed and limited to 80 characters in the form. Future generator versions may produce different islands. Progress is not saved.
 
@@ -19,7 +19,7 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 
 | Input | Action |
 | --- | --- |
-| Begin your island / Keep wandering | Enter first-person play with the selected controls |
+| Begin your landing / Keep wandering | Enter first-person play with the selected controls |
 | Mouse | Look horizontally and vertically |
 | W A S D | Walk / strafe relative to your view |
 | Arrow keys | Look left/right/up/down, including while mouse look is active |
@@ -34,7 +34,7 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 
 Mouse sensitivity and invert-Y are available in the pause panel. **Use keyboard controls** starts play without mouse capture; WASD moves and arrow keys look around. Keyboard controls remain active while the mouse is locked too. The pause panel can switch back to mouse controls. Keep wandering, overview return, and reset preserve the selected mode until reload. Escape pauses either mode. The integrated browser currently rejects mouse capture; keyboard play and its resume flow have been checked there. Captured mouse look still needs a standalone-browser playtest. Drag-to-look is not supported.
 
-Walk within four metres of each resource deposit to survey it. Jump onto one-block terraces; walking off a ledge causes a fall. Water and the island boundary remain impassable, including while jumping. Trunks, resource deposits and ship parts have collision; leaves and flowers are decorative. There is no fall damage. Progress and look settings last until page reload; a restart clears progress while preserving settings.
+Walk within four metres of each resource deposit to survey it. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and look settings last until page reload; a restart clears progress while preserving settings.
 
 This experiment targets keyboard-and-mouse play. Narrow layouts are supported visually; touch movement, sound, terrain editing, swimming, and saved progress are not implemented.
 
@@ -46,7 +46,7 @@ npm run check
 
 Runs strict TypeScript checking, type-aware ESLint with zero warnings, automated tests, Prettier verification, and a production build. Individual commands are `npm run typecheck`, `npm run lint`, `npm test`, `npm run format:check`, and `npm run build`. Use `npm run format` to format code.
 
-Gameplay and UI also require real integrated-browser interaction tests, per [the testing workflow](docs/testing.md). See the [seeded-arrival test record and remaining limitations](docs/testing/experiment-003.md), [controls record](docs/testing/experiment-002.md), and [first experiment record](docs/testing/experiment-001.md).
+Gameplay and UI also require real integrated-browser interaction tests, per [the testing workflow](docs/testing.md). See the [Ember Fold validation record](docs/testing/experiment-004.md), [seeded-arrival history and remaining limitations](docs/testing/experiment-003.md), [controls record](docs/testing/experiment-002.md), and [first experiment record](docs/testing/experiment-001.md).
 
 ## Project documents
 
@@ -56,8 +56,8 @@ Gameplay and UI also require real integrated-browser interaction tests, per [the
 - [Learnings](docs/learnings.md): observations and limitations.
 - [Agent guidance](AGENTS.md): project rules and context reading instructions.
 
-## Alien visual prototypes
+## Art direction and prototype archive
 
-On branch `codex/alien-visual-prototypes`, run the same development command above and open `/?variant=A` on Vite's printed URL. Use `A` (Porcelain Expanse), `B` (Ember Fold), or `C` (Violet Relay). The bottom comparison bar or left/right arrow keys switch studies; buttons provide closer view, rotation, and hide/show of the illustrative interface. Expand the study details to see materials, geometry and current view state. The Current game link returns to the playable experiment.
+The selected direction is **B — Ember Fold**, with voxels preserved. The playable implementation is on `codex/ember-fold-world`. Generator version 2 uses half-metre terrain cells and stepped vent formations; a seed from version 1 will produce different terrain/decorations.
 
-These are throwaway 3D art/UI studies, with no walking or gameplay mutations. They are available only in development and excluded from the production build. Camera/interface state resets on reload; the variant remains in the URL. See [validation and limitations](docs/testing/visual-prototypes.md). No final visual direction has been selected.
+The three comparison studies were captured at commit `8df36f9` on `codex/alien-visual-prototypes`. That branch supports `/?variant=A`, `B` or `C` in development. The playable branch removes the comparison route and switcher; open `/` to play. No prototype state is migrated.

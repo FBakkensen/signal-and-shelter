@@ -195,7 +195,7 @@ await test("crouch lowers eye height, prevents standing inside a ceiling and sta
   assert.equal(s.crouching, false);
   near(eyeHeight(s), 1.62);
 });
-await test("airborne movement cannot cross water or the finite world boundary", () => {
+await test("airborne movement cannot cross the haze boundary or the finite world boundary", () => {
   const coast = (x: number) => (x >= 1 ? 0 : 3);
   const s = move(active(), { right: true, jump: true }, 240, STEP, coast);
   assert.ok(s.x <= 0.7);
@@ -403,4 +403,17 @@ await test("terminal interaction is proximity-limited, remembers connection and 
   assert.equal(recovered.linkChecked, true);
   assert.deepEqual(recovered.discovered, ["copper"]);
   assert.deepEqual(createGame(island), state);
+});
+
+await test("footprint catches a raised half-cell between old one-metre sample points", () => {
+  const halfCell = (x: number) => (x >= 0.5 && x < 1 ? 3.5 : 3);
+  assert.equal(
+    fits({ x: 0.55, z: 0.25 }, 3, STANDING_HEIGHT, halfCell, []),
+    false,
+  );
+  const state = { ...active(), x: 0.1, z: 0.25 };
+  const stopped = move(state, { right: true }, 120, STEP, halfCell);
+  assert.ok(stopped.x <= 0.2 + 1e-7);
+  const jumped = move(stopped, { right: true, jump: true }, 25, STEP, halfCell);
+  assert.ok(jumped.x > 0.5);
 });

@@ -1,12 +1,6 @@
 // Metres, Y-up. Shared by collision and the Blender asset recipe.
-export interface ShipPart {
-  name: string;
-  position: readonly [number, number, number];
-  size: readonly [number, number, number];
-  color: string;
-  emission?: number;
-}
-export const SHIP_PARTS: readonly ShipPart[] = [
+import type { BlockPart } from "./blocks.ts";
+export const SHIP_PARTS: readonly BlockPart[] = [
   { name: "Hull", position: [0, 1.6, 0], size: [3.6, 2, 6], color: "#d9decb" },
   {
     name: "Belly",

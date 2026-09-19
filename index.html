@@ -3,43 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#163c3b" />
-    <title>Stillwild — a place to begin</title>
+    <meta name="theme-color" content="#3e2c35" />
+    <title>Stillwild — Ember Fold</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8b86b' d='M16 2 30 10 16 18 2 10z'/%3E%3Cpath fill='%235b7950' d='M2 10v14l14 8V18z'/%3E%3Cpath fill='%23345243' d='M30 10v14l-14 8V18z'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23e9af81' d='M16 2 30 10 16 18 2 10z'/%3E%3Cpath fill='%23c58260' d='M2 10v14l14 8V18z'/%3E%3Cpath fill='%23703f55' d='M30 10v14l-14 8V18z'/%3E%3C/svg%3E"
     />
   </head>
   <body>
     <canvas
       id="world"
       tabindex="0"
-      aria-label="Island game. Mouse or arrow keys to look, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
+      aria-label="Ember Fold exploration. Mouse or arrow keys to look, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
     ></canvas>
     <header>
       <a class="brand" href="/" aria-label="Stillwild home"
         ><span class="brand-icon">◈</span> stillwild<span class="tag"
-          >ARRIVAL / 003</span
+          >EMBER FOLD / 004</span
         ></a
       >
       <div class="top-actions">
         <span class="live-dot"></span
-        ><span class="island-name">FIRST LANDING</span
+        ><span class="island-name">UNREGISTERED PLANET</span
         ><button id="overview" aria-pressed="false" title="Map overview (M)">
           ↗ <span>Overview</span></button
         ><button id="pause" aria-label="Pause exploration" hidden>Ⅱ</button>
       </div>
     </header>
     <main id="welcome" class="panel welcome">
-      <span class="eyebrow">STRANDED. NOT ALONE FOR LONG.</span>
-      <h1>A place<br />to begin.</h1>
+      <span class="eyebrow">PERSONAL EXPLORATION UNIT / 001</span>
+      <h1>Somewhere<br />to belong.</h1>
       <p>
-        Your ship cannot fly. Its signal still reaches the stars.<br />
-        Step onto a small island, check the data link,<br />and find the
-        beginnings of a new home.
+        Warm ceramic underfoot. Amber haze beyond the shelf.<br />
+        Your ship is grounded. Its communications still have power.<br />
+        Check the signal, survey the surface, make a beginning.
       </p>
       <form id="start-form">
-        <label for="seed">Island seed <span>optional</span></label>
+        <label for="seed">World seed <span>optional</span></label>
         <input
           id="seed"
           name="seed"
@@ -58,7 +58,7 @@
           <option value="keyboard">Keyboard — WASD + arrow keys</option>
         </select>
         <button id="start" class="primary" disabled>
-          Preparing the island…
+          Preparing your landing…
         </button>
         <p id="start-error" role="alert"></p>
       </form>
@@ -90,7 +90,7 @@
       ><button id="control-mode" class="subtle">Use keyboard controls</button
       ><button id="reset" class="subtle">Restart this island</button>
       <button id="new-island" class="subtle">Choose another seed</button>
-      <label class="seed-label" for="current-seed">Island seed</label>
+      <label class="seed-label" for="current-seed">World seed</label>
       <input id="current-seed" type="text" readonly />
       <small id="seed-version"></small>
     </section>
@@ -102,7 +102,7 @@
       <h2>A home starts here.</h2>
       <p id="link-status">Check the ship’s data link</p>
       <ul id="places"></ul>
-      <p id="journal-note">Explore the island to survey its resources.</p>
+      <p id="journal-note">Survey the ceramic shelf for useful materials.</p>
     </aside>
     <button id="interact" hidden>E · Ship terminal</button>
     <section
@@ -126,7 +126,7 @@
       <div class="location">
         <span class="location-icon">✳</span>
         <div>
-          <span id="biome">THE MEADOW</span
+          <span id="biome">CERAMIC SHELF</span
           ><small id="position">0 m wandered</small>
         </div>
       </div>
@@ -136,13 +136,13 @@
         ><span id="look-help">Mouse to look</span
         ><span><kbd>ESC</kbd> pause</span>
       </div>
-      <div class="edition">A SMALL BEGINNING<span>EXPERIMENT 003</span></div>
+      <div class="edition">EMBER FOLD<span>EXPERIMENT 004</span></div>
     </footer>
     <div id="overview-label" hidden>
-      FIRST LANDING <span>Exploration is paused</span
+      UNREGISTERED PLANET <span>Exploration is paused</span
       ><button id="return" class="primary">Return to exploration →</button>
     </div>
     <div id="crosshair" aria-hidden="true" hidden>+</div>
-    <script type="module" src="/src/entry.ts"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
