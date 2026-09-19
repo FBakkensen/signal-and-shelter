@@ -28,12 +28,11 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 | F / terminal button                 | Use selected ship within reach; with no selection, use nearby terminal |
 | Ctrl / Space / Shift                | Sprint / jump / sneak with existing physics                            |
 | Escape / pause / focus loss         | Pause; explicit resume required                                        |
-| M / Overview                        | Temporary paused overview, retained until atlas integration            |
 | Restart / new seed                  | Reset progress and selection; preserve camera heading and zoom         |
 
-No mouse capture or drag-to-look. Scenery fades locally around an obstructed humanoid; it never changes camera zoom or FOV. The active strategic atlas is the next implementation increment; current distant play remains 3D. See [third-person increment validation](docs/testing/third-person-controls.md).
+No mouse capture or drag-to-look. Scenery fades locally around an obstructed humanoid; it never changes camera zoom or FOV. Scroll out into the active strategic atlas. Both views share an 8 m exploration radius: unexplored terrain and objects stay concealed, explored ground stays visible, and a deposit is identified as soon as any part is revealed. The paused overview and M shortcut are retired. See [atlas validation](docs/testing/active-strategic-atlas.md).
 
-Walk within four metres of each resource deposit to survey it. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and camera settings last until page reload; a restart clears progress while preserving settings.
+Explore within eight metres to reveal terrain and resource deposits; there is no separate surveying distance. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and camera settings last until page reload; a restart clears progress while preserving settings.
 
 This experiment targets keyboard-and-mouse play. Narrow layouts are supported visually; touch movement, sound, terrain editing, swimming, and saved progress are not implemented.
 
@@ -73,4 +72,4 @@ This is the production implementation branch. `npm run dev` opens normal third-p
 
 The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
-The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play camera and controls are implemented; strategic atlas integration remains pending.
+The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play controls, shared exploration and the active strategic atlas are implemented. Sustained human playtesting and rendering-cost measurement remain for the final increment.

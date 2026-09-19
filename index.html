@@ -16,6 +16,7 @@
       tabindex="0"
       aria-label="Signal &amp; Shelter exploration. Q/E or arrow keys to orbit, scroll to zoom, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
     ></canvas>
+    <canvas id="atlas" aria-hidden="true"></canvas>
     <header>
       <a class="brand" href="/" aria-label="Signal &amp; Shelter home"
         ><span class="brand-icon">◈</span> Signal &amp; Shelter<span class="tag"
@@ -25,8 +26,6 @@
       <div class="top-actions">
         <span class="live-dot"></span
         ><span class="island-name">UNREGISTERED PLANET</span
-        ><button id="overview" aria-pressed="false" title="Map overview (M)">
-          ↗ <span>Overview</span></button
         ><button id="pause" aria-label="Pause exploration" hidden>Ⅱ</button>
       </div>
     </header>
@@ -120,10 +119,6 @@
       </div>
       <div class="edition">ISLAND SURVEY<span>EXPERIMENT 004</span></div>
     </footer>
-    <div id="overview-label" hidden>
-      UNREGISTERED PLANET <span>Exploration is paused</span
-      ><button id="return" class="primary">Return to exploration →</button>
-    </div>
     <aside id="selection" class="journal selection" hidden>
       <h2 id="selection-name"></h2>
       <p id="selection-help"></p>

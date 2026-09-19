@@ -398,31 +398,6 @@ footer {
   border: 1px solid #dca88899;
   border-radius: 8px;
 }
-#overview-label {
-  position: absolute;
-  top: 115px;
-  left: 50%;
-  transform: translateX(-50%);
-  font: 11px monospace;
-  letter-spacing: 0.18em;
-  text-align: center;
-  padding: 18px;
-  border-radius: 10px;
-  background: #3e2c35dc;
-}
-#overview-label span {
-  display: block;
-  font:
-    11px Arial,
-    sans-serif;
-  letter-spacing: 0;
-  margin-top: 10px;
-}
-#return {
-  margin: 18px auto 0;
-  letter-spacing: 0;
-  width: max-content;
-}
 #crosshair {
   position: absolute;
   top: 50%;
@@ -538,11 +513,6 @@ footer {
     bottom: 26%;
     width: max-content;
   }
-  #overview-label {
-    top: 95px;
-    width: max-content;
-    max-width: calc(100vw - 32px);
-  }
   #toast {
     top: auto;
     bottom: 130px;
@@ -581,4 +551,13 @@ footer {
     left: 12px;
     bottom: 125px;
   }
+}
+
+#atlas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
 }

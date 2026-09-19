@@ -17,7 +17,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D007 — Try first-person Minecraft-like controls
 
 - Date: 2026-09-19
-- Status: Camera/input superseded by D014 on the third-person implementation branch; temporary overview remains until atlas integration
+- Status: Camera/input/overview superseded by D014 on the third-person and atlas implementation branches
 - Basis: The user requested more Minecraft-like controls, then explicitly requested implementation.
 - Decision: First-person pointer-locked mouse look, WASD, Space jump, Ctrl sprint, and Shift sneak, retaining the island and overview. See [the implementation and validation plan](controls-plan.md).
 - Rationale: The present elevated camera, drag-only horizontal look, and automatic one-block stepping differ substantially from the requested feel.
@@ -131,10 +131,16 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D014 — Third-person play with active strategic zoom
 
 - Date: 2026-09-19
-- Status: Accepted; close-play controls and localized fading implemented on `codex/third-person-controls`, atlas integration pending
+- Status: Accepted; close-play controls and localized fading implemented, active atlas and shared exploration implemented on `codex/strategic-atlas-integration`
 - Basis: The user selected camera B, atlas A with true-size footprints, fading treatment B, and confirmed the consolidated controls, defaults and three playable increments.
 - Decision: Implement the [accepted third-person design](third-person-design.md). Zoom remains exclusively manual; active strategic presentation preserves actions and proximity rules. Replace first-person capture/look and retire the paused overview as the atlas lands.
 - Rationale: Support close exploration and readable strategic inspection through one humanoid-anchored view. Smooth, localized fading preserves visibility without moving the camera.
 - Tradeoff: Requires new presentation and input integration; prototype whole-chunk fading is insufficient. Shared click-to-move navigation follows separately.
-- Consequence: This is the accepted replacement for D007's camera/input/overview contract; D007 remains the implemented baseline until migration. Existing movement physics remain unless explicitly changed.
-- Evidence: [Design checkpoint](https://github.com/FBakkensen/signal-and-shelter/issues/9) and its linked prototype decisions. Production integration is not yet validated.
+- Consequence: This is the accepted replacement for D007's camera/input/overview contract; D007 camera/input/overview migration is complete on the atlas implementation branch. Existing movement physics remain unchanged.
+- Evidence: [Design checkpoint](https://github.com/FBakkensen/signal-and-shelter/issues/9) and its linked prototype decisions. Atlas integration evidence is recorded in [validation](testing/active-strategic-atlas.md); sustained human playtesting remains pending.
+
+### D014 exploration correction — 2026-09-19
+
+The user rejected inconsistent knowledge across close and strategic views and explicitly removed the separate 4 m surveying rule. The confirmed interview specifies one 8 m horizontal reveal radius, permanent visible/active explored areas, obstacle-independent reveal, and concealment of unexplored terrain and objects at every zoom and in the menu. Partly explored objects stay partly revealed; any exposed deposit part identifies its material. Starts/resets grant only the starting area, with no ship or island-outline exception. Physical use distances remain unchanged.
+
+Implemented with one simulation-owned half-metre coverage grid shared by discovery, CPU atlas clipping, GPU surface/shadow clipping and picking. This trades a mathematically smooth circle for a stepped boundary matching the voxel scale; the 2 m chart grid does not determine exploration. The previous atlas-only concealment and 4 m identity gate are superseded. See [accepted design](third-person-design.md) and [evidence](testing/active-strategic-atlas.md).

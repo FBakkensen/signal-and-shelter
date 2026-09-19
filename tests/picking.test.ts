@@ -74,3 +74,12 @@ void test("empty space, avatar-only hits and unselectable scenery return no sele
   assert.equal(pick(520, 280, viewport), null);
   assert.equal(pick(120, 80, viewport), null);
 });
+
+void test("picking cannot select a hidden portion of an otherwise known object", () => {
+  const { scene, camera, avatar, viewport } = fixture();
+  scene.add(target("ship"));
+  scene.updateMatrixWorld(true);
+  const pick = createPicker(scene, camera, avatar, (point) => point.x < 0);
+  assert.equal(pick(518, 280, viewport), "ship");
+  assert.equal(pick(522, 280, viewport), null);
+});

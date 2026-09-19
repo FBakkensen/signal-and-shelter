@@ -6,7 +6,8 @@ type Viewport = Pick<DOMRectReadOnly, "left" | "top" | "width" | "height">;
 export function createPicker(
   scene: THREE.Scene,
   camera: THREE.Camera,
-  avatar: THREE.Object3D
+  avatar: THREE.Object3D,
+  visible: (point: THREE.Vector3) => boolean = () => true
 ) {
   function isAvatar(object: THREE.Object3D): boolean {
     return (
@@ -29,7 +30,10 @@ export function createPicker(
     const hit = ray
       .intersectObjects(scene.children, true)
       .find((h) => !isAvatar(h.object));
-    let object: THREE.Object3D | null = hit?.object ?? null;
+    if (!hit || !visible(hit.point)) {
+      return null;
+    }
+    let object: THREE.Object3D | null = hit.object;
     while (object) {
       if (object.name.startsWith("select:")) {
         return object.name.slice(7);

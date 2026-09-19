@@ -24,7 +24,6 @@ export type PlayState = Readonly<
     | "grounded"
     | "crouching"
     | "paused"
-    | "overview"
     | "linkChecked"
   >
 > & { readonly discovered: readonly string[] };
@@ -44,6 +43,9 @@ export class GameApplication {
   private terminal = false;
   private captureGeneration: number | null = null;
 
+  get exploration() {
+    return this.currentState.exploration;
+  }
   private facingAngle = 0;
   private selected: string | null = null;
   private readonly orbitSources = new Set<string>();
@@ -159,21 +161,15 @@ export class GameApplication {
     this.look(delta.yaw, delta.pitch);
   }
 
-  pause(overview = false) {
+  pause() {
     this.orbitSources.clear();
     this.terminal = false;
     this.captureGeneration = null;
     this.session.pause();
-    this.currentState = transition(
-      this.currentState,
-      overview ? "overview" : "pause"
-    );
+    this.currentState = transition(this.currentState, "pause");
   }
   resume(source: "button" | "canvas" | "terminal" = "button"): ResumeResult {
-    if (
-      source === "canvas" &&
-      (!this.started || !this.currentState.paused || this.currentState.overview)
-    ) {
+    if (source === "canvas" && (!this.started || !this.currentState.paused)) {
       return { kind: "ignored" };
     }
     if (source === "terminal") {
@@ -272,11 +268,7 @@ export class GameApplication {
     return true;
   }
   captureLost(): boolean {
-    if (
-      this.currentState.overview ||
-      this.terminal ||
-      this.session.mode === "keyboard"
-    ) {
+    if (this.terminal || this.session.mode === "keyboard") {
       return false;
     }
     this.pause();

@@ -1,3 +1,8 @@
+import { createExplorationFog } from "./exploration-fog.ts";
+import { exploredAt } from "./packages/play/exploration.ts";
+import { createAtlas } from "./atlas.ts";
+import type { Rect } from "./atlas.ts";
+import type { Exploration } from "./packages/play/index.ts";
 import type { CameraFrame, Position3 } from "./camera.ts";
 import { createPicker } from "./picking.ts";
 import { createOcclusion } from "./occlusion.ts";
@@ -20,9 +25,13 @@ export async function loadShip() {
 export function createScene(
   canvas: HTMLCanvasElement,
   island: Island,
-  shipAsset: THREE.Group
+  shipAsset: THREE.Group,
+  atlasCanvas: HTMLCanvasElement
 ) {
   const { heightAt, hash } = island;
+  const atlas = createAtlas(atlasCanvas, island);
+  let atlasAmount = 0;
+  let visibleKnowledge: Exploration | undefined;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
@@ -145,6 +154,8 @@ export function createScene(
       block(scene, vent.x + dx, y + dy, vent.z + dz, sx, sy, sz, part.color);
     }
   }
+  const sky = new THREE.Group();
+  scene.add(sky);
   // Distant voxel shelves and a stepped satellite establish an unfamiliar planet.
   for (let i = 0; i < 5; i++) {
     for (let tier = 0; tier < 5; tier++) {
@@ -163,7 +174,7 @@ export function createScene(
   }
   for (let tier = -6; tier <= 6; tier++) {
     const width = Math.floor(Math.sqrt(49 - tier * tier)) * 2;
-    block(scene, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
+    block(sky, -35, 37 + tier * 2, -85, width, 2, width, "#e4b699");
   }
   const ship = shipAsset.clone(true);
   ship.name = "select:ship";
@@ -198,6 +209,7 @@ export function createScene(
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const visibility = createOcclusion(scene, avatar);
+  const fog = createExplorationFog(scene, [avatar, sky]);
   let lastTime = 0;
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
@@ -211,15 +223,19 @@ export function createScene(
     pose: { ground: Position3; eye: Position3 },
     time: number,
     started: boolean,
-    frame?: CameraFrame
+    frame: CameraFrame | undefined,
+    knowledge: Exploration,
+    selection: string | null,
+    blend: number,
+    obstacles: readonly Rect[]
   ) {
     avatar.position.set(pose.ground.x, pose.ground.y, pose.ground.z);
     avatar.rotation.y = frame?.facing ?? state.yaw;
     left.rotation.x = Math.sin(state.distance * 3) * 0.4;
     right.rotation.x = -left.rotation.x;
-    const overview = state.overview || !started;
-    avatar.visible = overview || Boolean(frame);
-    const fov = frame?.fov ?? (overview ? 44 : 70);
+    const preview = !started;
+    avatar.visible = preview || Boolean(frame);
+    const fov = frame?.fov ?? (preview ? 44 : 70);
     if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
@@ -227,7 +243,7 @@ export function createScene(
     if (frame) {
       camera.position.set(frame.position.x, frame.position.y, frame.position.z);
       camera.lookAt(frame.target.x, frame.target.y, frame.target.z);
-    } else if (overview) {
+    } else if (preview) {
       camera.position.set(49, 53, 66);
       camera.lookAt(0, 2, 0);
     } else {
@@ -237,10 +253,23 @@ export function createScene(
     grains.position.y = Math.sin(time * 0.25) * 0.15;
     visibility.update(camera, time - lastTime, Boolean(frame));
     lastTime = time;
+    visibleKnowledge = knowledge;
+    fog.update(knowledge);
     renderer.render(scene, camera);
+    atlasAmount = started ? blend : 0;
+    atlas.render(
+      camera,
+      knowledge,
+      pose.ground,
+      frame?.facing ?? state.yaw,
+      selection,
+      atlasAmount,
+      obstacles
+    );
   }
   function dispose() {
     window.removeEventListener("resize", resize);
+    fog.dispose();
     visibility.dispose();
     // The shared ship template owns its geometry/materials across world rebuilds.
     scene.remove(ship);
@@ -262,9 +291,18 @@ export function createScene(
     sun.shadow.map?.dispose();
     renderer.dispose();
   }
-  const pickObject = createPicker(scene, camera, avatar);
+  const pickObject = createPicker(
+    scene,
+    camera,
+    avatar,
+    (point) =>
+      visibleKnowledge !== undefined &&
+      exploredAt(visibleKnowledge, point.x, point.z)
+  );
   function pick(clientX: number, clientY: number): string | null {
-    return pickObject(clientX, clientY, canvas.getBoundingClientRect());
+    return atlasAmount >= 0.5
+      ? atlas.pick(clientX, clientY)
+      : pickObject(clientX, clientY, canvas.getBoundingClientRect());
   }
   return { render, dispose, pick };
 }

@@ -182,3 +182,11 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 
 - Codex review found the visible avatar used the newest physics sample while the camera interpolated between samples. The renderer now consumes one play-owned ground/eye pose, also positioning the avatar before occlusion probing.
 - Regression coverage checks fractional-step positions and lifecycle/crouch boundaries. Full checks and focused browser jump/landing/pause inspection passed; high-refresh smoothness is not inferred from screenshots. See [validation](testing/avatar-interpolation.md).
+
+## 2026-09-19 — Shared exploration must survive presentation changes
+
+- User feedback rejected close play showing most of the island while the atlas concealed everything outside explored ground. The earlier accepted 8 m/4 m split was also rejected: one 8 m rule now reveals terrain and identifies deposits.
+- Confirmed through a live design interview: explored areas remain visible/active, obstacles do not block reveal, unknown geometry stays concealed at all zoom levels and in the opening menu, object boundaries reveal partially, and starts/resets grant only the initial radius. Physical use still requires proximity.
+- Implemented one immutable simulation-owned coverage mask. CPU atlas geometry, GPU surface/shadow clipping, picking and deposit discovery share it. Both views preserve partially revealed objects instead of exposing an entire mesh or only its icon.
+- Evidence: 68 tests and full checks pass. Real seed `atlas-92` places a deposit centre about 8.15 m from spawn but its footprint intersects explored ground: its material is identified, the exposed edge can be selected, and the concealed side cannot. Desktop/narrow browser checks exercised zoom, jump, terminal pause/return, restart and replacement seed without warning/error logs. See [validation](testing/active-strategic-atlas.md).
+- Limits: half-metre exploration sampling produces a stepped boundary and sliced object edges; chart terrain remains sampled at 2 m. Discrete browser movement/orbit input did not demonstrate sustained traversal. Full integrated feel and measured rendering costs remain for the next increment.

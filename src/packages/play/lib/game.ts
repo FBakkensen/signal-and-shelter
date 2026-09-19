@@ -1,9 +1,6 @@
-import type {
-  HeightSampler,
-  ResourceDeposit,
-  Point,
-  Island,
-} from "../../island/index.ts";
+import { emptyExploration, reveal, discoveredDeposits } from "./exploration.ts";
+import type { Exploration } from "./exploration.ts";
+import type { HeightSampler, Point, Island } from "../../island/index.ts";
 import { DEFAULT_ISLAND } from "../../island/index.ts";
 import {
   CROUCH_HEIGHT,
@@ -29,8 +26,8 @@ export interface GameState extends Point {
   pitch: number;
   distance: number;
   discovered: string[];
+  exploration: Exploration;
   paused: boolean;
-  overview: boolean;
   linkChecked: boolean;
 }
 export interface Input {
@@ -51,6 +48,7 @@ export const JUMP_SPEED = Math.sqrt(2 * GRAVITY * 1.25);
 export const MAX_PITCH = Math.PI / 2 - 0.01;
 export function createGame(island: Island = DEFAULT_ISLAND): GameState {
   const { spawn: SPAWN, heightAt } = island;
+  const exploration = reveal(emptyExploration(), SPAWN);
   return {
     ...SPAWN,
     y: heightAt(SPAWN.x, SPAWN.z),
@@ -63,24 +61,11 @@ export function createGame(island: Island = DEFAULT_ISLAND): GameState {
     yaw: 0,
     pitch: 0,
     distance: 0,
-    discovered: [],
+    exploration,
+    discovered: discoveredDeposits(exploration, island.resources),
     paused: true,
-    overview: false,
     linkChecked: false,
   };
-}
-export function discover(
-  state: GameState,
-  landmarks: readonly ResourceDeposit[]
-) {
-  return [
-    ...new Set([
-      ...state.discovered,
-      ...landmarks
-        .filter((p) => Math.hypot(p.x - state.x, p.z - state.z) <= 4)
-        .map((p) => p.id),
-    ]),
-  ];
 }
 function simulate(
   state: GameState,
@@ -169,12 +154,7 @@ export function advance(
   obstacles: readonly Obstacle[] = [],
   island: Island = DEFAULT_ISLAND
 ) {
-  if (
-    state.paused ||
-    state.overview ||
-    !Number.isFinite(seconds) ||
-    seconds <= 0
-  ) {
+  if (state.paused || !Number.isFinite(seconds) || seconds <= 0) {
     return state;
   }
   let result = state;
@@ -195,6 +175,7 @@ export function advance(
       ...createGame(island),
       paused: false,
       discovered: [...state.discovered],
+      exploration: state.exploration,
       distance: state.distance,
       linkChecked: state.linkChecked,
     };
@@ -208,16 +189,17 @@ export function advance(
     remaining -= STEP;
   }
   result = { ...result, accumulator: Math.max(0, remaining) };
-  result.discovered = discover(result, island.resources);
+  result.exploration = reveal(result.exploration, result);
+  result.discovered = [
+    ...new Set([
+      ...result.discovered,
+      ...discoveredDeposits(result.exploration, island.resources),
+    ]),
+  ];
   return result;
 }
 export function look(state: GameState, yaw: number, pitch: number) {
-  if (
-    state.paused ||
-    state.overview ||
-    !Number.isFinite(yaw) ||
-    !Number.isFinite(pitch)
-  ) {
+  if (state.paused || !Number.isFinite(yaw) || !Number.isFinite(pitch)) {
     return state;
   }
   return {
@@ -226,13 +208,12 @@ export function look(state: GameState, yaw: number, pitch: number) {
     pitch: Math.max(-MAX_PITCH, Math.min(MAX_PITCH, state.pitch + pitch)),
   };
 }
-export type PlayEvent = "capture" | "pause" | "overview" | "return";
+export type PlayEvent = "capture" | "pause" | "return";
 export function transition(state: GameState, event: PlayEvent): GameState {
   return {
     ...state,
     previousPosition: { x: state.x, y: state.y, z: state.z },
     paused: event !== "capture",
-    overview: event === "overview",
     jumpBuffer: 0,
     accumulator: 0,
   };
@@ -242,8 +223,7 @@ export function eyeHeight(state: GameState) {
 }
 
 export function renderPose(state: GameState) {
-  const alpha =
-    state.paused || state.overview ? 1 : Math.min(1, state.accumulator / STEP);
+  const alpha = state.paused ? 1 : Math.min(1, state.accumulator / STEP);
   const ground = {
     x: state.previousPosition.x + (state.x - state.previousPosition.x) * alpha,
     y: state.previousPosition.y + (state.y - state.previousPosition.y) * alpha,
@@ -258,7 +238,6 @@ export function viewPosition(state: GameState) {
 
 export function canUseTerminal(state: GameState, island: Island): boolean {
   return (
-    !state.overview &&
     Math.hypot(state.x - island.terminal.x, state.z - island.terminal.z) <=
       3.2 &&
     Math.abs(state.y - island.heightAt(island.terminal.x, island.terminal.z)) <

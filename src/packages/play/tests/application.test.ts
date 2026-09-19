@@ -37,7 +37,7 @@ await test("terminal background clicks cannot resume physics or request capture 
   }
 });
 
-await test("welcome and overview canvas clicks do not start play; explicit overview return does", () => {
+await test("welcome clicks do not start play; explicit pause return clears input", () => {
   const island = createIsland("starter-island");
   const app = new GameApplication(island);
   const initial = app.state;
@@ -51,14 +51,12 @@ await test("welcome and overview canvas clicks do not start play; explicit overv
   app.press("KeyW");
   app.press("ArrowRight");
   app.press("Space");
-  app.pause(true);
-  const overview = app.state;
+  app.pause();
+  const paused = app.state;
   app.tick(0.1);
-  assert.equal(app.state, overview);
-  assert.equal(app.resume("canvas").kind, "ignored");
-  assert.equal(app.captureLost(), false);
+  assert.equal(app.state, paused);
+  assert.equal(app.captureLost(), true);
   assert.equal(app.resume().kind, "keyboard");
-  assert.equal(app.state.overview, false);
   app.tick(0.1);
   assert.equal(app.state.distance, 0);
   assert.equal(app.state.yaw, 0);

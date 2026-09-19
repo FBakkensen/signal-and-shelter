@@ -11,13 +11,19 @@ _Avoid_: World (when referring to one island)
 
 **Play**: The player's exploration of an island, including movement, surveying deposits, and using the ship terminal. Pausing suspends movement.
 
-**Resource deposit**: An outcrop that can be surveyed by approaching it. Deposits currently contain copper, iron, or silica; surveying does not gather material.
+**Resource deposit**: An outcrop whose material is identified when any part is first revealed through exploration. Deposits contain copper, iron, or silica; discovery does not gather material.
 _Avoid_: Landmark (when referring to a resource deposit)
+
+**Exploration**: Uncovering terrain, objects and deposit identities within eight horizontal metres of the humanoid, regardless of obstacles. Camera direction and zoom do not change exploration.
+
+**Explored area**: Ground already uncovered through exploration. It remains visible and active after the humanoid leaves; knowing an object does not grant remote physical interaction.
+
+**Unexplored area**: Ground not yet uncovered through exploration. Fog conceals its terrain and objects in both close play and strategic view.
 
 **Vent**: A stepped, block-built formation on the island. Vents are solid scenery, with no current production or power behavior.
 
 **Ship terminal**: The stranded ship's communications console. Checking its data link records a successful connection without restoring flight or delivering software.
 
-**Overview**: The existing separate, paused view of the island. It is distinct from the planned strategic view and will be retired by the accepted third-person control design.
+**Overview**: The retired separate, paused view of the island. Use strategic view for the active distant-zoom presentation.
 
-**Strategic view**: The planned distant-zoom presentation of the island, anchored to the humanoid, with simplified terrain and recognizable information about explored resource deposits. It changes presentation without changing which actions are available.
+**Strategic view**: The distant-zoom presentation of the island, anchored to the humanoid, with simplified terrain and recognizable information about explored resource deposits. It changes presentation without changing which actions are available.

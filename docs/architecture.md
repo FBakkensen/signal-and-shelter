@@ -1,6 +1,6 @@
 # Architecture
 
-Last updated: 2026-09-19. Seeded arrival, third-person close-play controls and localized obstruction fading are implemented. Active strategic atlas integration and sustained browser traversal validation remain pending.
+Last updated: 2026-09-19. Seeded arrival, third-person close-play controls and localized obstruction fading are implemented. The active strategic atlas and shared exploration are implemented; sustained browser traversal validation remains pending.
 
 ## Runtime and tooling
 
@@ -10,7 +10,7 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `src/packages/island/index.ts`    | Seed selection and complete island generation, including solid geometry                                                   |
 | `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering                       |
-| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause/overview, restart and island replacement                 |
+| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause, exploration, restart and island replacement                 |
 | `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
 | `src/resources.ts`                | Three.js resource mesh adapter using island geometry                                                                      |
 | `src/scene.ts`                    | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime                                      |
@@ -31,7 +31,7 @@ Dependency-cruiser scans `src/` and `tests/`, enforcing root-entry imports, priv
 
 The bounded height field spans 96 by 96 metres, sampled on a half-metre grid (192 by 192 cells). Seeded coast size, shape and outer hills surround a connected level starter shelf. Ship and resource placements vary within safe areas; vents stay clear of the ship and deposits. This deliberately trades interior terrain variety for a forgiving, reachable opening. Terrain is voxel-style height-field geometry, not editable block storage. Thirty-six 16-by-16 chunks contain top and exposed side quads sampled across chunk boundaries. Vent placements and suspended haze grains also use the seed. Terrain top and side quads have axis-aligned normals; the geometry preserves voxels.
 
-The stranded ship includes an external terminal. Within 3.2 metres horizontally and less than one metre vertically, F or the interaction button opens a paused terminal panel when the ship is selected or nothing is selected. A selected deposit never redirects use to the ship. A connection check records `linkChecked`; it is fictional local game state, not a network request or actual software download. Three resource deposits are discovered within four metres. Gathering is not implemented.
+The stranded ship includes an external terminal. Within 3.2 metres horizontally and less than one metre vertically, F or the interaction button opens a paused terminal panel when the ship is selected or nothing is selected. A selected deposit never redirects use to the ship. A connection check records `linkChecked`; it is fictional local game state, not a network request or actual software download. Resource deposits are identified when any portion of their footprint enters explored coverage, using the same 8 m rule as terrain reveal. Gathering is not implemented.
 
 Changing seeds disposes the old renderer, scene-owned geometry/materials, shadow map and resize listener, then creates a new world while reusing the loaded ship template. Restart resets the current seed's player/journal/link state and selection while preserving heading and zoom; replacing the seed preserves the same camera settings. Invalid-position recovery uses that same island's spawn and retains discoveries and the connection result. The URL records the seed, not progress; saves and old-generator compatibility are not implemented.
 
@@ -47,7 +47,7 @@ WASD moves relative to camera heading; Q/E or Left/Right orbit, Home restores st
 
 Left-click selects visible ship or deposit geometry. `picking.ts` owns the production raycast and accepts canvas bounds without constructing a WebGL renderer. It ignores avatar descendants, resolves selectable ancestors from the nearest remaining hit and allows unselectable foreground geometry to block selection, including visually faded scenery. The scene adapter supplies current canvas bounds and rendered scene/camera transforms. Play owns selection validity and physical interaction reach; selection alone never moves or pauses the humanoid.
 
-`GameApplication` owns lifecycle transitions and held input. Terminal opening, Esc, blur and visibility loss pause play and clear movement, orbit aliases and queued jumps. Resume is explicit; clicking the world does not resume. The terminal's Return button closes it and resumes; Esc or focus loss closes it into the ordinary pause menu. Pause/resume preserves heading and zoom. The separate paused overview and M shortcut remain temporarily until the active atlas increment replaces them.
+`GameApplication` owns lifecycle transitions and held input. Terminal opening, Esc, blur and visibility loss pause play and clear movement, orbit aliases and queued jumps. Resume is explicit; clicking the world does not resume. The terminal's Return button closes it and resumes; Esc or focus loss closes it into the ordinary pause menu. Pause/resume preserves heading and zoom. The separate paused overview and M shortcut are removed.
 
 `occlusion.ts` clones scenery materials, probes obstruction and smoothly fades fragments within a tapered camera-to-humanoid opening. Dithered coverage preserves depth writing and avoids whole-chunk transparency sorting. Visibility handling never feeds camera framing back to the camera. Original materials are restored on scene disposal.
 
@@ -74,7 +74,7 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 
 ## Current boundaries
 
-Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 640 kB uncompressed JavaScript bundle, which includes Three.js.
+Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 648 kB uncompressed JavaScript bundle, which includes Three.js.
 
 ## Current presentation — 2026-09-19
 
@@ -94,3 +94,13 @@ The comparison source, styles, tests and run commands are preserved on experimen
 - Local archive `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`: exact pre-cleanup snapshot including the production-fade render fixtures used for historical validation.
 
 The [accepted design](third-person-design.md) owns the behavior contract and remaining increments. First-person control history is retained in [experiment 002](testing/experiment-002.md) and [experiment 004](testing/experiment-004.md).
+
+## Shared exploration and active atlas — 2026-09-19
+
+The play simulation owns immutable exploration rows, initialized around spawn before either the menu or gameplay is drawn. Active ticks reveal an 8 m horizontal disc sampled at half-metre cell centres; untouched rows are shared between snapshots. Reveal ignores height, scenery and camera settings. Deposit discovery tests every block footprint against this same coverage, replacing the former separate 4 m distance. Reset recreates starting knowledge; returning from a pause preserves it.
+
+`play/exploration.ts` exposes coverage queries and clipping through a public package entry point. `exploration-fog.ts` uploads changed rows to a nearest-filtered texture and clips world and shadow fragments. It composes with localized fading, excludes the humanoid and celestial backdrop, and restores original materials before scene disposal. Close picking checks the nearest hit against the same coverage, so hidden portions cannot be selected.
+
+`atlas.ts` projects a 2 m terrain chart and exact block footprint bounds through the existing Three.js camera onto a canvas overlay. CPU clipping uses the same half-metre mask as close-play shaders. Unknown scenery is omitted entirely, including ship portions outside explored ground. Smooth blending uses 62–80% of manual zoom; picking uses the dominant presentation. Identity labels anchor to revealed fragments, prioritize selection, and avoid the humanoid, selected geometry, UI and other labels. Revealed areas remain visible and play remains active at every zoom. The chart is a simplified presentation, not a navigation guarantee.
+
+See [atlas validation](testing/active-strategic-atlas.md) for real browser evidence and remaining sustained-play/performance limits.

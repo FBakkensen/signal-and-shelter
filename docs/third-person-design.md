@@ -1,6 +1,6 @@
 # Third-person play and strategic zoom
 
-Status: accepted design, 2026-09-19. The user confirmed the defaults, fading refinements and delivery sequence. The first production increment implements third-person controls and localized fading; atlas integration remains pending. Camera, atlas and occlusion studies are archived throwaway evidence, separate from the production implementation.
+Status: accepted design, 2026-09-19. The user confirmed the defaults, fading refinements and delivery sequence. The first production increment implements third-person controls and localized fading; atlas integration and the revised shared exploration rule are implemented on `codex/strategic-atlas-integration`; integrated human playtesting remains pending. Camera, atlas and occlusion studies are archived throwaway evidence, separate from the production implementation.
 
 Owning checkpoint: [Settle the design and define playable implementation increments](https://github.com/FBakkensen/signal-and-shelter/issues/9). The [wayfinder map](https://github.com/FBakkensen/signal-and-shelter/issues/5) indexes decision rationale.
 
@@ -36,7 +36,7 @@ Terminal opening and focus loss pause play and clear held inputs. Resume is expl
 These are accepted implementation starting values and visual requirements; numeric tuning remains subject to playtest evidence.
 
 1. Keep the tested camera range (3.5–70 m), fixed 55° FOV and camera B framing. Blend into the atlas over 62–80% of scroll range. One continuous zoom value drives both views; crossing the blend does not change position, heading, selection or simulation. Tune numbers through playtests without changing the agreed behavior.
-2. Exploration reveals an 8 m neighborhood during active play. Located but unsurveyed deposits show an unknown marker and neutral footprint; existing 4 m surveying reveals identity. Unvisited ground stays dark, ship and humanoid remain known, and zooming out never reveals new knowledge. Exploration freezes while paused and resets with the island. Keep the prototype's readable 2 m chart grid initially, but derive object bounds from real geometry. It is a strategic chart, not a precise navigation/reachability guarantee.
+2. Exploration reveals terrain, objects and deposit identities within one 8 m horizontal radius around the humanoid during active play, regardless of obstacles. There is no separate 4 m surveying rule. Explored areas remain visible and active after leaving; physical interaction still requires its normal proximity. Fog conceals unexplored terrain and objects in both close play and the atlas, while sky and atmosphere remain visible. Camera direction, orbit, jumping and zoom do not extend exploration. Exploration freezes while paused and resets with the island. Keep the readable 2 m chart grid initially, but derive object bounds from real geometry. It is a strategic chart, not a precise navigation/reachability guarantee. This exploration correction was agreed on 2026-09-19 and is implemented using shared half-metre coverage sampled at cell centres. Reveal only the explored portion of an object that crosses the boundary; identify a deposit when any part is first revealed. Fresh starts, restarts and seed replacement reveal only the 8 m area around the starting position, with no ship or island-outline exception. The opening menu must conceal unexplored scenery as well.
 3. Fade over roughly 150–200 ms, with a short release delay to avoid flicker. Localize terrain fading to the obstruction region instead of fading an entire chunk. Preserve surrounding terrain and solid object identity. Camera-inside cases require a readable local opening without changing camera framing; exposed broad terrain undersides from the prototype are not a shippable outcome. Start from the prototype's 18% opacity and tune for legibility. This refinement is untested.
 
 ## Accepted playable increments
@@ -49,7 +49,7 @@ Acceptance: start a seeded island; move, jump, sprint and sneak; orbit with both
 
 ### 2. Active strategic atlas and exploration
 
-Integrate atlas A with the same camera state and active play. Add exploration coverage, unknown/surveyed identities, selectable true-size footprints and a smooth transition. Remove the separate paused overview and its shortcut/UI. Keep selection and interaction behavior across both presentations; manage labels so they do not hide the humanoid or selected target.
+Integrate atlas A with the same camera state and active play. Add shared exploration coverage and deposit discovery at 8 m, selectable true-size footprints and a smooth transition. Conceal unexplored terrain and objects consistently in both views. Remove the separate paused overview and its shortcut/UI. Keep selection and interaction behavior across both presentations; manage labels so they do not hide the humanoid or selected target.
 
 Acceptance: continuous manual zoom in both directions preserves location, heading and action availability. Known resources remain identifiable, unknown ones stay unknown, and every multi-part footprint matches its geometry. Jump and use the nearby terminal in map view. Pause, restart and seed replacement preserve only the agreed state. Desktop and 390×844 views retain usable controls and readable relevant markers without automatic fitting.
 
@@ -74,3 +74,7 @@ D007 remains the implemented first-person baseline until migration. On acceptanc
 ## Evidence and unresolved limits
 
 See [camera](testing/camera-prototype.md), [atlas](testing/strategic-map-prototype.md) and [occlusion](testing/occlusion-prototype.md) records. Prototype checks passed 63 tests; this is not validation of the integrated design. Browser sustained traversal, dense future-base labels and production performance remain unverified. Occlusion transition/terrain localization accepted here still requires implementation and validation.
+
+## Exploration interview checkpoint — 2026-09-19
+
+The user agreed to the exploration corrections above in the live grill-with-docs discussion. The user confirmed the complete rule set and authorized implementation. These corrections remain part of [Implement the active strategic atlas and exploration](https://github.com/FBakkensen/signal-and-shelter/issues/13); implementation and actual validation evidence are recorded in [the atlas validation record](testing/active-strategic-atlas.md).
