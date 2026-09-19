@@ -1,9 +1,21 @@
 import { mouseLook } from "./controls.ts";
 import { ControlSession } from "./session.ts";
 import "./style.css";
-import { createScene } from "./scene.ts";
-import { createGame, advance, look, transition } from "./game.ts";
-import { LANDMARKS, biomeAt } from "./world.ts";
+import { createScene, loadShip } from "./scene.ts";
+import {
+  createGame,
+  advance,
+  look,
+  transition,
+  canUseTerminal,
+  checkDataLink,
+} from "./game.ts";
+import {
+  createIsland,
+  chooseSeed,
+  DEFAULT_SEED,
+  GENERATOR_VERSION,
+} from "./world.ts";
 
 function element<T extends HTMLElement>(id: string, type: new () => T): T {
   const found = document.getElementById(id);
@@ -15,24 +27,46 @@ function element<T extends HTMLElement>(id: string, type: new () => T): T {
 const $ = (id: string): HTMLElement => element(id, HTMLElement);
 const startButton = element("start", HTMLButtonElement);
 const canvas = element("world", HTMLCanvasElement);
-let state = createGame(),
+let island = createIsland(
+  new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED,
+);
+let state = createGame(island),
   started = false,
-  world: Awaited<ReturnType<typeof createScene>>,
+  world: ReturnType<typeof createScene>,
+  shipAsset: Awaited<ReturnType<typeof loadShip>>,
+  terminalOpen = false,
   previous = 0,
   toastUntil = 0;
 const session = new ControlSession();
 const sensitivity = element("sensitivity", HTMLInputElement);
 const invertY = element("invert-y", HTMLInputElement);
 
-$("places").innerHTML = LANDMARKS.map(
-  (p) => `<li data-place="${p.id}"><span>◇</span><span>${p.name}</span></li>`,
-).join("");
+const seedInput = element("seed", HTMLInputElement);
+seedInput.value = new URLSearchParams(location.search).get("seed") ?? "";
+function updateWorldUI() {
+  $("places").replaceChildren(
+    ...island.resources.map((resource) => {
+      const row = document.createElement("li");
+      row.dataset.place = resource.id;
+      const marker = document.createElement("span");
+      const name = document.createElement("span");
+      name.textContent = resource.name;
+      row.append(marker, name);
+      return row;
+    }),
+  );
+  element("current-seed", HTMLInputElement).value = island.seed;
+  $("seed-version").textContent =
+    `World generation ${String(GENERATOR_VERSION)}`;
+  $("seed-badge").textContent = `Seed: ${island.seed}`;
+}
 function sync() {
   $("welcome").hidden = started;
   $("control-mode").textContent = session.keyboardPreferred
     ? "Use mouse controls"
     : "Use keyboard controls";
-  $("pause-panel").hidden = !started || !state.paused || state.overview;
+  $("pause-panel").hidden =
+    !started || !state.paused || state.overview || terminalOpen;
   $("crosshair").hidden = !started || state.paused || state.overview;
   document.body.classList.toggle("in-menu", !started || state.paused);
   $("overview").hidden = !started;
@@ -40,8 +74,8 @@ function sync() {
   $("overview").setAttribute("aria-pressed", String(state.overview));
   $("overview-label").hidden = !state.overview;
   $("count").textContent =
-    `${String(state.discovered.length)} / ${String(LANDMARKS.length)}`;
-  for (const p of LANDMARKS) {
+    `${String(state.discovered.length)} / ${String(island.resources.length)}`;
+  for (const p of island.resources) {
     const row = document.querySelector(`[data-place="${p.id}"]`);
     if (!row?.firstElementChild) {
       throw new Error("Missing journal row");
@@ -51,11 +85,24 @@ function sync() {
     row.firstElementChild.textContent = found ? "◆" : "◇";
   }
   $("journal-note").textContent =
-    state.discovered.length === 3
-      ? "Every landmark found. The rest of the walk is yours."
-      : "Follow your curiosity. Walk close to a landmark to discover it.";
+    state.discovered.length === island.resources.length
+      ? "Starter resources surveyed. Gathering and building will come in a later experiment."
+      : "Explore the island. Walk close to an outcrop to record what you find.";
+  $("terminal-panel").hidden = !terminalOpen;
+  $("interact").hidden =
+    !started || state.paused || !canUseTerminal(state, island);
+  $("link-status").textContent = state.linkChecked
+    ? "Data link confirmed"
+    : "Check the ship’s data link";
+  $("terminal-status").textContent = state.linkChecked
+    ? "Connection confirmed. The ship can exchange data, but its flight systems are offline. Software delivery will come in a later experiment."
+    : "The communications unit still has power. Run a connection check.";
+  $("check-link").textContent = state.linkChecked
+    ? "Check connection again"
+    : "Check connection";
 }
 function release(overview = false) {
+  terminalOpen = false;
   session.pause();
   $("capture-message").textContent = session.keyboardPreferred
     ? "WASD to move. Arrow keys to look around. Escape pauses."
@@ -124,7 +171,34 @@ $("control-mode").onclick = () => {
   session.keyboardPreferred = keyboard;
   resume();
 };
-$("start").onclick = resume;
+element("start-form", HTMLFormElement).onsubmit = (event) => {
+  event.preventDefault();
+  const seed = chooseSeed(seedInput.value, () =>
+    crypto.randomUUID().slice(0, 12),
+  );
+  try {
+    const nextIsland = createIsland(seed);
+    world.dispose();
+    world = createScene(canvas, nextIsland, shipAsset);
+    island = nextIsland;
+    state = createGame(island);
+    terminalOpen = false;
+    seedInput.value = seed;
+    const url = new URL(location.href);
+    url.searchParams.set("seed", seed);
+    history.replaceState(null, "", url);
+    session.keyboardPreferred =
+      element("start-controls", HTMLSelectElement).value === "keyboard";
+    toastUntil = 0;
+    $("toast").hidden = true;
+    updateWorldUI();
+    resume();
+  } catch (error) {
+    console.error(error);
+    $("start-error").textContent =
+      "The island could not be prepared. Please reload and try again.";
+  }
+};
 $("resume").onclick = resume;
 $("return").onclick = resume;
 $("pause").onclick = () => {
@@ -139,9 +213,36 @@ $("overview").onclick = () => {
 };
 $("reset").onclick = () => {
   release();
-  state = createGame();
+  state = createGame(island);
   toastUntil = 0;
   $("toast").hidden = true;
+  resume();
+};
+$("new-island").onclick = () => {
+  release();
+  started = false;
+  state = createGame(island);
+  toastUntil = 0;
+  $("toast").hidden = true;
+  sync();
+  seedInput.focus();
+};
+function openTerminal() {
+  if (state.paused || !canUseTerminal(state, island)) {
+    return;
+  }
+  release();
+  terminalOpen = true;
+  sync();
+  $("check-link").focus();
+}
+$("interact").onclick = openTerminal;
+$("check-link").onclick = () => {
+  state = checkDataLink(state, island);
+  sync();
+};
+$("terminal-return").onclick = () => {
+  terminalOpen = false;
   resume();
 };
 document.addEventListener("pointerlockchange", () => {
@@ -152,7 +253,7 @@ document.addEventListener("pointerlockchange", () => {
     }
 
     activatePlay();
-  } else if (!state.overview && session.mode !== "keyboard") {
+  } else if (!state.overview && !terminalOpen && session.mode !== "keyboard") {
     release();
   }
 });
@@ -167,7 +268,14 @@ window.addEventListener("keydown", (e) => {
     release();
     return;
   }
-  const editing = e.target instanceof HTMLInputElement;
+  const editing =
+    e.target instanceof HTMLInputElement ||
+    e.target instanceof HTMLSelectElement;
+  if (e.code === "KeyE" && !editing && !e.repeat && !state.paused) {
+    e.preventDefault();
+    openTerminal();
+    return;
+  }
   if (e.code === "KeyM" && started && !e.repeat && !editing) {
     e.preventDefault();
     release(!state.overview);
@@ -213,9 +321,20 @@ function tick(now: number) {
   const before = state.discovered.length;
   const rotation = session.look(dt);
   state = look(state, rotation.yaw, rotation.pitch);
-  state = advance(state, session.readInput(), dt, undefined, world.obstacles);
+  state = advance(
+    state,
+    session.readInput(),
+    dt,
+    island.heightAt,
+    world.obstacles,
+    island,
+  );
+  $("interact").hidden =
+    !started || state.paused || !canUseTerminal(state, island);
   if (before !== state.discovered.length) {
-    const place = LANDMARKS.find((p) => p.id === state.discovered.at(-1));
+    const place = island.resources.find(
+      (p) => p.id === state.discovered.at(-1),
+    );
     if (!place) {
       throw new Error("Unknown discovered landmark");
     }
@@ -233,14 +352,16 @@ function tick(now: number) {
     shore: "THE SHORE",
     grove: "THE GROVE",
     meadow: "THE MEADOW",
-  }[biomeAt(state.x, state.z)];
+  }[island.biomeAt(state.x, state.z)];
   world.render(state, now / 1000, started);
   requestAnimationFrame(tick);
 }
 try {
-  world = await createScene(canvas);
+  shipAsset = await loadShip();
+  world = createScene(canvas, island, shipAsset);
+  updateWorldUI();
   startButton.disabled = false;
-  startButton.textContent = "Begin exploring →";
+  startButton.textContent = "Begin your island →";
   sync();
   requestAnimationFrame(tick);
 } catch (error) {

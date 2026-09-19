@@ -1,5 +1,6 @@
-import { heightAt, LANDMARKS, makeTrees, SIZE, WATER } from "./world.ts";
-import type { HeightSampler, Point } from "./world.ts";
+import { SHIP_PARTS } from "./ship.ts";
+import { DEFAULT_ISLAND, SIZE, WATER, RESOURCE_CRYSTALS } from "./world.ts";
+import type { HeightSampler, Point, Island } from "./world.ts";
 
 export interface Obstacle {
   minX: number;
@@ -118,38 +119,47 @@ export function ledgeSafe(
     }),
   );
 }
-export function makeObstacles(): Obstacle[] {
-  const result = makeTrees().map((t) =>
+export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
+  const { heightAt, ship } = island;
+  const result = island.trees.map((t) =>
     boxCollider(t.x, heightAt(t.x, t.z), t.z, 0.48, t.height * 0.9, 0.48),
   );
-  for (const p of LANDMARKS) {
-    const y = heightAt(p.x, p.z);
-    if (p.id === "arch") {
+  for (const part of SHIP_PARTS) {
+    const [x, y, z] = part.position;
+    const [width, height, depth] = part.size;
+    result.push(
+      boxCollider(
+        ship.x + x,
+        heightAt(ship.x, ship.z) + y - height / 2,
+        ship.z + z,
+        width,
+        height,
+        depth,
+      ),
+    );
+  }
+  for (const resource of island.resources) {
+    result.push(
+      boxCollider(
+        resource.x,
+        heightAt(resource.x, resource.z),
+        resource.z,
+        1.8,
+        1.1,
+        1.8,
+      ),
+    );
+    for (const [dx, dz, h] of RESOURCE_CRYSTALS) {
       result.push(
-        boxCollider(p.x - 1.8, y, p.z, 1.2, 4, 1.5),
-        boxCollider(p.x + 1.8, y, p.z, 1.2, 4, 1.5),
-        boxCollider(p.x, y + 3.5, p.z, 4.8, 1.2, 1.7),
+        boxCollider(
+          resource.x + dx,
+          heightAt(resource.x, resource.z) + 0.7,
+          resource.z + dz,
+          0.45,
+          h,
+          0.45,
+        ),
       );
-    } else if (p.id === "grove") {
-      result.push(boxCollider(p.x, y, p.z, 0.85, 5, 0.85));
-    } else if (p.id === "beacon") {
-      // Match the authored GLB's individual blocks; keep the gaps around its column.
-      for (const [bottom, width, height] of [
-        [0, 2, 0.4],
-        [0.4, 1.3, 0.5],
-        [0.9, 0.65, 1.6],
-        [2.475, 1.4, 0.25],
-        [2.7, 0.8, 0.8],
-        [3.575, 1.65, 0.25],
-        [3.825, 1, 0.25],
-      ] as const) {
-        result.push(boxCollider(p.x, y + bottom, p.z, width, height, width));
-      }
-      for (const dx of [-0.55, 0.55]) {
-        for (const dz of [-0.55, 0.55]) {
-          result.push(boxCollider(p.x + dx, y + 2.6, p.z + dz, 0.12, 1, 0.12));
-        }
-      }
     }
   }
   return result;

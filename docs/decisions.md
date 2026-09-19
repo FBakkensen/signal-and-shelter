@@ -2,6 +2,18 @@
 
 Record significant choices with date, status, rationale, and consequences. Use proposed, accepted, or superseded; link a replacement when superseding a choice.
 
+## D008 — Make seeded arrival the next small experiment
+
+- Date: 2026-09-19
+- Status: Accepted and implemented; full browser traversal remains unverified
+- Basis: The user agreed to reshape the opening around a stranded ship, a small island, a data terminal, resource discoveries and optional seed entry while preserving incremental development.
+- Decision: The same seed and generator version reproduce the complete starting world and player state. Use a safe starter meadow with seed-varying coast, foliage, ship and deposits. Restart begins that island again; URL seed sharing does not save progress.
+- Rationale: Reproducible starts let us revisit experiences and report problems while experimenting. A fixed safe interior constrains variation but keeps the opening accessible.
+- Tradeoff: Generator changes may change an existing seed's world; we do not promise historical generator compatibility. Record a new generator version when changing generation in future work.
+- Scope: Robots, gathering, power systems, manufacturing, software downloads and travel between islands remain later experiments. The terminal only records an in-game connection check.
+- Evidence: [Experiment 003](testing/experiment-003.md) distinguishes production-code tests, browser interaction checks and tooling limitations.
+- Consequence: Replaces D006's three-landmark discovery content while retaining D007's controls and the bounded island experiment approach.
+
 ## D007 — Try first-person Minecraft-like controls
 
 - Date: 2026-09-19
@@ -20,7 +32,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Status: Accepted
 - Basis: The user wants a voxel-style open world and to see where it evolves.
 - Decision: Develop through small experiments and user feedback.
-- Consequence: A genre and full feature roadmap remain open. The proposed first experiment is described in [vision](vision.md).
+- Consequence: The overall direction is now the friendly stranded-island game recorded in [vision](vision.md); a full feature roadmap remains open.
 
 ## D002 — Start with Three.js and Blender
 

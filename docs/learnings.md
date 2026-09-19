@@ -62,3 +62,14 @@ Record durable observations with date, evidence, implications, and limitations. 
 - User requirement: WASD movement and arrow-key look must always work during active play, including when the mouse is locked. Provide keyboard play as the alternative to captured mouse look. Drag-to-look remains rejected.
 - Implemented: keyboard play does not request capture; selected mode survives pause/overview/reset. Keep wandering now resumes keyboard play without hitting the embedded-browser capture failure.
 - Evidence: focused real-browser selection → Escape → Keep wandering → Space entered play and showed Airborne. Automated tests cover arrow-only look, WASD movement, simultaneous locked-session keyboard input, clearing inputs and mode retention. Full checks pass. Sustained keyboard-look feel and real captured input remain unverified by browser tools.
+
+
+## 2026-09-19 — Seeded arrival experiment
+
+- Question: Does a small island opening beside a stranded ship establish the intended game's premise?
+- Implemented: optional seed entry, deterministic world generation version 1, safe arrival beside a Blender-authored ship, an interactive data-link check, and three discoverable resource deposits. Player feedback on the experience is still pending.
+- Evidence: `npm run check` passed; 200 seeds had clear dry starts and level ship sites. Production movement traversed 15 resource routes across five seeds. Actual GLTFLoader geometry matched all 17 ship colliders. See [experiment 003](testing/experiment-003.md).
+- Browser evidence: seed entry, terminal interaction/pause/return, restart, seed changes, random-seed generation and repeated-seed overview were exercised. Narrow start/pause/terminal layouts were visually inspected; a terminal width issue was corrected. Browser logs inspected for these flows were empty.
+- Tradeoff: a connected level starter meadow simplifies safe placement and access while coastline, outer hills, foliage, ship and resources vary. More varied interior terrain is an untested future direction.
+- Limitation: the browser tool exposes discrete key presses without held input; full browser resource traversal remains unverified. Captured mouse look retains the documented host limitation. Automated reachability does not establish movement feel.
+- Next: user feedback on arrival, the ship's scale and resource surveying should guide the next small experiment. Robots and power remain future work.

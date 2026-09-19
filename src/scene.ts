@@ -3,17 +3,18 @@ import { viewPosition } from "./game.ts";
 import { makeObstacles } from "./collision.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import {
-  heightAt,
-  hash,
-  terrainQuads,
-  makeTrees,
-  LANDMARKS,
-  SIZE,
-  WATER,
-} from "./world.ts";
+import { terrainQuads, SIZE, WATER, RESOURCE_CRYSTALS } from "./world.ts";
+import type { Island } from "./world.ts";
 
-export async function createScene(canvas: HTMLCanvasElement) {
+export async function loadShip() {
+  return (await new GLTFLoader().loadAsync("/assets/ship.glb")).scene;
+}
+export function createScene(
+  canvas: HTMLCanvasElement,
+  island: Island,
+  shipAsset: THREE.Group,
+) {
+  const { heightAt, hash } = island;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
@@ -79,15 +80,6 @@ export async function createScene(canvas: HTMLCanvasElement) {
           quad.top ? (h <= 2 ? "#d8c494" : "#809650") : "#877a56",
         );
         color.multiplyScalar(0.92 + hash(quad.x, quad.z) * 0.16);
-        if (
-          quad.top &&
-          h > 2 &&
-          Math.abs(quad.x) < 2 &&
-          quad.z > -3 &&
-          quad.z < 20
-        ) {
-          color.set("#b6a476");
-        }
         for (const i of [0, 1, 2, 0, 2, 3] as const) {
           positions.push(...quad.points[i]);
           colors.push(color.r, color.g, color.b);
@@ -137,7 +129,7 @@ export async function createScene(canvas: HTMLCanvasElement) {
       "#9bc9bb",
     );
   }
-  const trees = makeTrees();
+  const trees = island.trees;
   for (const tree of trees) {
     const { x, z, height: h } = tree,
       y = heightAt(x, z);
@@ -151,7 +143,7 @@ export async function createScene(canvas: HTMLCanvasElement) {
     const x = Math.floor(hash(i, 88) * 64 - 32) + 0.5,
       z = Math.floor(hash(i, 99) * 64 - 32) + 0.5,
       y = heightAt(x, z);
-    if (y < 3 || Math.abs(x) < 3) {
+    if (y < 3 || Math.hypot(x - island.ship.x, z - island.ship.z) < 8) {
       continue;
     }
     block(
@@ -165,39 +157,44 @@ export async function createScene(canvas: HTMLCanvasElement) {
       i % 3 === 0 ? "#e6bc71" : "#aeb571",
     );
   }
-  const arch = LANDMARKS.find((p) => p.id === "arch");
-  const grove = LANDMARKS.find((p) => p.id === "grove");
-  const beacon = LANDMARKS.find((p) => p.id === "beacon");
-  if (!arch || !grove || !beacon) {
-    throw new Error("Missing landmark configuration");
-  }
-  const ay = heightAt(arch.x, arch.z);
-  block(scene, arch.x - 1.8, ay + 2, arch.z, 1.2, 4, 1.5, "#b2ad8a");
-  block(scene, arch.x + 1.8, ay + 2, arch.z, 1.2, 4, 1.5, "#a5a282");
-  block(scene, arch.x, ay + 4.1, arch.z, 4.8, 1.2, 1.7, "#c1ba94");
-  const gy = heightAt(grove.x, grove.z);
-  block(scene, grove.x, gy + 2.5, grove.z, 0.85, 5, 0.85, "#7c6650");
-  block(scene, grove.x, gy + 5, grove.z, 5, 2, 4.5, "#cba76c");
-  block(scene, grove.x - 0.5, gy + 6.4, grove.z, 3.5, 1.3, 3, "#e0bd78");
-  const gltf = await new GLTFLoader().loadAsync("/assets/beacon.glb");
-  gltf.scene.position.set(beacon.x, heightAt(beacon.x, beacon.z), beacon.z);
-  gltf.scene.traverse((o) => {
+  const ship = shipAsset.clone(true);
+  ship.position.set(
+    island.ship.x,
+    heightAt(island.ship.x, island.ship.z),
+    island.ship.z,
+  );
+  ship.traverse((o) => {
     if (o instanceof THREE.Mesh) {
       o.castShadow = true;
       o.receiveShadow = true;
     }
   });
-  scene.add(gltf.scene);
+  scene.add(ship);
+  for (const resource of island.resources) {
+    const y = heightAt(resource.x, resource.z);
+    block(scene, resource.x, y + 0.55, resource.z, 1.8, 1.1, 1.8, "#626e66");
+    for (const [dx, dz, h] of RESOURCE_CRYSTALS) {
+      block(
+        scene,
+        resource.x + dx,
+        y + 0.7 + h / 2,
+        resource.z + dz,
+        0.45,
+        h,
+        0.45,
+        resource.color,
+      );
+    }
+  }
   const avatar = new THREE.Group();
   scene.add(avatar);
-  block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#c7764d");
-  block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#efd3a0");
-  block(avatar, 0, 1.46, 0, 0.62, 0.12, 0.6, "#d9ba77");
-  block(avatar, 0, 1.58, 0, 0.38, 0.16, 0.37, "#d9ba77");
+  block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#d9decb");
+  block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#537d87");
+  block(avatar, 0, 1.25, -0.22, 0.3, 0.13, 0.03, "#8ce6bd");
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, "#495e4d");
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
-  const obstacles = makeObstacles();
+  const obstacles = makeObstacles(island);
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -229,5 +226,27 @@ export async function createScene(canvas: HTMLCanvasElement) {
     glints.position.y = Math.sin(time * 0.4) * 0.015;
     renderer.render(scene, camera);
   }
-  return { render, obstacles };
+  function dispose() {
+    window.removeEventListener("resize", resize);
+    // The shared ship template owns its geometry/materials across world rebuilds.
+    scene.remove(ship);
+    scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry instanceof THREE.BufferGeometry) {
+          object.geometry.dispose();
+        }
+        const mats = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
+        for (const mat of mats) {
+          if (mat instanceof THREE.Material) {
+            mat.dispose();
+          }
+        }
+      }
+    });
+    sun.shadow.map?.dispose();
+    renderer.dispose();
+  }
+  return { render, obstacles, dispose };
 }

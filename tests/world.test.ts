@@ -4,52 +4,121 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   hash,
-  heightAt,
-  biomeAt,
-  makeTrees,
+  createIsland,
+  chooseSeed,
+  normalizeSeed,
+  DEFAULT_ISLAND,
+  DEFAULT_SEED,
   terrainQuads,
-  LANDMARKS,
-  SPAWN,
   WATER,
   SIZE,
 } from "../src/world.ts";
+import { fits, makeObstacles, STANDING_HEIGHT } from "../src/collision.ts";
+import { createGame } from "../src/game.ts";
 
-await test("generation is repeatable, seed-sensitive and bounded", () => {
+function snapshot(seed: string) {
+  const world = createIsland(seed);
+  return {
+    seed: world.seed,
+    version: world.version,
+    heights: Array.from({ length: SIZE * SIZE }, (_, i) =>
+      world.heightAt((i % SIZE) - SIZE / 2, Math.floor(i / SIZE) - SIZE / 2),
+    ),
+    ship: world.ship,
+    terminal: world.terminal,
+    spawn: world.spawn,
+    resources: world.resources,
+    trees: world.trees,
+    state: createGame(world),
+    obstacles: makeObstacles(world),
+  };
+}
+await test("seeds reproduce the full starting world and different seeds vary terrain and placements", () => {
+  for (const seed of ["731", "stillwild", "ø-hop 🌱", "0", "x".repeat(80)]) {
+    assert.deepEqual(snapshot(seed), snapshot(seed));
+  }
+  const a = snapshot("one"),
+    b = snapshot("two");
+  assert.notDeepEqual(a.heights, b.heights);
+  assert.notDeepEqual(a.resources, b.resources);
+  assert.notDeepEqual(a.ship, b.ship);
+  assert.notDeepEqual(a.trees, b.trees);
+});
+await test("seed text is normalized, bounded, case-sensitive and blank input chooses a reusable seed", () => {
+  assert.equal(normalizeSeed("  robot  "), "robot");
+  assert.equal(normalizeSeed("a".repeat(79) + "🌱"), "a".repeat(79) + "\uFFFD");
+  assert.equal(normalizeSeed("a".repeat(81)), "a".repeat(80));
+  assert.equal(
+    chooseSeed("  ", () => "new-island"),
+    "new-island",
+  );
+  assert.equal(
+    chooseSeed("0", () => {
+      throw new Error("Must not generate");
+    }),
+    "0",
+  );
+  assert.equal(
+    chooseSeed("", () => "  "),
+    DEFAULT_SEED,
+  );
+  assert.deepEqual(snapshot(" seed "), snapshot("seed"));
+  assert.notDeepEqual(snapshot("Seed").heights, snapshot("seed").heights);
+  assert.equal(createIsland("").seed, DEFAULT_SEED);
+});
+await test("terrain is finite, grid-based and bounded; hash varies with seed", () => {
+  const { heightAt } = DEFAULT_ISLAND;
   for (let x = -50; x < 50; x++) {
     for (let z = -50; z < 50; z++) {
-      assert.equal(hash(x, z), hash(x, z));
       assert.ok(hash(x, z) >= 0 && hash(x, z) < 1);
       assert.ok(Number.isInteger(heightAt(x, z)));
-      assert.ok(heightAt(x, z) >= 0 && heightAt(x, z) <= 8);
+      assert.ok(heightAt(x, z) >= 0 && heightAt(x, z) <= 6);
     }
   }
   assert.notEqual(hash(2, 3, 731), hash(2, 3, 732));
   assert.equal(heightAt(-SIZE, 0), 0);
   assert.equal(heightAt(SIZE, 0), 0);
+  assert.equal(heightAt(NaN, 0), 0);
   assert.equal(heightAt(0.1, 0.9), heightAt(0.9, 0.1));
 });
-await test("spawn and all landmarks are on dry terrain", () => {
-  for (const p of [SPAWN, ...LANDMARKS]) {
-    assert.ok(heightAt(p.x, p.z) > WATER);
-  }
-});
-await test("biomes distinguish shoreline, grove, and meadow", () => {
-  assert.equal(biomeAt(47, 47), "shore");
-  assert.equal(biomeAt(20, -12), "grove");
-  assert.equal(biomeAt(0, 0), "meadow");
-});
-await test("tree placement is deterministic, on land and clear of landmarks and trail", () => {
-  const trees = makeTrees();
-  assert.ok(trees.length > 20);
-  assert.deepEqual(trees, makeTrees());
-  for (const t of trees) {
-    assert.ok(heightAt(t.x, t.z) >= 3);
-    assert.ok(Math.abs(t.x) >= 3.5);
-    assert.ok(t.height >= 3 && t.height < 5);
-    for (const p of LANDMARKS) {
-      assert.ok(Math.hypot(t.x - p.x, t.z - p.z) > 4);
+await test("200 seeded starts have a clear dry spawn, level ship site, and dry deposits", () => {
+  for (let i = 0; i < 200; i++) {
+    const world = createIsland(String(i));
+    const obstacles = makeObstacles(world);
+    assert.ok(
+      fits(
+        world.spawn,
+        world.heightAt(world.spawn.x, world.spawn.z),
+        STANDING_HEIGHT,
+        world.heightAt,
+        obstacles,
+      ),
+      world.seed,
+    );
+    for (const p of world.resources) {
+      assert.ok(world.heightAt(p.x, p.z) > WATER);
+    }
+    for (let dx = -6; dx <= 5; dx++) {
+      for (let dz = -4; dz <= 4; dz++) {
+        assert.equal(world.heightAt(world.ship.x + dx, world.ship.z + dz), 4);
+      }
+    }
+    for (const tree of world.trees) {
+      assert.ok(world.heightAt(tree.x, tree.z) >= 3);
+      assert.ok(Math.hypot(tree.x - world.ship.x, tree.z - world.ship.z) >= 9);
+      assert.ok(tree.height >= 3 && tree.height < 5);
+      assert.ok(
+        world.resources.every(
+          (p) => Math.hypot(tree.x - p.x, tree.z - p.z) >= 4.5,
+        ),
+      );
     }
   }
+});
+await test("biomes distinguish shoreline, grove and meadow", () => {
+  assert.equal(DEFAULT_ISLAND.biomeAt(47, 47), "shore");
+  assert.equal(DEFAULT_ISLAND.biomeAt(20, -12), "grove");
+  assert.equal(DEFAULT_ISLAND.biomeAt(0, 0), "meadow");
 });
 await test("meshing omits empty and internal faces", () => {
   assert.equal(terrainQuads(() => 0, 0, 0, 2).length, 0);

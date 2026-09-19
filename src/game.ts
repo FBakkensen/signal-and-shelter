@@ -1,5 +1,5 @@
-import type { HeightSampler, Landmark, Point } from "./world.ts";
-import { SPAWN, LANDMARKS, heightAt } from "./world.ts";
+import type { HeightSampler, ResourceDeposit, Point, Island } from "./world.ts";
+import { DEFAULT_ISLAND } from "./world.ts";
 import {
   CROUCH_HEIGHT,
   STANDING_HEIGHT,
@@ -26,6 +26,7 @@ export interface GameState extends Point {
   discovered: string[];
   paused: boolean;
   overview: boolean;
+  linkChecked: boolean;
 }
 export interface Input {
   forward?: boolean;
@@ -43,7 +44,8 @@ export const STEP = 1 / 120;
 export const GRAVITY = 24;
 export const JUMP_SPEED = Math.sqrt(2 * GRAVITY * 1.25);
 export const MAX_PITCH = Math.PI / 2 - 0.01;
-export function createGame(): GameState {
+export function createGame(island: Island = DEFAULT_ISLAND): GameState {
+  const { spawn: SPAWN, heightAt } = island;
   return {
     ...SPAWN,
     y: heightAt(SPAWN.x, SPAWN.z),
@@ -59,9 +61,13 @@ export function createGame(): GameState {
     discovered: [],
     paused: true,
     overview: false,
+    linkChecked: false,
   };
 }
-export function discover(state: GameState, landmarks: readonly Landmark[]) {
+export function discover(
+  state: GameState,
+  landmarks: readonly ResourceDeposit[],
+) {
   return [
     ...new Set([
       ...state.discovered,
@@ -154,8 +160,9 @@ export function advance(
   state: GameState,
   input: Input,
   seconds: number,
-  sample: HeightSampler = heightAt,
+  sample: HeightSampler = DEFAULT_ISLAND.heightAt,
   obstacles: readonly Obstacle[] = [],
+  island: Island = DEFAULT_ISLAND,
 ) {
   if (
     state.paused ||
@@ -180,10 +187,11 @@ export function advance(
     !onIsland(state, sample)
   ) {
     result = {
-      ...createGame(),
+      ...createGame(island),
       paused: false,
       discovered: [...state.discovered],
       distance: state.distance,
+      linkChecked: state.linkChecked,
     };
   }
   if (input.jump) {
@@ -195,7 +203,7 @@ export function advance(
     remaining -= STEP;
   }
   result = { ...result, accumulator: Math.max(0, remaining) };
-  result.discovered = discover(result, LANDMARKS);
+  result.discovered = discover(result, island.resources);
   return result;
 }
 export function look(state: GameState, yaw: number, pitch: number) {
@@ -239,4 +247,20 @@ export function viewPosition(state: GameState) {
       eyeHeight(state),
     z: state.previousPosition.z + (state.z - state.previousPosition.z) * alpha,
   };
+}
+
+export function canUseTerminal(state: GameState, island: Island): boolean {
+  return (
+    !state.overview &&
+    Math.hypot(state.x - island.terminal.x, state.z - island.terminal.z) <=
+      3.2 &&
+    Math.abs(state.y - island.heightAt(island.terminal.x, island.terminal.z)) <
+      1
+  );
+}
+export function checkDataLink(state: GameState, island: Island): GameState {
+  if (!canUseTerminal(state, island)) {
+    return state;
+  }
+  return { ...state, linkChecked: true };
 }

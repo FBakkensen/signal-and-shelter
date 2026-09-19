@@ -1,12 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import type { GameState, Input } from "../src/game.ts";
-import type { HeightSampler } from "../src/world.ts";
+import type { HeightSampler, Island } from "../src/world.ts";
 import type { Obstacle } from "../src/collision.ts";
 import {
   viewPosition,
   advance,
   createGame,
+  canUseTerminal,
+  checkDataLink,
   discover,
   eyeHeight,
   look,
@@ -25,7 +27,8 @@ import {
   STANDING_HEIGHT,
   terrainHeights,
 } from "../src/collision.ts";
-import { heightAt, LANDMARKS, SPAWN } from "../src/world.ts";
+import { DEFAULT_ISLAND, createIsland } from "../src/world.ts";
+const { resources: RESOURCES, spawn: SPAWN } = DEFAULT_ISLAND;
 const flat = () => 3;
 const active = (): GameState => ({
   ...createGame(),
@@ -47,9 +50,10 @@ function move(
   dt = STEP,
   sample: HeightSampler = flat,
   obstacles: readonly Obstacle[] = [],
+  island: Island = DEFAULT_ISLAND,
 ) {
   for (let i = 0; i < frames; i++) {
-    s = advance(s, input, dt, sample, obstacles);
+    s = advance(s, input, dt, sample, obstacles, island);
   }
   return s;
 }
@@ -240,14 +244,14 @@ await test("invalid positions recover to spawn preserving the journal; fresh res
     { velocityY: Infinity },
   ]) {
     const s = advance(
-      { ...active(), ...bad, discovered: ["beacon"] },
+      { ...active(), ...bad, discovered: ["copper"] },
       {},
       STEP,
     );
     near(s.x, SPAWN.x);
     near(s.z, SPAWN.z);
     assert.ok(Number.isFinite(s.y));
-    assert.deepEqual(s.discovered, ["beacon"]);
+    assert.deepEqual(s.discovered, ["copper"]);
   }
   const fresh = createGame();
   near(fresh.velocityY, 0);
@@ -259,15 +263,15 @@ await test("invalid positions recover to spawn preserving the journal; fresh res
   assert.deepEqual(fresh.discovered, []);
 });
 await test("stationary discovery respects four-metre boundary, persists and never duplicates", () => {
-  const p = LANDMARKS[0];
+  const p = RESOURCES[0];
   assert.ok(p);
   const s = { ...active(), x: p.x, z: p.z + 4 };
-  assert.deepEqual(discover(s, LANDMARKS), [p.id]);
-  assert.deepEqual(discover({ ...s, z: p.z + 4.01 }, LANDMARKS), []);
+  assert.deepEqual(discover(s, RESOURCES), [p.id]);
+  assert.deepEqual(discover({ ...s, z: p.z + 4.01 }, RESOURCES), []);
   const found = advance(s, {}, STEP, flat);
   assert.deepEqual(found.discovered, [p.id]);
   assert.deepEqual(s.discovered, []);
-  assert.deepEqual(discover({ ...found, x: 100 }, LANDMARKS), [p.id]);
+  assert.deepEqual(discover({ ...found, x: 100 }, RESOURCES), [p.id]);
 });
 await test("terrain footprint includes diagonal cells and box collision uses vertical bounds", () => {
   assert.deepEqual(
@@ -279,76 +283,87 @@ await test("terrain footprint includes diagonal cells and box collision uses ver
   assert.equal(fits(active(), 4, STANDING_HEIGHT, flat, [box]), false);
   assert.equal(fits(active(), 6, STANDING_HEIGHT, flat, [box]), true);
 });
-await test("all real landmarks are reachable by executing the controller along terrain routes", () => {
-  const obstacles = makeObstacles();
+await test("all seeded resources are reachable by executing the controller along terrain routes", () => {
   // Search cardinal cell routes, then actually traverse every selected route with
   // production walking/jumping. Candidate routes alone do not establish reachability.
-  for (const landmark of LANDMARKS) {
-    const queue: { x: number; z: number; parent: number }[] = [
-      { ...SPAWN, parent: -1 },
-    ];
-    const seen = new Set([`${String(SPAWN.x)},${String(SPAWN.z)}`]);
-    let target = -1;
-    for (let i = 0; i < queue.length; i++) {
-      const p = queue[i];
-      assert.ok(p);
-      if (Math.hypot(p.x - landmark.x, p.z - landmark.z) <= 3) {
-        target = i;
-        break;
-      }
-      for (const [dx, dz] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ] as const) {
-        const next = { x: p.x + dx, z: p.z + dz, parent: i };
-        const key = `${String(next.x)},${String(next.z)}`;
-        if (seen.has(key)) {
-          continue;
+  for (const seed of [
+    "stillwild",
+    "731",
+    "robots",
+    "ø-hop",
+    "a different coast",
+  ]) {
+    const island = createIsland(seed);
+    const { spawn: SPAWN, heightAt, resources: RESOURCES } = island;
+    const obstacles = makeObstacles(island);
+    for (const resource of RESOURCES) {
+      const queue: { x: number; z: number; parent: number }[] = [
+        { ...SPAWN, parent: -1 },
+      ];
+      const seen = new Set([`${String(SPAWN.x)},${String(SPAWN.z)}`]);
+      let target = -1;
+      for (let i = 0; i < queue.length; i++) {
+        const p = queue[i];
+        assert.ok(p);
+        if (Math.hypot(p.x - resource.x, p.z - resource.z) <= 3) {
+          target = i;
+          break;
         }
-        seen.add(key);
-        const y = heightAt(next.x, next.z);
-        if (
-          Math.abs(y - heightAt(p.x, p.z)) <= 1 &&
-          fits(next, y, STANDING_HEIGHT, heightAt, obstacles)
+        for (const [dx, dz] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ] as const) {
+          const next = { x: p.x + dx, z: p.z + dz, parent: i };
+          const key = `${String(next.x)},${String(next.z)}`;
+          if (seen.has(key)) {
+            continue;
+          }
+          seen.add(key);
+          const y = heightAt(next.x, next.z);
+          if (
+            Math.abs(y - heightAt(p.x, p.z)) <= 1 &&
+            fits(next, y, STANDING_HEIGHT, heightAt, obstacles)
+          ) {
+            queue.push(next);
+          }
+        }
+      }
+      assert.ok(target >= 0, `No route to ${resource.id}`);
+      const route = [];
+      while (target >= 0) {
+        const p = queue[target];
+        assert.ok(p);
+        route.unshift(p);
+        target = p.parent;
+      }
+      let s = transition(createGame(island), "capture");
+      for (const point of route.slice(1)) {
+        for (
+          let tick = 0;
+          tick < 300 && Math.hypot(s.x - point.x, s.z - point.z) > 0.035;
+          tick++
         ) {
-          queue.push(next);
+          const yaw = Math.atan2(-(point.x - s.x), -(point.z - s.z));
+          s = look(s, yaw - s.yaw, 0);
+          s = advance(
+            s,
+            { forward: true, jump: heightAt(point.x, point.z) > s.y + 0.01 },
+            STEP,
+            heightAt,
+            obstacles,
+            island,
+          );
         }
-      }
-    }
-    assert.ok(target >= 0, `No route to ${landmark.id}`);
-    const route = [];
-    while (target >= 0) {
-      const p = queue[target];
-      assert.ok(p);
-      route.unshift(p);
-      target = p.parent;
-    }
-    let s = transition(createGame(), "capture");
-    for (const point of route.slice(1)) {
-      for (
-        let tick = 0;
-        tick < 300 && Math.hypot(s.x - point.x, s.z - point.z) > 0.035;
-        tick++
-      ) {
-        const yaw = Math.atan2(-(point.x - s.x), -(point.z - s.z));
-        s = look(s, yaw - s.yaw, 0);
-        s = advance(
-          s,
-          { forward: true, jump: heightAt(point.x, point.z) > s.y + 0.01 },
-          STEP,
-          heightAt,
-          obstacles,
+        assert.ok(
+          Math.hypot(s.x - point.x, s.z - point.z) <= 0.035,
+          `Stuck on route to ${resource.id} at ${String(s.x)},${String(s.z)}`,
         );
+        s = move(s, {}, 100, STEP, heightAt, obstacles, island);
       }
-      assert.ok(
-        Math.hypot(s.x - point.x, s.z - point.z) <= 0.035,
-        `Stuck on route to ${landmark.id} at ${String(s.x)},${String(s.z)}`,
-      );
-      s = move(s, {}, 100, STEP, heightAt, obstacles);
+      assert.ok(s.discovered.includes(resource.id));
     }
-    assert.ok(s.discovered.includes(landmark.id));
   }
 });
 
@@ -361,4 +376,31 @@ await test("camera interpolates fixed-step positions but pauses and resets witho
   near(viewPosition(paused).x, s.x);
   near(viewPosition(transition(paused, "capture")).x, s.x);
   near(viewPosition(createGame()).x, SPAWN.x);
+});
+
+await test("terminal interaction is proximity-limited, remembers connection and resets with the current seed", () => {
+  const island = createIsland("robot-home");
+  const state = createGame(island);
+  assert.equal(canUseTerminal(state, island), true);
+  const checked = checkDataLink(state, island);
+  assert.equal(state.linkChecked, false);
+  assert.equal(checked.linkChecked, true);
+  assert.deepEqual(checkDataLink(checked, island), checked);
+  const far = { ...state, x: 40 };
+  assert.equal(checkDataLink(far, island), far);
+  assert.equal(canUseTerminal({ ...state, y: state.y + 2 }, island), false);
+  assert.equal(canUseTerminal(transition(state, "overview"), island), false);
+  const recovered = advance(
+    { ...checked, x: NaN, paused: false, discovered: ["copper"] },
+    {},
+    STEP,
+    island.heightAt,
+    makeObstacles(island),
+    island,
+  );
+  assert.equal(recovered.x, island.spawn.x);
+  assert.equal(recovered.z, island.spawn.z);
+  assert.equal(recovered.linkChecked, true);
+  assert.deepEqual(recovered.discovered, ["copper"]);
+  assert.deepEqual(createGame(island), state);
 });
