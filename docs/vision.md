@@ -8,18 +8,20 @@ Create an open world in a voxel style, potentially evolving into a game. The pro
 
 Keep project knowledge in separate documents, with a compact AGENTS.md directing future work to the relevant context. Improve that guidance as evidence accumulates.
 
-## First experiment: implemented, awaiting user feedback
+## Current experiment: first-person exploration
 
-Stillwild: a small coastal island with terraced terrain, trees, water, warm lighting, and three discoverable landmarks. Third-person movement and an overview camera are provisional choices for this experiment. Evaluate whether the space looks appealing and movement feels comfortable before expanding its scale.
+Stillwild: a small coastal island with terraced terrain, trees, water, warm lighting, and three discoverable landmarks. The user requested Minecraft-like controls after the initial third-person experiment. First-person exploration, mouse look, jumping, sprinting, and sneaking are now implemented, alongside the island overview. Evaluate the movement feel before expanding the world.
 
 Possible initial audio: procedural footsteps, quiet wind, and interaction sounds when corresponding interactions exist. These are suggestions, not implemented features or a settled sound style.
 
-The experiment runs locally and has been exercised in the integrated browser. See [the validation record](testing/experiment-001.md). The next step is user feedback on the look, camera, and movement; no performance target has been agreed.
+The experiment runs locally and has been exercised in the integrated browser. See [the controls validation record](testing/experiment-002.md). The next step is user feedback on the look, camera, and movement; no performance target has been agreed.
 
 ## Open questions
 
+2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
+
 - Does voxel mean a blocky visual style, editable blocks, or both?
-- Which camera and movement style feel right: first person, third person, or another approach?
+- How should we tune the new first-person sensitivity, speed, jumping, and sneaking?
 - What atmosphere should the world have, and which visual references express it?
 - Which devices and browsers should define our performance target?
 - Should the first terrain be handcrafted, generated, or a mixture?

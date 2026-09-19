@@ -409,3 +409,59 @@ footer {
     margin-bottom: 7px;
   }
 }
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font: 22px monospace;
+  text-shadow: 0 1px 3px #123;
+  pointer-events: none;
+}
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 18px 0;
+  font-size: 13px;
+}
+.setting input {
+  accent-color: #f1ddb0;
+}
+.pause-panel {
+  top: 50%;
+  transform: translateY(-50%);
+  max-height: calc(100dvh - 170px);
+  overflow-y: auto;
+}
+.in-menu .journal {
+  opacity: 0.45;
+  pointer-events: none;
+}
+#return {
+  margin: 22px auto 0;
+  letter-spacing: normal;
+}
+@media (max-width: 1100px) {
+  .edition {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .in-menu .journal {
+    display: none;
+  }
+  .pause-panel {
+    padding: 22px;
+  }
+  .pause-panel h2 {
+    font-size: 27px;
+    margin: 12px 0;
+  }
+  .setting {
+    flex-wrap: wrap;
+  }
+}

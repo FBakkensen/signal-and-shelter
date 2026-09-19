@@ -2,6 +2,18 @@
 
 Record significant choices with date, status, rationale, and consequences. Use proposed, accepted, or superseded; link a replacement when superseding a choice.
 
+## D007 — Try first-person Minecraft-like controls
+
+- Date: 2026-09-19
+- Status: Accepted and implemented; captured-look validation pending
+- Basis: The user requested more Minecraft-like controls, then explicitly requested implementation.
+- Decision: First-person pointer-locked mouse look, WASD, Space jump, Ctrl sprint, and Shift sneak, retaining the island and overview. See [the implementation and validation plan](controls-plan.md).
+- Rationale: The present elevated camera, drag-only horizontal look, and automatic one-block stepping differ substantially from the requested feel.
+- Tradeoff: Jumping requires vertical physics and updated collision/reachability tests; pointer capture requires explicit browser lifecycle handling.
+- Evidence: Automated controller tests and integrated-browser drag-mode traversal reached all three landmarks; see [experiment 002](testing/experiment-002.md).
+- User correction: Removed the unsolicited drag-to-look alternative. The user explicitly requested WASD movement and arrow-key look as a keyboard alternative, with keyboard input always available during captured mouse look as well. Keyboard mode resumes without capture and preserves its selection across pause/overview/reset. Pointer capture still fails in the integrated browser; keyboard mode is usable there.
+- Consequence: Supersedes D006's third-person movement choice. Captured-look feel and lock loss still need a supported-browser playtest. Block editing and survival systems remain outside scope.
+
 ## D001 — Explore before defining a full game
 
 - Date: 2026-09-19
@@ -48,7 +60,7 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D006 — Make the first experiment a bounded third-person island
 
 - Date: 2026-09-19
-- Status: Provisional experiment choice
+- Status: Camera/movement superseded by D007; bounded island and discovery loop retained
 - Decision: Use generated voxel-style terrain, third-person walking, three proximity discoveries, and an overview camera. Use a Blender-authored beacon to validate the asset pipeline.
 - Rationale: Provides a concrete environment and a small reason to explore without committing to a game genre or editable voxel storage.
 - Consequence: Feedback may change the camera, style, terrain representation, or interaction model. Audio is deferred so this experiment focuses on navigation and visuals.

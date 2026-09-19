@@ -1,3 +1,5 @@
+import { makeObstacles } from "../src/collision.ts";
+import { LANDMARKS, heightAt } from "../src/world.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -10,10 +12,29 @@ await test("Blender beacon exports load through the actual Three.js loader at me
   );
   const array = new Uint8Array(buffer).buffer;
   const asset = await new GLTFLoader().parseAsync(array, "");
+  const beacon = LANDMARKS.find((p) => p.id === "beacon");
+  assert.ok(beacon);
+  const colliders = makeObstacles();
   let meshCount = 0;
   asset.scene.traverse((object) => {
     if (object instanceof Mesh) {
       meshCount++;
+      const box = new Box3().setFromObject(object);
+      box.translate(
+        new Vector3(beacon.x, heightAt(beacon.x, beacon.z), beacon.z),
+      );
+      assert.ok(
+        colliders.some(
+          (c) =>
+            Math.abs(c.minX - box.min.x) < 0.001 &&
+            Math.abs(c.maxX - box.max.x) < 0.001 &&
+            Math.abs(c.minY - box.min.y) < 0.001 &&
+            Math.abs(c.maxY - box.max.y) < 0.001 &&
+            Math.abs(c.minZ - box.min.z) < 0.001 &&
+            Math.abs(c.maxZ - box.max.z) < 0.001,
+        ),
+        `Collider must match ${object.name}`,
+      );
     }
   });
   assert.equal(meshCount, 11);

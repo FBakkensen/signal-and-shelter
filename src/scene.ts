@@ -1,4 +1,6 @@
-import type { GameState, Obstacle } from "./game.ts";
+import type { GameState } from "./game.ts";
+import { viewPosition } from "./game.ts";
+import { makeObstacles } from "./collision.ts";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -195,16 +197,7 @@ export async function createScene(canvas: HTMLCanvasElement) {
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, "#495e4d");
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#394c45");
-  const obstacles: Obstacle[] = [
-    ...trees,
-    { x: arch.x - 1.8, z: arch.z, radius: 0.85 },
-    { x: arch.x + 1.8, z: arch.z, radius: 0.85 },
-    { x: grove.x, z: grove.z, radius: 0.6 },
-    { x: beacon.x, z: beacon.z, radius: 1.25 },
-  ];
-  const aim = new THREE.Vector3(),
-    desired = new THREE.Vector3();
-  let initialized = false;
+  const obstacles = makeObstacles();
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -212,32 +205,27 @@ export async function createScene(canvas: HTMLCanvasElement) {
   }
   resize();
   window.addEventListener("resize", resize);
-  function render(
-    state: GameState,
-    dt: number,
-    time: number,
-    started: boolean,
-  ) {
-    const y = heightAt(state.x, state.z);
+  function render(state: GameState, time: number, started: boolean) {
+    const y = state.y;
     avatar.position.set(state.x, y, state.z);
     avatar.rotation.y = state.yaw;
     left.rotation.x = Math.sin(state.distance * 3) * 0.4;
     right.rotation.x = -left.rotation.x;
     const overview = state.overview || !started;
-    if (overview) {
-      desired.set(49, 53, 66);
-      aim.set(0, 2, 0);
-    } else {
-      desired.set(
-        state.x + Math.sin(state.yaw) * 15,
-        y + 12,
-        state.z + Math.cos(state.yaw) * 15,
-      );
-      aim.set(state.x, y + 1.1, state.z);
+    avatar.visible = overview;
+    const fov = overview ? 44 : 70;
+    if (camera.fov !== fov) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
     }
-    camera.position.lerp(desired, initialized ? 1 - Math.exp(-dt * 5) : 1);
-    camera.lookAt(aim);
-    initialized = true;
+    if (overview) {
+      camera.position.set(49, 53, 66);
+      camera.lookAt(0, 2, 0);
+    } else {
+      const view = viewPosition(state);
+      camera.position.set(view.x, view.y, view.z);
+      camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
+    }
     glints.position.y = Math.sin(time * 0.4) * 0.015;
     renderer.render(scene, camera);
   }

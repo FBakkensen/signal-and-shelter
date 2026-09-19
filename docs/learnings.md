@@ -36,3 +36,29 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Evidence: The Blender GLB loaded in the browser and through the automated Three.js loader test. The original Blender scene was restored after asset generation.
 - Limitation: The exporter reported an unavailable optional MeshOptimizer library, but uncompressed GLB export succeeded and requires no such decoder.
 - Limitation: No audio was created, no frame-rate benchmark was measured, and narrow-layout checks do not establish touch playability.
+
+## 2026-09-19 — First-person movement and browser capture
+
+- Evidence: `npm run check` passed after implementing first-person look, fixed-step physics, jumping, sneaking, finite box collisions and session input handling. Production-controller route tests reach all three landmarks, and actual integrated-browser drag-mode traversal also completed the journal. See [experiment 002](testing/experiment-002.md).
+- Evidence: Pointer lock consistently rejected with an internal Chromium `UnknownError` in the integrated browser. Temporary targeted logging isolated a promise rejection rather than a missing API return value. Logging was removed.
+- User correction: Captured mouse look is required. The unsolicited drag-to-look alternative was explicitly rejected and removed. A tool limitation must be reported as a blocker, not used to change the requested interaction. Real captured look and lock-loss handling remain unverified.
+- Evidence: A quick Space press can begin and end between render frames. The input session now queues taps and the controller buffers them for 120 ms; production tests cover a press/release across a frame shorter than one physics step.
+- Evidence: Real keyboard chord sequences and mouse drags completed all three discoveries, reset cleared them, and the narrow pause/HUD layouts were visually inspected. The tools did not expose held-key events, so these are not continuous-control feel or speed measurements.
+- Limitation: Opening a second integrated-browser tab did not induce observable focus loss. Actual blur/visibility behavior still needs a browser-level check despite passing input lifecycle tests.
+
+## 2026-09-19 — Validation scope and annotated resume failure
+
+- User requirement: Use change-driven, risk-based validation. Each check needs a changed behavior, expected result and observable evidence; stop at a concrete tooling limitation. The authoritative workflow is in [testing](testing.md).
+- Evidence: Clicking the annotated Keep wandering button reproduced the capture rejection. The user then explicitly rejected drag-to-look; its UI, event handlers, session mode and tests were removed. The capture failure now shows a plain-language explanation while keeping the Keep wandering label.
+- Limitation: Error reporting is improved, but the underlying embedded-browser capture failure is unresolved. Automated lifecycle tests do not establish working real mouse capture.
+
+## 2026-09-19 — Isolated pointer-lock reproduction
+
+- A temporary standalone diagnostic page invoked requestPointerLock directly from a button click after focusing the target. In the integrated browser, document focus was true, visibility was visible, transient user activation was true, and the document was top-level. The request still rejected with Chromium UnknownError. This rules out the game's pause/resume state machine as a necessary cause of this rejection; it does not identify the host-level cause.
+- Only the Codex integrated browser was connected to the browser tools. Standalone Chrome/Firefox behavior has not been tested. The temporary diagnostic files were removed after this focused check.
+
+## 2026-09-19 — User-approved keyboard controls
+
+- User requirement: WASD movement and arrow-key look must always work during active play, including when the mouse is locked. Provide keyboard play as the alternative to captured mouse look. Drag-to-look remains rejected.
+- Implemented: keyboard play does not request capture; selected mode survives pause/overview/reset. Keep wandering now resumes keyboard play without hitting the embedded-browser capture failure.
+- Evidence: focused real-browser selection → Escape → Keep wandering → Space entered play and showed Airborne. Automated tests cover arrow-only look, WASD movement, simultaneous locked-session keyboard input, clearing inputs and mode retention. Full checks pass. Sustained keyboard-look feel and real captured input remain unverified by browser tools.
