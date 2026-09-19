@@ -1,3 +1,4 @@
+import { createSimulationClock } from "./simulation-clock.ts";
 import { atlasBlend } from "./atlas.ts";
 import { GameApplication } from "./packages/play/index.ts";
 import type { ResumeResult } from "./packages/play/index.ts";
@@ -30,13 +31,14 @@ const app = new GameApplication(
 );
 let world: ReturnType<typeof createScene>,
   shipAsset: Awaited<ReturnType<typeof loadShip>>,
-  previous = 0,
-  toastUntil = 0;
+  toastUntil = 0,
+  presentedDiscoveryCount = 0;
 const camera = new ThirdPersonCamera();
 
 const seedInput = element("seed", HTMLInputElement);
 seedInput.value = new URLSearchParams(location.search).get("seed") ?? "";
 function updateWorldUI() {
+  presentedDiscoveryCount = app.state.discovered.length;
   $("places").replaceChildren(
     ...app.island.resources.map((resource) => {
       const row = document.createElement("li");
@@ -58,7 +60,10 @@ function sync() {
   $("pause-panel").hidden =
     !app.started || !app.state.paused || app.terminalOpen;
 
-  document.body.classList.toggle("in-menu", !app.started || app.state.paused);
+  document.body.classList.toggle(
+    "in-menu",
+    !app.started || app.state.paused || app.terminalOpen
+  );
   $("pause").hidden = !app.started || app.state.paused;
   $("count").textContent =
     `${String(app.state.discovered.length)} / ${String(app.island.resources.length)}`;
@@ -103,7 +108,7 @@ function applyResume(result: ResumeResult) {
   if (result.kind === "ignored") {
     return;
   }
-  previous = performance.now();
+  advanceClock(performance.now());
   sync();
   canvas.focus();
 }
@@ -177,7 +182,13 @@ window.addEventListener("keydown", (e) => {
   const editing =
     e.target instanceof HTMLElement &&
     Boolean(e.target.closest("input,textarea,select,[contenteditable]"));
-  if (e.code === "KeyF" && !editing && !e.repeat && !app.state.paused) {
+  if (
+    e.code === "KeyF" &&
+    !editing &&
+    !e.repeat &&
+    !app.state.paused &&
+    !app.terminalOpen
+  ) {
     e.preventDefault();
     openTerminal();
     return;
@@ -194,12 +205,12 @@ window.addEventListener("keyup", (e) => {
 });
 window.addEventListener("blur", () => {
   if (app.started) {
-    release();
+    app.focusLost();
   }
 });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && app.started) {
-    release();
+    app.focusLost();
   }
 });
 canvas.addEventListener("click", (e) => {
@@ -221,13 +232,15 @@ canvas.addEventListener(
   },
   { passive: false }
 );
+const advanceClock = createSimulationClock((seconds) => {
+  app.tick(seconds);
+});
 function tick(now: number) {
-  const dt = Math.min((now - previous) / 1000, 0.05);
-  previous = now;
-  const before = app.state.discovered.length;
-  app.tick(dt);
+  const before = presentedDiscoveryCount;
+  advanceClock(now);
+  presentedDiscoveryCount = app.state.discovered.length;
   $("interact").hidden = !app.canUseSelection;
-  if (before !== app.state.discovered.length) {
+  if (before < app.state.discovered.length) {
     const place = app.island.resources.find(
       (p) => p.id === app.state.discovered.at(-1)
     );
@@ -243,7 +256,7 @@ function tick(now: number) {
     $("toast").hidden = true;
   }
   $("position").textContent =
-    `${String(Math.floor(app.state.distance))} m wandered · ${app.state.x.toFixed(1)}, ${app.state.z.toFixed(1)} · ${app.state.grounded ? (app.state.crouching ? "Sneaking" : "Grounded") : "Airborne"}`;
+    `${String(Math.floor(app.state.distance))} m wandered · ${app.state.x.toFixed(1)}, ${app.state.z.toFixed(1)} · ${app.state.traversal.phase === "walking" ? "Grounded" : app.state.traversal.phase}`;
   $("biome").textContent = {
     haze: "THE HAZE EDGE",
     vents: "THE VENT FIELDS",
@@ -301,6 +314,12 @@ try {
   startButton.disabled = false;
   startButton.textContent = "Begin your landing →";
   sync();
+  advanceClock(performance.now());
+  window.setInterval(() => {
+    if (document.hidden) {
+      advanceClock(performance.now());
+    }
+  }, 50);
   requestAnimationFrame(tick);
 } catch (error) {
   console.error(error);

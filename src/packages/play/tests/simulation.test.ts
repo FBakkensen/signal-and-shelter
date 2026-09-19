@@ -12,11 +12,8 @@ import { DEFAULT_ISLAND, createIsland } from "../../island/index.ts";
 import { boxCollider } from "../../island/geometry.ts";
 import type { Obstacle } from "../../island/geometry.ts";
 // Physical expectations are specifications, not imports of private implementation constants.
-const WALK_SPEED = 4.3,
-  RUN_SPEED = 5.6,
-  SNEAK_SPEED = 1.3;
+const WALK_SPEED = 4.3;
 const STEP = 1 / 120,
-  RADIUS = 0.3,
   STANDING_HEIGHT = 1.8,
   MAX_PITCH = Math.PI / 2 - 0.01;
 const createGame = (island = DEFAULT_ISLAND) =>
@@ -80,15 +77,10 @@ function move(
   }
   return s;
 }
-await test("walk, forward sprint, sneak priority and backward sprint restriction", () => {
+await test("walking has one speed in every direction", () => {
   near(move(active(), { forward: true }).distance, WALK_SPEED);
-  near(move(active(), { forward: true, run: true }).distance, RUN_SPEED);
-  near(
-    move(active(), { forward: true, run: true, sneak: true }).distance,
-    SNEAK_SPEED
-  );
-  near(move(active(), { back: true, run: true }).distance, WALK_SPEED);
-  near(move(active(), { right: true, run: true }).distance, WALK_SPEED);
+  near(move(active(), { back: true }).distance, WALK_SPEED);
+  near(move(active(), { right: true }).distance, WALK_SPEED);
 });
 await test("diagonals normalize, opposing keys cancel, strafing follows yaw not pitch", () => {
   near(move(active(), { forward: true, right: true }).distance, WALK_SPEED);
@@ -109,124 +101,35 @@ await test("mouse look wraps yaw, clamps pitch and ignores paused or invalid inp
   const s = active();
   assert.equal(look(s, NaN, 0), s);
 });
-await test("jump reaches 1.25 metres, lands, and cannot double jump", () => {
-  let s = advance(active(), { jump: true }, STEP, flat);
-  const airborne = s;
-  near(move(airborne, { jump: true }, 10).y, move(airborne, {}, 10).y);
-  let apex = s.y;
-  for (let i = 0; i < 100; i++) {
-    s = advance(s, {}, STEP, flat);
-    apex = Math.max(apex, s.y);
-  }
-  near(apex, 4.25, 0.001);
-  near(s.y, 3);
-  assert.equal(s.grounded, true);
-  near(s.velocityY, 0);
-  near(s.distance, 0);
-  const repeated = move(active(), { jump: true }, 100);
-  assert.ok(repeated.y > 3);
-  assert.equal(repeated.grounded, false);
-});
-await test("one-block terrace requires a jump; taller walls block and permit sliding", () => {
+await test("eligible terraces jump automatically while excessive rises and drops block", () => {
   const terrace = (x: number) => (x >= 1 ? 4 : 3);
-  const stopped = move(active(), { right: true }, 120, STEP, terrace);
-  assert.ok(stopped.x <= 1 - RADIUS);
-  near(stopped.y, 3);
-  let jumped = move(stopped, { right: true, jump: true }, 50, STEP, terrace);
-  jumped = move(jumped, {}, 100, STEP, terrace);
-  assert.ok(jumped.x > 1.3);
-  near(jumped.y, 4);
-  assert.equal(jumped.grounded, true);
+  const climbed = move(active(), { right: true }, 240, STEP, terrace);
+  assert.ok(climbed.x > 2);
+  near(climbed.y, 4);
   const wall = (x: number) => (x >= 1 ? 6 : 3);
-  const slid = move(
-    active(),
-    { right: true, forward: true, jump: true, run: true },
-    120,
-    STEP,
-    wall
-  );
+  const slid = move(active(), { right: true, forward: true }, 120, STEP, wall);
   assert.ok(slid.x <= 0.7);
-  assert.ok(slid.z < -3);
-});
-await test("walking off a cliff falls and lands; sneak protects edges and corners", () => {
-  const cliff = (x: number, z: number) => (x < 1 && z < 1 ? 6 : 3);
-  const start = { ...active(), y: 6 };
-  const falling = move(start, { right: true }, 35, STEP, cliff);
-  assert.ok(falling.y < 6 && falling.y > 3);
-  assert.equal(falling.grounded, false);
-  const landed = move(falling, {}, 120, STEP, cliff);
-  near(landed.y, 3);
-  const sneaking = move(
-    start,
-    { right: true, back: true, sneak: true },
-    240,
-    STEP,
-    cliff
-  );
-  assert.ok(sneaking.x <= 0.7 && sneaking.z <= 0.7);
-  near(sneaking.y, 6);
-  const leap = move(
-    start,
-    { right: true, sneak: true, jump: true },
-    70,
-    STEP,
-    cliff
-  );
-  assert.ok(leap.x > 1);
-  assert.equal(leap.grounded, false);
-});
-await test("solid boxes stop sprinting, support landing and stop upward head motion", () => {
-  const wall = boxCollider(1.5, 3, 0.5, 0.2, 4, 8);
-  const s = move(
-    active(),
-    { right: true, forward: true, run: true },
+  assert.ok(slid.z < -2);
+  const cliff = (x: number) => (x < 1 ? 6 : 3);
+  const stopped = move(
+    { ...active(), y: 6 },
+    { right: true },
     120,
     STEP,
-    flat,
-    [wall]
+    cliff
   );
-  assert.ok(s.x < 1.11);
-  assert.ok(s.z < -3);
-  const platform = boxCollider(0.5, 3, 0.5, 2, 1, 2);
-  const landed = move(
-    { ...active(), y: 7, grounded: false, velocityY: -30 },
-    {},
-    60,
-    STEP,
-    flat,
-    [platform]
-  );
-  near(landed.y, 4);
-  assert.equal(landed.grounded, true);
-  const ceiling = boxCollider(0.5, 5.1, 0.5, 4, 0.1, 4);
-  let jumping = active();
-  let highest = jumping.y;
-  for (let i = 0; i < 100; i++) {
-    jumping = advance(jumping, { jump: true }, STEP, flat, [ceiling]);
-    highest = Math.max(highest, jumping.y);
-  }
-  assert.ok(highest <= 3.3 + 1e-8);
-});
-await test("crouch lowers eye height, prevents standing inside a ceiling and stands when clear", () => {
-  const ceiling = boxCollider(0.5, 4.6, 0.5, 2, 0.2, 2);
-  let s = advance(active(), { sneak: true }, STEP, flat, [ceiling]);
-  assert.equal(s.crouching, true);
-  near(eyeHeight(s), 1.27);
-  s = advance(s, {}, STEP, flat, [ceiling]);
-  assert.equal(s.crouching, true);
-  s = move(s, { right: true }, 240, STEP, flat, [ceiling]);
-  assert.equal(s.crouching, false);
-  near(eyeHeight(s), 1.62);
+  assert.ok(stopped.x <= 0.7);
+  near(stopped.y, 6);
 });
 await test("airborne movement cannot cross the haze boundary or the finite world boundary", () => {
   const coast = (x: number) => (x >= 1 ? 0 : 3);
-  const s = move(active(), { right: true, jump: true }, 240, STEP, coast);
+  const s = move(active(), { right: true }, 240, STEP, coast);
   assert.ok(s.x <= 0.7);
-  const edge = move({ ...active(), x: 47.5 }, { right: true, jump: true }, 240);
+  const edge = move({ ...active(), x: 47.5 }, { right: true }, 240);
   assert.ok(edge.x <= 47.7);
 });
 await test("fixed-step physics agrees across frame rates; invalid times freeze and stalls are bounded", () => {
-  const input = { forward: true, jump: true, run: true };
+  const input = { forward: true };
   const sixty = move(active(), input, 60, 1 / 60);
   for (const fps of [30, 144, 240]) {
     const s = move(active(), input, fps, 1 / fps);
@@ -244,10 +147,10 @@ await test("fixed-step physics agrees across frame rates; invalid times freeze a
   }
 });
 await test("pause freezes physics and look; capture resumes without catch-up", () => {
-  const airborne = move(active(), { jump: true }, 15);
+  const airborne = move(active(), {}, 15);
   for (const event of ["pause", "return"] as const) {
     const s = transition(airborne, event);
-    assert.equal(advance(s, { jump: true, forward: true }, 50, flat), s);
+    assert.equal(advance(s, { forward: true }, 50, flat), s);
     assert.equal(look(s, 1, 1), s);
     near(s.y, airborne.y);
     near(s.velocityY, airborne.velocityY);
@@ -280,7 +183,7 @@ await test("invalid positions recover to spawn preserving the journal; fresh res
   near(fresh.pitch, 0);
   near(fresh.yaw, 0);
   near(fresh.accumulator, 0);
-  assert.equal(fresh.crouching, false);
+  assert.equal(fresh.traversal.phase, "walking");
   assert.equal(fresh.grounded, true);
   assert.deepEqual(fresh.discovered, []);
 });
@@ -362,14 +265,7 @@ await test("all seeded resources are reachable by executing the controller along
         ) {
           const yaw = Math.atan2(-(point.x - s.x), -(point.z - s.z));
           s = look(s, yaw - s.yaw, 0);
-          s = advance(
-            s,
-            { forward: true, jump: heightAt(point.x, point.z) > s.y + 0.01 },
-            STEP,
-            heightAt,
-            obstacles,
-            island
-          );
+          s = advance(s, { forward: true }, STEP, heightAt, obstacles, island);
         }
         assert.ok(
           Math.hypot(s.x - point.x, s.z - point.z) <= 0.035,
@@ -383,7 +279,7 @@ await test("all seeded resources are reachable by executing the controller along
 });
 
 await test("camera interpolates fixed-step positions but pauses and resets without drift", () => {
-  const s = advance(active(), { right: true, jump: true }, STEP * 1.5, flat);
+  const s = advance(active(), { right: true }, STEP * 1.5, flat);
   const view = viewPosition(s);
   near(view.x, (s.previousPosition.x + s.x) / 2);
   near(view.y, (s.previousPosition.y + s.y) / 2 + eyeHeight(s));
@@ -400,10 +296,9 @@ await test("footprint catches a raised half-cell between old one-metre sample po
     false
   );
   const state = { ...active(), x: 0.1, z: 0.25 };
-  const stopped = move(state, { right: true }, 120, STEP, halfCell);
-  assert.ok(stopped.x <= 0.2 + 1e-7);
-  const jumped = move(stopped, { right: true, jump: true }, 25, STEP, halfCell);
-  assert.ok(jumped.x > 0.5);
+  const jumped = move(state, { right: true }, 240, STEP, halfCell);
+  assert.ok(jumped.x > 1.5);
+  near(jumped.y, 3);
 });
 
 await test("recovery uses the bound island spawn and preserves discoveries and connection progress", () => {
@@ -421,4 +316,16 @@ await test("recovery uses the bound island spawn and preserves discoveries and c
   near(recovered.z, island.spawn.z);
   assert.equal(recovered.linkChecked, true);
   assert.deepEqual(recovered.discovered, ["copper"]);
+});
+
+await test("automatic jump timing and position agree across render frame rates", () => {
+  const terrace = (x: number) => (x >= 1 ? 4 : 3);
+  const reference = move(active(), { right: true }, 60, 1 / 60, terrace);
+  for (const fps of [30, 120, 144, 240]) {
+    const result = move(active(), { right: true }, fps, 1 / fps, terrace);
+    near(result.x, reference.x);
+    near(result.y, reference.y);
+    near(result.velocityY, reference.velocityY);
+    assert.deepEqual(result.traversal, reference.traversal);
+  }
 });

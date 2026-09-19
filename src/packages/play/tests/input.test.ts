@@ -29,25 +29,25 @@ function near(actual: number, expected: number) {
   );
 }
 
-await test("WASD, both modifier sides and arrow look execute through play in both control modes", () => {
+await test("WASD, ignored modifiers and arrow look execute through play in both control modes", () => {
   for (const keyboard of [true, false]) {
     for (const side of ["Left", "Right"]) {
       const app = playing(keyboard);
       app.press("KeyW");
       app.press(`Control${side}`);
       app.tick(0.1);
-      near(app.state.distance, 0.56);
+      near(app.state.distance, 0.43);
       app.press(`Shift${side}`);
       app.tick(0.1);
-      near(app.state.distance, 0.69);
-      assert.equal(app.state.crouching, true);
+      near(app.state.distance, 0.86);
+      assert.equal(app.state.grounded, true);
       app.release("KeyW");
       app.release(`Control${side}`);
       app.release(`Shift${side}`);
       app.press("ArrowLeft");
       app.press("ArrowUp");
       app.tick(0.1);
-      near(app.state.distance, 0.69);
+      near(app.state.distance, 0.86);
       near(app.state.yaw, 0.18);
       near(app.state.pitch, 0.18);
       app.press("ArrowRight");
@@ -77,7 +77,7 @@ await test("WASD, both modifier sides and arrow look execute through play in bot
   }
 });
 
-await test("quick jump survives release and a substep frame; pause clears queued jumps and held inputs", () => {
+await test("Space is ignored across substep frames; pause clears held input", () => {
   for (const keyboard of [true, false]) {
     const app = playing(keyboard);
     app.press("Space");
@@ -85,7 +85,7 @@ await test("quick jump survives release and a substep frame; pause clears queued
     app.tick(1 / 480);
     near(app.state.y, 4);
     app.tick(1 / 120);
-    assert.ok(app.state.y > 4);
+    near(app.state.y, 4);
     app.restart();
     if (!keyboard) {
       app.captureSucceeded();

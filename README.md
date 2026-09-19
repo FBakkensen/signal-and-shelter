@@ -20,19 +20,20 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 | Input                               | Action                                                                 |
 | ----------------------------------- | ---------------------------------------------------------------------- |
 | Begin your landing / Keep wandering | Enter third-person play with a free pointer                            |
-| WASD                                | Move relative to camera heading; humanoid faces movement               |
+| WASD                                | Move relative to camera heading; jump eligible steps automatically     |
 | Q/E or Left/Right arrows            | Orbit                                                                  |
 | Home                                | Restore starting heading without changing zoom                         |
 | Scroll over world                   | Manual zoom; UI scrolling never zooms the world                        |
 | Left-click                          | Select/inspect; empty ground clears selection                          |
 | F / terminal button                 | Use selected ship within reach; with no selection, use nearby terminal |
-| Ctrl / Space / Shift                | Sprint / jump / sneak with existing physics                            |
-| Escape / pause / focus loss         | Pause; explicit resume required                                        |
+| Escape / pause                      | Pause; explicit resume required                                        |
 | Restart / new seed                  | Reset progress and selection; preserve camera heading and zoom         |
 
 No mouse capture or drag-to-look. Scenery fades locally around an obstructed humanoid; it never changes camera zoom or FOV. Scroll out into the active strategic atlas. Both views share an 8 m exploration radius: unexplored terrain and objects stay concealed, explored ground stays visible, and a deposit is identified as soon as any part is revealed. The paused overview and M shortcut are retired. See [atlas validation](docs/testing/active-strategic-atlas.md).
 
-Explore within eight metres to reveal terrain and resource deposits; there is no separate surveying distance. Jump onto half-metre voxel terraces; walking off a ledge causes a fall. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and camera settings last until page reload; a restart clears progress while preserving settings.
+Explore within eight metres to reveal terrain and resource deposits; there is no separate surveying distance. Eligible steps and low obstacles up to 1 m higher or lower trigger automatic jumps, with 0.12 s preparation and recovery. Release or redirect during preparation to cancel takeoff. Excessive drops, gaps and blocked landings stop movement. The haze edge and the island boundary remain impassable, including while jumping. Stepped vents, resource deposits and ship parts have collision. Terrain rendering and footprint collision both use half-metre cells. There is no fall damage. Progress and camera settings last until page reload; a restart clears progress while preserving settings.
+
+The terminal leaves simulation running while disabling gameplay keys. Focus loss clears held input without pausing; only explicit pause freezes play. A shared elapsed-time clock uses animation callbacks while visible and a timer while hidden. Browser/OS suspension beyond two seconds is not replayed. Actual hidden-tab scheduling and sustained automatic traversal still need human browser validation; see [the traversal evidence](docs/testing/automatic-keyboard-traversal.md). Click-to-move is the next increment.
 
 This experiment targets keyboard-and-mouse play. Narrow layouts are supported visually; touch movement, sound, terrain editing, swimming, and saved progress are not implemented.
 
@@ -50,7 +51,7 @@ GitHub Actions runs the same checks for pushes and pull requests.
 
 Gameplay and UI also require real integrated-browser interaction tests, per [the testing workflow](docs/testing.md). See the [deep-module validation](docs/testing/deep-modules.md), [name and UI cleanup check](docs/testing/name-and-ui-2026-09-19.md), [seeded-arrival validation record](docs/testing/experiment-004.md), [arrival history and remaining limitations](docs/testing/experiment-003.md), [controls record](docs/testing/experiment-002.md), and [first experiment record](docs/testing/experiment-001.md).
 
-Implemented deep TypeScript modules live in `src/packages/island` and `src/packages/play`; see the [package guide](src/packages/README.md) for their entry points.
+Implemented deep TypeScript modules live in `src/packages/island`, `src/packages/play` and `src/packages/navigation`; see the [package guide](src/packages/README.md) for their entry points.
 
 ## Project documents
 

@@ -40,7 +40,7 @@ Remove sprint and sneak entirely. Reaching the requested destination within a sm
 
 The user accepted the navigation prototype on 2026-09-19: one shared maximum elevation change of 1 m for jumping up and down, with timing A (0.12 s setup and 0.12 s recovery). Custom scenarios must reuse the game’s movement, collision, input and camera logic. Steering strength, arrival tolerance and feedback can be refined during production integration. Robot gameplay remains outside this effort. See [accepted prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md). These values are accepted design, implemented only in the archived prototype so far.
 
-These are accepted upcoming requirements, not implemented behavior. They supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Production still implements those earlier behaviors; background execution has not yet been validated.
+These accepted requirements supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Route-related behavior is still pending. The automatic-keyboard-traversal branch implements the first production increment; background execution has not yet been validated in an actually hidden browser tab.
 
 2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
 
@@ -121,3 +121,7 @@ Upgrades require movement to be interrupted first; subsequent routing uses the u
 ### Navigation design checkpoint accepted — 2026-09-19
 
 The user accepted the [consolidated navigation design](navigation-design.md), its acceptance criteria and two sequential playable production increments: automatic keyboard traversal with shared individual capabilities and lifecycle behavior, followed by time-aware click-to-move using the same movement logic. Both require production-code tests and integrated-browser validation. The prototype remains archived; production implementation is pending.
+
+### Automatic keyboard traversal implementation — 2026-09-19
+
+The first accepted increment is implemented on `codex/automatic-keyboard-traversal`: shared individual movement capabilities, automatic traversal, explicit pause and a live terminal. Click-to-move remains pending. Automated checks pass; sustained human traversal and real hidden-tab scheduling remain unverified. See [the evidence](testing/automatic-keyboard-traversal.md).

@@ -8,11 +8,6 @@ export const MOVEMENT_KEYS = new Set([
   "ArrowDown",
   "ArrowLeft",
   "ArrowRight",
-  "ControlLeft",
-  "ControlRight",
-  "ShiftLeft",
-  "ShiftRight",
-  "Space",
 ]);
 export function inputFromKeys(keys: ReadonlySet<string>): Input {
   return {
@@ -20,9 +15,6 @@ export function inputFromKeys(keys: ReadonlySet<string>): Input {
     back: keys.has("KeyS"),
     left: keys.has("KeyA"),
     right: keys.has("KeyD"),
-    run: keys.has("ControlLeft") || keys.has("ControlRight"),
-    sneak: keys.has("ShiftLeft") || keys.has("ShiftRight"),
-    jump: keys.has("Space"),
   };
 }
 export function mouseLook(

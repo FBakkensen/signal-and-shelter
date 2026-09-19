@@ -66,11 +66,11 @@ module.exports = {
       to: { path: `^${R}/[^/]+/tests/` },
     },
     {
-      name: "island-and-play-are-renderer-independent",
+      name: "simulation-packages-are-renderer-independent",
       comment:
-        "Island and play logic must run without importing a rendering adapter or Three.js.",
+        "Island, navigation and play logic must run without importing a rendering adapter or Three.js.",
       severity: "error",
-      from: { path: `^${R}/(island|play)/` },
+      from: { path: `^${R}/(island|navigation|play)/` },
       to: { path: "^(three|node_modules/three|src/(scene|resources)\\.ts)" },
     },
     {

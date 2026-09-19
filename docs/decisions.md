@@ -144,3 +144,13 @@ Record significant choices with date, status, rationale, and consequences. Use p
 The user rejected inconsistent knowledge across close and strategic views and explicitly removed the separate 4 m surveying rule. The confirmed interview specifies one 8 m horizontal reveal radius, permanent visible/active explored areas, obstacle-independent reveal, and concealment of unexplored terrain and objects at every zoom and in the menu. Partly explored objects stay partly revealed; any exposed deposit part identifies its material. Starts/resets grant only the starting area, with no ship or island-outline exception. Physical use distances remain unchanged.
 
 Implemented with one simulation-owned half-metre coverage grid shared by discovery, CPU atlas clipping, GPU surface/shadow clipping and picking. This trades a mathematically smooth circle for a stepped boundary matching the voxel scale; the 2 m chart grid does not determine exploration. The previous atlas-only concealment and 4 m identity gate are superseded. See [accepted design](third-person-design.md) and [evidence](testing/active-strategic-atlas.md).
+
+## D015 — Shared automatic traversal with individual capabilities
+
+- Date: 2026-09-19
+- Status: Accepted design; first production increment implemented on `codex/automatic-keyboard-traversal`, browser traversal acceptance pending.
+- Basis: The accepted [navigation checkpoint](navigation-design.md) and its linked decisions.
+- Decision: Navigation owns supported surfaces, local traversal and movement physics; play owns camera-relative input, exploration and lifecycle. Profiles carry individual body dimensions, speed, jump availability, elevation limit and setup/recovery durations. Planning in the next increment must reuse this movement implementation.
+- Tradeoff: Fully supported landing footprints and prevalidated arcs conservatively reject narrow footholds and clearance-constrained paths. Lateral airborne steering is allowed only when the remaining arc and landing remain feasible. Actual feel still needs human playtesting.
+- Lifecycle: Explicit pause freezes movement; the terminal leaves it running with gameplay keys disabled. Focus loss clears held keys without pausing. A shared clock and hidden-page timer reduce dependence on render scheduling, with a two-second cap after browser/OS suspension; actual hidden-tab behavior remains unverified.
+- Evidence: [Automatic keyboard traversal validation](testing/automatic-keyboard-traversal.md). No prototype branch was merged.

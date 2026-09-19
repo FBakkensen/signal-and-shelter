@@ -2,17 +2,22 @@ import type { Island, Point } from "../island/index.ts";
 import { DEFAULT_ISLAND } from "../island/index.ts";
 import { advance, createGame } from "./lib/game.ts";
 import type { GameState, Input } from "./lib/game.ts";
-import { fits, STANDING_HEIGHT } from "./lib/collision.ts";
+import { createMovement, HUMANOID_CAPABILITIES } from "../navigation/index.ts";
+import type { MovementCapabilities } from "../navigation/index.ts";
 export type { GameState, Input } from "./lib/game.ts";
 export { look, transition, viewPosition } from "./lib/game.ts";
 
 // Headless movement and traversal seam: terrain, solids and recovery belong to one island.
-export function createSimulation(island: Island = DEFAULT_ISLAND) {
+export function createSimulation(
+  island: Island = DEFAULT_ISLAND,
+  capabilities: MovementCapabilities = HUMANOID_CAPABILITIES
+) {
+  const movement = createMovement(island, capabilities);
   return {
     createState: () => createGame(island),
     advance: (state: GameState, input: Input, seconds: number) =>
-      advance(state, input, seconds, island.heightAt, island.solids, island),
+      advance(state, input, seconds, island, movement),
     canStandAt: (point: Point, y: number) =>
-      fits(point, y, STANDING_HEIGHT, island.heightAt, island.solids),
+      movement.supported({ ...point, y }),
   };
 }

@@ -4,7 +4,7 @@ import { Box3, Mesh, MeshStandardMaterial } from "three";
 import { createResourceGroup } from "../src/resources.ts";
 import { resourceParts } from "../src/packages/island/geometry.ts";
 import { createIsland } from "../src/packages/island/index.ts";
-import { createSimulation } from "../src/packages/play/simulation.ts";
+import { createMovement } from "../src/packages/navigation/index.ts";
 
 await test("actual resource render meshes match collision and retain bounds and individual colors", () => {
   const island = createIsland("resource-bounds");
@@ -42,9 +42,12 @@ await test("actual resource render meshes match collision and retain bounds and 
         assert.equal(`#${child.material.color.getHexString()}`, resource.color);
       }
     }
-    assert.equal(createSimulation(island).canStandAt(resource, floor), false);
     assert.equal(
-      createSimulation(island).canStandAt(resource, floor + 2),
+      createMovement(island).canOccupy({ ...resource, y: floor }),
+      false
+    );
+    assert.equal(
+      createMovement(island).canOccupy({ ...resource, y: floor + 2 }),
       true
     );
   }

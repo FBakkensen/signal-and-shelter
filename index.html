@@ -14,7 +14,7 @@
     <canvas
       id="world"
       tabindex="0"
-      aria-label="Signal &amp; Shelter exploration. Q/E or arrow keys to orbit, scroll to zoom, W A S D to walk, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
+      aria-label="Signal &amp; Shelter exploration. Q/E or arrow keys to orbit, scroll to zoom, W A S D to walk, automatic jumping, Escape to pause."
     ></canvas>
     <canvas id="atlas" aria-hidden="true"></canvas>
     <header>
@@ -112,8 +112,7 @@
         </div>
       </div>
       <div class="controls">
-        <span><kbd>W A S D</kbd> walk</span><span><kbd>CTRL</kbd> sprint</span
-        ><span><kbd>SPACE</kbd> jump</span><span><kbd>SHIFT</kbd> sneak</span
+        <span><kbd>W A S D</kbd> walk · auto-jump</span
         ><span id="look-help">Q/E orbit · Scroll zoom · Home heading</span
         ><span><kbd>ESC</kbd> pause</span>
       </div>

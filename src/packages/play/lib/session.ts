@@ -21,12 +21,13 @@ export class ControlSession {
     return keyboardLook(this.active ? this.keys : new Set<string>(), seconds);
   }
   private readonly keys = new Set<string>();
-  private jumpQueued = false;
+  clearInput() {
+    this.keys.clear();
+  }
   pause() {
     this.mode = "paused";
     this.generation++;
     this.keys.clear();
-    this.jumpQueued = false;
   }
   requestCapture() {
     this.keyboardPreferred = false;
@@ -55,9 +56,6 @@ export class ControlSession {
     if (!this.active || !MOVEMENT_KEYS.has(code)) {
       return false;
     }
-    if (code === "Space" && !this.keys.has(code)) {
-      this.jumpQueued = true;
-    }
     this.keys.add(code);
     return true;
   }
@@ -66,8 +64,6 @@ export class ControlSession {
   }
   readInput() {
     const input = inputFromKeys(this.keys);
-    input.jump = Boolean(input.jump) || this.jumpQueued;
-    this.jumpQueued = false;
     return input;
   }
 }

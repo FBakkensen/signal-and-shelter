@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { GameApplication } from "../index.ts";
 import { createIsland } from "../../island/index.ts";
 
-await test("terminal background clicks cannot resume physics or request capture in either control mode", () => {
+await test("terminal runs simulation but blocks gameplay input and capture in either control mode", () => {
   for (const keyboard of [true, false]) {
     const island = createIsland("starter-island");
     const app = new GameApplication(island);
@@ -18,7 +18,8 @@ await test("terminal background clicks cannot resume physics or request capture 
     assert.equal(app.resume().kind, "ignored");
     assert.equal(app.press("Space"), false);
     app.tick(0.1);
-    assert.equal(app.state, paused);
+    assert.equal(app.state.paused, false);
+    assert.equal(app.state.distance, paused.distance);
     assert.equal(app.terminalOpen, true);
     assert.equal(app.controlMode, "paused");
     assert.equal(app.captureSucceeded(), false);
@@ -33,7 +34,7 @@ await test("terminal background clicks cannot resume physics or request capture 
     }
     app.press("Space");
     app.tick(0.1);
-    assert.ok(app.state.y > paused.y);
+    assert.equal(app.state.y, paused.y);
   }
 });
 
@@ -102,7 +103,7 @@ await test("expected capture loss preserves a terminal; only explicit return req
   app.tick(0.05);
   assert.equal(app.state.distance, beforeInputCheck.distance);
   assert.equal(app.captureFailed(), false);
-  assert.equal(app.state, terminal);
+  assert.equal(app.state.paused, terminal.paused);
   const returned = app.resume("terminal");
   assert.equal(returned.kind, "capture");
   assert.equal(app.state.paused, true);

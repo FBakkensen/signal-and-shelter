@@ -206,3 +206,10 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Generalized lesson: preserve implementation fidelity where it affects the experiment’s conclusion, while simplifying unrelated work. Custom scenarios and fixtures help isolate a question; separately recreating established behavior can invalidate the answer. The prototype guidance now requires a short question/foundations/controlled-differences plan and gives movement, UI, domain-logic and integration examples. Production readiness is not the completion criterion.
 - An earlier return to the design branch happened before the user had tested the build. The workflow now explicitly gates return on user acceptance/finish, preserves a clean committed branch boundary, and records durable decisions on the return branch. No prototype source was merged or copied into design.
 - Evidence: [archived validation](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md).
+
+## 2026-09-19 — Automatic traversal and browser timing limits
+
+- Implemented shared capability-based movement and automatic keyboard traversal in the normal game. Production tests exercise setup/recovery, supported heights, up/down limits, clearance, gaps, steering, differing bodies and no-jump actors, plus lifecycle and seeded resource routes. See [the validation record](testing/automatic-keyboard-traversal.md).
+- Browser testing caught a stale clock variable during start and a journal overlapping the now-live terminal. Both were corrected and the relevant flow rechecked.
+- The integrated browser exposes brief presses but no held-key operation. Sustained traversal, jump timing/feel and airborne lifecycle interactions cannot be established with those presses. No internal state mutation or synthetic gameplay event was substituted.
+- Opening another integrated-browser tab left the game document `visible` and `hidden=false`. This cannot validate hidden-tab scheduling. The elapsed-time clock tests validate delayed callbacks deterministically, not browser scheduling.

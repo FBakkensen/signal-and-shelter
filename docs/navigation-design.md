@@ -1,6 +1,6 @@
 # Navigation design checkpoint
 
-Status: accepted by the user, 2026-09-19, including both sequential playable increments and their acceptance criteria. Production implementation remains pending.
+Status: accepted by the user, 2026-09-19, including both sequential playable increments and their acceptance criteria. The first production increment is implemented on `codex/automatic-keyboard-traversal`, with [browser playtest limitations](testing/automatic-keyboard-traversal.md) still open. The second increment remains pending.
 
 ## Decision sources
 

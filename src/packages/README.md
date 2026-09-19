@@ -16,6 +16,7 @@ src/packages/<name>/
 
 ## Implemented modules
 
+- `navigation/index.ts`: world-bound movement with individual capabilities, supported surfaces, clearance, automatic traversal and fixed-step execution. No camera, input mapping, exploration or robot job policy.
 - `island/index.ts`: seeded island generation with matching `solids`.
 - `island/geometry.ts`: pure render/authoring descriptions and terrain geometry.
 - `play/index.ts`: browser-facing play actions and read-only observations.

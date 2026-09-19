@@ -22,7 +22,7 @@ export type PlayState = Readonly<
     | "pitch"
     | "distance"
     | "grounded"
-    | "crouching"
+    | "traversal"
     | "paused"
     | "linkChecked"
   >
@@ -64,7 +64,7 @@ export class GameApplication {
     return this.selected;
   }
   select(id: string | null) {
-    if (!this.started || this.state.paused) {
+    if (!this.started || this.state.paused || this.terminal) {
       return;
     }
     this.selected =
@@ -104,6 +104,7 @@ export class GameApplication {
     return (
       this.started &&
       !this.currentState.paused &&
+      !this.terminal &&
       canUseTerminal(this.currentState, this.island)
     );
   }
@@ -114,6 +115,15 @@ export class GameApplication {
     return viewPosition(this.currentState);
   }
   press(code: string) {
+    if (this.terminal) {
+      return false;
+    }
+    if (
+      this.session.active &&
+      ["KeyW", "KeyA", "KeyS", "KeyD"].includes(code)
+    ) {
+      this.currentState = { ...this.currentState, preservePreparation: false };
+    }
     if (this.thirdPerson) {
       if (
         this.session.active &&
@@ -134,6 +144,9 @@ export class GameApplication {
     return this.session.press(code);
   }
   release(code: string) {
+    if (!this.state.paused && ["KeyW", "KeyA", "KeyS", "KeyD"].includes(code)) {
+      this.currentState = { ...this.currentState, preservePreparation: false };
+    }
     if (this.thirdPerson) {
       this.orbitSources.delete(code);
       const mapped =
@@ -161,6 +174,10 @@ export class GameApplication {
     this.look(delta.yaw, delta.pitch);
   }
 
+  focusLost() {
+    this.orbitSources.clear();
+    this.session.clearInput();
+  }
   pause() {
     this.orbitSources.clear();
     this.terminal = false;
@@ -243,7 +260,8 @@ export class GameApplication {
     ) {
       return false;
     }
-    this.pause();
+    this.orbitSources.clear();
+    this.session.pause();
     this.terminal = true;
     return true;
   }

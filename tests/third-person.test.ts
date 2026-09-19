@@ -169,6 +169,6 @@ void test("avatar ground and camera eye share interpolation through fractional f
   app.press("ShiftLeft");
   app.tick(1.5 / 120);
   const crouched = app.renderPose;
-  assert.equal(app.state.crouching, true);
-  assert.ok(Math.abs(crouched.eye.y - crouched.ground.y - 1.27) < 1e-9);
+  assert.equal(app.state.grounded, true);
+  assert.ok(Math.abs(crouched.eye.y - crouched.ground.y - 1.62) < 1e-9);
 });
