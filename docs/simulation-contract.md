@@ -1,6 +1,6 @@
 # Shared simulation contract
 
-Status: consolidated proposal for [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27), 2026-09-19. Individual user agreements below are confirmed; the proposed authority/command/migration details await consolidated approval. This document does not authorize implementation or claim current compliance. The issue's eventual resolution is the canonical decision.
+Status: accepted by the user, 2026-09-19, through [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27). The requirements, authority/command semantics and migration scope are accepted. Detailed design and migration gates remain open; this does not authorize production implementation or claim current compliance. The issue resolution is the canonical decision.
 
 ## Confirmed requirements
 
@@ -14,7 +14,7 @@ Status: consolidated proposal for [Agree the simulation contract and migration b
 - Restarting or changing islands begins a new reproducible run. Each run records versions, initialization inputs and ordered gameplay commands; failed-run diagnostics remain available. Storage/retention details are not settled here.
 - The scale target is 1,000 simultaneously active simulated robots at normal game speed on documented reference hardware, including route requests, movement, jumps and congestion. Simulated population and visible population are independent workload dimensions. Visibility must not change gameplay outcomes. Slowdown is an overload fallback, not a passing benchmark.
 
-## Proposed authority and command contract
+## Accepted authority and command contract
 
 The simulation owns every value that can affect future gameplay: island gameplay geometry, actors and capabilities, movement progress, occupancy, exploration, discoveries, interaction results, and any future gameplay counters or random state. Derived indexes/caches may be omitted from authoritative snapshots only if rebuilding them cannot change outcomes or the tick on which gameplay results become available.
 
@@ -46,7 +46,7 @@ Read-only inventory against production baseline `3929c5b`; no new tests or perfo
 
 No robot jobs, gathering, resource transfers, saves, runtime gameplay PRNG, or replay system currently exist. They are future consumers or new infrastructure, not existing implementations to rewrite. Keep visual assets and accepted camera behavior outside the migration unless a demonstrated dependency requires a specific change.
 
-## Proposed gates and ownership
+## Accepted gates and ownership
 
 This ticket approves the project-wide contract and migration scope only. It does not select units, tick rate, physics algorithms, spatial indexes, scheduling implementation, support dimensions, runtime matrix or hardware budgets.
 
