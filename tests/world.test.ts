@@ -34,7 +34,13 @@ function snapshot(seed: string) {
   };
 }
 await test("seeds reproduce the full starting world and different seeds vary terrain and placements", () => {
-  for (const seed of ["731", "stillwild", "ø-hop 🌱", "0", "x".repeat(80)]) {
+  for (const seed of [
+    "731",
+    "signal-and-shelter",
+    "ø-hop 🌱",
+    "0",
+    "x".repeat(80),
+  ]) {
     assert.deepEqual(snapshot(seed), snapshot(seed));
   }
   const a = snapshot("one"),
@@ -45,6 +51,7 @@ await test("seeds reproduce the full starting world and different seeds vary ter
   assert.notDeepEqual(a.vents, b.vents);
 });
 await test("seed text is normalized, bounded, case-sensitive and blank input chooses a reusable seed", () => {
+  assert.equal(DEFAULT_SEED, "signal-and-shelter");
   assert.equal(normalizeSeed("  robot  "), "robot");
   assert.equal(normalizeSeed("a".repeat(79) + "🌱"), "a".repeat(79) + "\uFFFD");
   assert.equal(normalizeSeed("a".repeat(81)), "a".repeat(80));

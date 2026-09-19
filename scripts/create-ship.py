@@ -1,4 +1,4 @@
-"""Run in Blender after exporting SHIP_PARTS to /tmp/stillwild-ship-parts.json.
+"""Run in Blender after exporting SHIP_PARTS to /tmp/signal-and-shelter-ship-parts.json.
 See docs/architecture.md for the generation command. Preserves the active scene.
 """
 import bpy
@@ -6,9 +6,9 @@ import json
 from pathlib import Path
 
 root = Path('/home/fbakkensen/Code/MyFirstGame')
-parts = json.loads(Path('/tmp/stillwild-ship-parts.json').read_text())
+parts = json.loads(Path('/tmp/signal-and-shelter-ship-parts.json').read_text())
 previous_scene = bpy.context.window.scene
-scene = bpy.data.scenes.new('Stillwild_Ship_Asset')
+scene = bpy.data.scenes.new('Signal_And_Shelter_Ship_Asset')
 bpy.context.window.scene = scene
 try:
     for part in parts:

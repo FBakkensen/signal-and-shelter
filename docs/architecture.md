@@ -1,6 +1,6 @@
 # Architecture
 
-Last updated: 2026-09-19. Experiment 004 Ember Fold arrival is implemented; captured-look and full browser traversal validation remain incomplete.
+Last updated: 2026-09-19. Experiment 004's seeded island arrival is implemented; captured-look and full browser traversal validation remain incomplete.
 
 ## Runtime and tooling
 
@@ -17,14 +17,14 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | `src/blocks.ts` | Common typed block-part definition |
 | `src/resources.ts` | Shared resource parts and their production mesh factory |
 | `src/ship.ts` | Shared ship block dimensions, colors, and positions for collision and Blender authoring |
-| `src/ember.ts` | Ember palette and block dimensions shared by vent rendering and collision |
+| `src/world-visuals.ts` | World palette and block dimensions shared by vent rendering and collision |
 | `src/scene.ts` | Three.js rendering, geometry, lighting, authored asset loading, avatar and camera |
 | `src/main.ts` | Seed form/URL, world replacement, DOM/input adapters, terminal panel, journal, and animation loop |
 | `tests/` | Production-logic tests and a real GLTFLoader asset integration test |
 
 ## World and movement
 
-`createIsland(seed)` returns the world definition used by rendering, collisions, discovery and player initialization. Seeds are case-sensitive text, trimmed and limited to 80 UTF-16 code units with lone surrogates replaced so URL round trips remain stable. Blank UI input generates a seed with `crypto.randomUUID`; world generation itself has no runtime randomness. Generator version 2 combines a text hash with coordinate hashing. The default menu preview uses `stillwild` unless the URL supplies a seed.
+`createIsland(seed)` returns the world definition used by rendering, collisions, discovery and player initialization. Seeds are case-sensitive text, trimmed and limited to 80 UTF-16 code units with lone surrogates replaced so URL round trips remain stable. Blank UI input generates a seed with `crypto.randomUUID`; world generation itself has no runtime randomness. Generator version 2 combines a text hash with coordinate hashing. The default menu preview uses `signal-and-shelter` unless the URL supplies a seed.
 
 The bounded height field spans 96 by 96 metres, sampled on a half-metre grid (192 by 192 cells). Seeded coast size, shape and outer hills surround a connected level starter shelf. Ship and resource placements vary within safe areas; vents stay clear of the ship and deposits. This deliberately trades interior terrain variety for a forgiving, reachable opening. Terrain is voxel-style height-field geometry, not editable block storage. Thirty-six 16-by-16 chunks contain top and exposed side quads sampled across chunk boundaries. Vent placements and suspended haze grains also use the seed. Terrain top and side quads have axis-aligned normals; the geometry preserves voxels.
 
@@ -56,7 +56,7 @@ The stranded ship was authored through Blender MCP in a new isolated scene. The 
 To regenerate, first inspect the connected Blender scene. Export the TypeScript block definitions, then execute the Python recipe through Blender MCP:
 
 ```sh
-node --import tsx --input-type=module -e 'import { SHIP_PARTS } from "./src/ship.ts"; import { writeFileSync } from "node:fs"; writeFileSync("/tmp/stillwild-ship-parts.json", JSON.stringify(SHIP_PARTS))'
+node --import tsx --input-type=module -e 'import { SHIP_PARTS } from "./src/ship.ts"; import { writeFileSync } from "node:fs"; writeFileSync("/tmp/signal-and-shelter-ship-parts.json", JSON.stringify(SHIP_PARTS))'
 ```
 
 The recipe converts the Y-up definitions to Blender Z-up, exports to glTF Y-up, and saves the editable scene separately. Conventions: metre scale, base at zero, applied object scales, named parts, no exported camera/light, and no textures or compression extensions. The asset test uses the actual Three.js GLTFLoader and compares all mesh bounds to collision data. Runtime does not require Blender.
@@ -67,10 +67,10 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 
 Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 634 kB uncompressed JavaScript bundle, which includes Three.js.
 
-## Ember Fold presentation — 2026-09-19
+## Current presentation — 2026-09-19
 
-The user selected study B. `scene.ts` applies the `EMBER` palette to ceramic terrain, stepped vents, suspended grains, distant voxel shelves and a voxel satellite. The opaque haze plane marks the unwalkable boundary; it has no liquid behavior. Seeded copper/iron/silica discoveries retain their mechanics with new display names. The existing authored ship is retained, including its working communications light and terminal geometry.
+The user selected the warm console interface from study B. `scene.ts` applies the world palette to ceramic terrain, stepped vents, suspended grains, distant voxel shelves and a voxel satellite. The opaque haze plane marks the unwalkable boundary; it has no liquid behavior. Seeded copper/iron/silica discoveries retain their mechanics with new display names. The existing authored ship is retained, including its working communications light and terminal geometry.
 
 `style.css` implements the warm console layout for arrival, pause and the terminal; the resource journal is compact during play and hidden in menus. All existing IDs and session controls remain connected to real game state. There are no prototype statistics or simulation claims in the playable UI.
 
-The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-prototypes`, then removed from the implementation branch `codex/ember-fold-world`. `index.html` again loads `main.ts` directly. The prototype URL parameter no longer changes the game. See [experiment 004](testing/experiment-004.md) for validation and remaining limitations.
+The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-prototypes`, then removed from the playable implementation. `index.html` again loads `main.ts` directly. The prototype URL parameter no longer changes the game. See [experiment 004](testing/experiment-004.md) for validation and remaining limitations.

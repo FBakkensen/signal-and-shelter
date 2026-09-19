@@ -1,5 +1,5 @@
 import { createResourceGroup } from "./resources.ts";
-import { EMBER, ventParts } from "./ember.ts";
+import { WORLD_PALETTE, ventParts } from "./world-visuals.ts";
 import type { GameState } from "./game.ts";
 import { viewPosition } from "./game.ts";
 import { makeObstacles } from "./collision.ts";
@@ -24,10 +24,10 @@ export function createScene(
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(EMBER.sky);
-  scene.fog = new THREE.Fog(EMBER.sky, 65, 160);
+  scene.background = new THREE.Color(WORLD_PALETTE.sky);
+  scene.fog = new THREE.Fog(WORLD_PALETTE.sky, 65, 160);
   const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 300);
-  scene.add(new THREE.HemisphereLight("#f9e9e4", EMBER.strata, 2.8));
+  scene.add(new THREE.HemisphereLight("#f9e9e4", WORLD_PALETTE.strata, 2.8));
   const sun = new THREE.DirectionalLight("#ffe1b0", 3.3);
   sun.position.set(-25, 55, 25);
   sun.castShadow = true;
@@ -79,7 +79,11 @@ export function createScene(
       for (const quad of terrainQuads(heightAt, cx, cz, 16, CELL_SIZE)) {
         const h = heightAt(quad.x, quad.z);
         const color = new THREE.Color(
-          quad.top ? (h <= 2 ? EMBER.rim : EMBER.crust) : EMBER.strata,
+          quad.top
+            ? h <= 2
+              ? WORLD_PALETTE.rim
+              : WORLD_PALETTE.crust
+            : WORLD_PALETTE.strata,
         );
         color.multiplyScalar(0.96 + hash(quad.x * 2, quad.z * 2) * 0.08);
         for (const i of [0, 1, 2, 0, 2, 3] as const) {
@@ -102,7 +106,7 @@ export function createScene(
   }
   const haze = new THREE.Mesh(
     new THREE.PlaneGeometry(500, 500),
-    new THREE.MeshStandardMaterial({ color: EMBER.sky, roughness: 1 }),
+    new THREE.MeshStandardMaterial({ color: WORLD_PALETTE.sky, roughness: 1 }),
   );
   haze.rotation.x = -Math.PI / 2;
   haze.position.y = HAZE_LEVEL;
@@ -124,7 +128,7 @@ export function createScene(
       0.09,
       0.09,
       0.09,
-      EMBER.light,
+      WORLD_PALETTE.light,
     );
   }
   for (const vent of island.vents) {
@@ -147,7 +151,7 @@ export function createScene(
         width,
         1.5,
         width * 0.75,
-        EMBER.strata,
+        WORLD_PALETTE.strata,
       );
     }
   }
@@ -182,7 +186,7 @@ export function createScene(
   block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#ece7d7");
   block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#424c62");
   block(avatar, 0, 1.25, -0.22, 0.3, 0.13, 0.03, "#8ce6bd");
-  block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, EMBER.strata);
+  block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const obstacles = makeObstacles(island);

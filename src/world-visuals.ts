@@ -1,6 +1,6 @@
 import type { BlockPart } from "./blocks.ts";
 
-export const EMBER = {
+export const WORLD_PALETTE = {
   sky: "#ad827e",
   crust: "#c58260",
   rim: "#e9af81",
@@ -22,7 +22,7 @@ export function ventParts(height: number): BlockPart[] {
       name: `Vent_tier_${String(layer)}`,
       position: [0, layer * 0.5 + 0.25, 0],
       size: [width, 0.5, width],
-      color: EMBER.vent,
+      color: WORLD_PALETTE.vent,
     });
   }
   const top = tiers * 0.5;
@@ -31,20 +31,20 @@ export function ventParts(height: number): BlockPart[] {
       name: `Vent_rim_x_${String(direction)}`,
       position: [direction * 0.5, top + 0.125, 0],
       size: [0.25, 0.25, 1.25],
-      color: EMBER.rim,
+      color: WORLD_PALETTE.rim,
     });
     parts.push({
       name: `Vent_rim_z_${String(direction)}`,
       position: [0, top + 0.125, direction * 0.5],
       size: [0.75, 0.25, 0.25],
-      color: EMBER.rim,
+      color: WORLD_PALETTE.rim,
     });
   }
   parts.push({
     name: "Vent_core",
     position: [0, top + 0.025, 0],
     size: [0.75, 0.05, 0.75],
-    color: EMBER.light,
+    color: WORLD_PALETTE.light,
   });
   return parts;
 }

@@ -18,7 +18,7 @@ Question: Does arriving beside a stranded spaceship on a small, explorable islan
 - `npm run check` passed: strict TypeScript, zero-warning type-aware ESLint, all five test files, formatting and production build. The build retains the bundle-size warning (about 631 kB uncompressed).
 - Repeated seeds compare complete terrain grids, resources, trees, ship/terminal/spawn positions, collision geometry and initial game state. Different seeds change the terrain and placements. Normalization covers whitespace, zero, case, Unicode, length limits and surrogate truncation; blank input chooses a reusable seed.
 - A sample of 200 seeds has dry, unobstructed player spawns, level ship sites and dry deposits, with foliage clear of the arrival area and resources.
-- The production controller traversed routes to all three resources for `stillwild`, `731`, `robots`, `ø-hop`, and `a different coast` (15 routes). This is automated reachability evidence, not a browser playthrough.
+- The production controller traversed routes to all three resources across five fixed seeds (15 routes). This is automated reachability evidence, not a browser playthrough.
 - Tests verify proximity and vertical limits for terminal use, connection state, overview exclusion, repeat checks, fresh reset and seed-specific recovery preserving progress. Existing physics/input/session tests remain passing.
 - Actual GLTFLoader parsing verified all 17 ship meshes against production colliders, metre scale and editable source presence. Blender MCP inspection confirmed the original active `Scene` was restored; the ship occupies its own new scene. Export succeeded despite an MCP output-capture finalization warning.
 

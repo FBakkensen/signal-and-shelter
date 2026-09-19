@@ -1,6 +1,6 @@
-# Experiment 004 — Ember Fold
+# Experiment 004 — Seeded Island Arrival
 
-2026-09-19. User selected study B after explicitly requiring preservation of voxel visuals.
+2026-09-19. User selected study B's warm console interface after explicitly requiring preservation of voxel visuals.
 
 ## Validation plan
 
@@ -11,10 +11,10 @@
 
 ## Results
 
-- Environment: Vite on `http://127.0.0.1:5174`; Codex integrated browser; desktop and 390×844. Test seed `ember-home`.
+- Environment: Vite on `http://127.0.0.1:5174`; Codex integrated browser; desktop and 390×844. A fixed test seed was used.
 - Automated: `npm run check` passed strict types, zero-warning ESLint, all six test files, formatting and build. Tests cover deterministic half-metre heights, chunk seams, outward axis normals, half-cell wall collision/jumping, vent block dimensions/collider correspondence, 200 clear starts and actual controller traversal to three resources across five seeds (15 routes).
 - Browser: filled seed, selected keyboard controls and clicked Begin your landing. First-person scene, vents, resource journal and terminal prompt rendered. E opened the terminal; Check connection changed the status to confirmed; Return to the island resumed. Short real D/Right presses moved x from 6.0 to 6.1; Space showed Airborne. Escape paused; Keep wandering resumed; another Space showed Airborne. Restart returned to x=6.0 and Grounded. Choose another seed returned to the form. M entered the paused overview.
 - Visual: desktop arrival, active scene and overview inspected. Narrow arrival, pause and terminal panels were inspected; inputs/buttons fit within the viewport. No CSS or gameplay failures observed in those flows. Viewport override restored afterward.
 - Errors: inspected application error logs were empty. Production bundle remains approximately 631 kB uncompressed and emits the existing size warning.
 - Limitations: discrete browser key presses cannot validate sustained control feel or faithfully execute full resource traversal; that browser check remains incomplete. Automated controller routes do not replace that evidence. Captured mouse look retains its earlier host limitation and was not retested. No performance benchmark, physical vapor simulation, editable blocks or asset-pipeline change.
-- Prototype source preserved at `8df36f9` on `codex/alien-visual-prototypes`; B selected and comparison implementation removed from the playable branch.
+- Prototype source preserved at `8df36f9` on `codex/alien-visual-prototypes`; study B's warm interface was selected and the comparison implementation removed from the playable branch.

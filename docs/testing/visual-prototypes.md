@@ -1,4 +1,4 @@
-# Alien visual studies — 2026-09-19
+# Visual and UI studies — 2026-09-19
 
 Question: which combination of alien terrain, gentler geometry and interface feels like a friendly robot's new home?
 
@@ -13,11 +13,13 @@ Question: which combination of alien terrain, gentler geometry and interface fee
 ## Results
 
 - Environment: Codex integrated Chromium browser, Vite at `http://127.0.0.1:5174` (5173 was occupied), desktop viewport and 390×844 override.
-- Visually inspected A, B and C at desktop and narrow sizes. No clipped comparison controls observed. Ember's compact heading initially joined two words; added whitespace and visually rechecked the correction.
+- Visually inspected A, B and C at desktop and narrow sizes. No clipped comparison controls observed. Study B's compact heading initially joined two words; added whitespace and visually rechecked the correction.
 - Real interactions: Next switched A→B; Right switched B→C; Next wrapped C→A. URL and scene/UI changed together. Reload on C restored C. Closer view and Rotate scene visibly changed the rendered viewpoint; Hide interface removed the overlay and Show interface restored it. Expanded details showed the selected materials, geometry, UI and view state. Current game returned to the existing arrival form with its enabled Begin button.
 - `npm run check` passed strict types, zero-warning lint, all six test files (including selection, URL and height/boundary tests), formatting and production build. Build output contains the normal game's assets and excludes the visual studies. The existing approximately 630 kB game bundle warning remains.
 - Browser logs: no application errors in the inspected logs. An initial Three.js deprecation warning for PCFSoftShadowMap was corrected to PCFShadowMap before the final checks; the captured log retains that earlier warning.
-- Limits: these are static art studies with illustrative UI, not first-person gameplay. World generation, collision, resource collection, power, traversal, motion simulation and frame-rate performance were not evaluated. Existing integrated-browser pointer-lock limitations are unaffected. No user verdict yet.
+- Limits: these are static art studies with illustrative UI, not first-person gameplay. World generation, collision, resource collection, power, traversal, motion simulation and frame-rate performance were not evaluated. Existing integrated-browser pointer-lock limitations are unaffected. The later interface selection is recorded below.
+
+- Naming clarification: these studies compared interface and visual presentations. Their prototype labels are not game or world names; the game is titled Signal & Shelter.
 
 ## Voxel correction — 2026-09-19
 

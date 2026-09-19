@@ -3,7 +3,7 @@ import bpy
 from pathlib import Path
 
 root = Path('/home/fbakkensen/Code/MyFirstGame')
-scene = bpy.data.scenes.new('Stillwild_Beacon_Asset')
+scene = bpy.data.scenes.new('Signal_And_Shelter_Beacon_Asset')
 previous_scene = bpy.context.window.scene
 bpy.context.window.scene = scene
 

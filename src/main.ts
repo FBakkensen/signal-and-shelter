@@ -120,8 +120,8 @@ function activatePlay() {
   canvas.setAttribute(
     "aria-label",
     app.session.keyboardPreferred
-      ? "Ember Fold exploration. W A S D to move, arrow keys to look, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
-      : "Ember Fold exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause.",
+      ? "Signal & Shelter exploration. W A S D to move, arrow keys to look, Control to sprint, Space to jump, Shift to sneak, Escape to pause."
+      : "Signal & Shelter exploration. Mouse or arrow keys to look, W A S D to move, Control to sprint, Space to jump, Shift to sneak, Escape to pause.",
   );
   previous = performance.now();
   sync();

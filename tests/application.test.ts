@@ -6,7 +6,7 @@ import { makeObstacles } from "../src/collision.ts";
 
 await test("terminal background clicks cannot resume physics or request capture in either control mode", () => {
   for (const keyboard of [true, false]) {
-    const island = createIsland("ember-home");
+    const island = createIsland("starter-island");
     const app = new GameApplication(island);
     const entry = app.start(island, keyboard);
     if (!keyboard) {
@@ -39,7 +39,7 @@ await test("terminal background clicks cannot resume physics or request capture 
 });
 
 await test("welcome and overview canvas clicks do not start play; explicit overview return does", () => {
-  const island = createIsland("ember-home");
+  const island = createIsland("starter-island");
   const app = new GameApplication(island);
   const initial = app.state;
   assert.equal(app.resume("canvas").kind, "ignored");
@@ -109,7 +109,7 @@ await test("expected capture loss preserves a terminal; only explicit return req
   assert.equal(app.terminalOpen, false);
 });
 await test("seed replacement clears the old terminal, progress and queued inputs and rejects old capture results", () => {
-  const oldIsland = createIsland("ember-home");
+  const oldIsland = createIsland("starter-island");
   const nextIsland = createIsland("next-home");
   const app = new GameApplication(oldIsland);
   const oldCapture = app.start(oldIsland, false);

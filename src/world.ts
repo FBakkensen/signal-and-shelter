@@ -19,7 +19,7 @@ export interface Quad extends Point {
   points: readonly [Vertex, Vertex, Vertex, Vertex];
 }
 export const GENERATOR_VERSION = 2;
-export const DEFAULT_SEED = "stillwild";
+export const DEFAULT_SEED = "signal-and-shelter";
 export const SIZE = 96;
 export const HAZE_LEVEL = 1.2;
 export const CELL_SIZE = 0.5;

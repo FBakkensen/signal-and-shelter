@@ -1,5 +1,5 @@
 import { resourceParts } from "./resources.ts";
-import { ventParts } from "./ember.ts";
+import { ventParts } from "./world-visuals.ts";
 import { SHIP_PARTS } from "./ship.ts";
 import { DEFAULT_ISLAND, SIZE, HAZE_LEVEL, CELL_SIZE } from "./world.ts";
 import type { HeightSampler, Point, Island } from "./world.ts";

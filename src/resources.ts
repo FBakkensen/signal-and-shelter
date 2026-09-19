@@ -1,7 +1,7 @@
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
 import type { BlockPart } from "./blocks.ts";
 import type { ResourceDeposit } from "./world.ts";
-import { EMBER } from "./ember.ts";
+import { WORLD_PALETTE } from "./world-visuals.ts";
 
 export function resourceParts(resource: ResourceDeposit): readonly BlockPart[] {
   return [
@@ -9,7 +9,7 @@ export function resourceParts(resource: ResourceDeposit): readonly BlockPart[] {
       name: "Resource_base",
       position: [0, 0.55, 0],
       size: [1.8, 1.1, 1.8],
-      color: EMBER.strata,
+      color: WORLD_PALETTE.strata,
     },
     {
       name: "Crystal_left",

@@ -4,6 +4,8 @@ Last updated: 2026-09-19.
 
 ## Confirmed direction
 
+The game is named **Signal & Shelter**.
+
 Create a friendly, combat-free game in a voxel-style world, starting on a small island. You play a battery-powered humanoid stranded on a planet with a broken spaceship that cannot fly. The ship still has a working data connection, which could support requests for software updates or new capabilities.
 
 Build a home and small robot companions. Give the robots jobs they carry out autonomously; the player does not program them. Over time, explore travel between islands with different resources and automation of manufacturing and logistics.
@@ -14,9 +16,9 @@ This direction was agreed with the user on 2026-09-19. It is an overall vision, 
 
 Keep project knowledge in separate documents, with a compact AGENTS.md directing future work to the relevant context. Improve that guidance as evidence accumulates.
 
-## Current experiment: Ember Fold arrival
+## Current experiment: Seeded island arrival
 
-Experiment 004 carries the selected Ember Fold visual direction into the seeded arrival: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover conductive seams (copper), ferric nodules (iron), and prismatic silica. These resource types are experimental choices, not a settled manufacturing design. First-person movement and the island overview remain available.
+Experiment 004 implements seeded arrival: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover conductive seams (copper), ferric nodules (iron), and prismatic silica. These resource types are experimental choices, not a settled manufacturing design. First-person movement and the island overview remain available.
 
 The same seed and world-generation version reproduce terrain, decorations, resources, ship placement, and the initial player state. The chosen seed appears in the game, in a selectable pause-menu field, and in the URL. Restarting recreates the beginning; it does not load saved progress. Generator changes in future experiments may change a seed's island.
 
@@ -42,12 +44,12 @@ See [experiment 004's validation record](testing/experiment-004.md) for actual c
 
 Resolve questions when an experiment depends on them. Robot companions, power systems, manufacturing, logistics, and inter-island travel are intended directions, not implemented features. Multiplayer, infinite terrain, and persistent world editing have no current commitment; combat is excluded from the agreed vision.
 
-## Visual direction revision — 2026-09-19
+## Visual presentation — 2026-09-19
 
 User feedback: the metre-block appearance is too clunky, and the Earth-like island and UI do not fit being stranded on an unfamiliar planet. Explore unfamiliar terrain and materials in place of recognizable trees, ordinary water, grass and sand. The specific replacements and final UI remain open; compare several prototypes before committing.
 
-Three archived visual studies explored Porcelain Expanse (pale crust, hollow arches, mineral haze, field-note UI), Ember Fold (stepped ceramic terrain, vents, warm instrument console), and Violet Relay (shallow violet strata, levitating luminous minerals, minimal visor). These were illustrative art studies. The user selected B, Ember Fold, on 2026-09-19. Its warm ceramic palette, stepped vents, amber haze and console UI are now implemented in the playable experiment; trees, grass, sand and water visuals have been removed. The full comparison is preserved on `codex/alien-visual-prototypes` at commit `8df36f9`.
+Three archived visual studies compared different voxel terrain treatments and interfaces. The user selected study B's warm console interface. Its prototype label was only for that study; the game is **Signal & Shelter**, and the planet and island have no settled proper name. The playable experiment currently uses ceramic terrain, stepped vents and amber haze as visual experiments; trees, grass, sand and water visuals have been removed. The comparison is preserved on `codex/alien-visual-prototypes` at commit `8df36f9`.
 
 User correction, 2026-09-19: “you broke the voxels.” Preserve the voxel aesthetic. Less clunky means improving block scale, proportions, materials and composition; it does not authorize smooth or low-poly replacement geometry. The studies now use half-metre terrain cells and finer block-built formations. The exact scale remains experimental.
 
-Ember Fold implementation: half-metre terrain cells, finer stepped vent geometry and matching collision; generator version 2. Exact density, scale, lighting and movement feel still await play feedback. The selection approves the visual direction, not future manufacturing or power systems.
+The seeded island uses half-metre terrain cells, finer stepped vent geometry and matching collision; generator version 2. Exact density, scale, lighting and movement feel still await play feedback. Selecting the console interface did not settle the world name or future manufacturing and power systems.

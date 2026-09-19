@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ventParts } from "../src/ember.ts";
+import { ventParts } from "../src/world-visuals.ts";
 import { createIsland } from "../src/world.ts";
 import { boxCollider, makeObstacles } from "../src/collision.ts";
 
@@ -35,7 +35,7 @@ await test("vent tiers retain block geometry, a square open rim and finite bound
   }
 });
 await test("all rendered vent block definitions have matching production colliders", () => {
-  const island = createIsland("ember");
+  const island = createIsland("vent-test-world");
   assert.ok(island.vents.length > 0);
   const expected = island.vents.flatMap((vent) =>
     ventParts(vent.height).map((part) => {

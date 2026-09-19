@@ -77,19 +77,19 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Rationale: Provides a concrete environment and a small reason to explore without committing to a game genre or editable voxel storage.
 - Consequence: Feedback may change the camera, style, terrain representation, or interaction model. Audio is deferred so this experiment focuses on navigation and visuals.
 
-## D009 — Compare alien art directions before replacing the world
+## D009 — Compare alien UI and visual studies before revising the presentation
 
 - Date: 2026-09-19
-- Status: Accepted — user selected B (Ember Fold); implemented in experiment 004
+- Status: Implemented — user selected study B's warm console interface
 - Basis: The user finds the current voxel forms clunky and rejects recognizable Earth-like trees, water and sand as the visual premise.
 - Decision: Build three development-only 3D/UI studies on the existing route, selected with `?variant=A`, `B` or `C`, to compare alien materials, block-built formations and UI layouts while preserving voxel geometry. Keep illustrative UI clearly labeled and provide overview/close-up inspection.
 - Tradeoff: The studies can answer questions about shapes, materials and visual hierarchy; they cannot establish walking feel, collision fit or the final production terrain representation. They are handcrafted scenes, not seed-based world generation.
 - Evidence: [Visual study validation](testing/visual-prototypes.md).
-- Outcome: User selected B. Preserve its ceramic palette, vents, haze and warm console UI in the playable arrival. Prototype source is captured at `8df36f9` on `codex/alien-visual-prototypes`; comparison code is removed from the implementation branch.
+- Outcome: User selected study B's warm console interface. The prototype label was not a game or world name. Prototype source is captured at `8df36f9` on `codex/alien-visual-prototypes`; comparison code is removed from the playable game.
 
 - D009 correction, 2026-09-19: The first implementation incorrectly interpreted “less clunky” as permission to abandon voxels. The user rejected that change. Voxel visuals are a retained constraint; the comparison now uses finer cubic terrain and voxelized formations. Half-metre terrain and quarter-metre formation cells are experimental scale choices, not an approved final resolution.
 
-## D010 — Use finer voxel terrain for Ember Fold
+## D010 — Use finer voxel terrain for the seeded island
 
 - Date: 2026-09-19
 - Status: Implemented scale experiment within the selected B direction
@@ -97,3 +97,21 @@ Record significant choices with date, status, rationale, and consequences. Use p
 - Rationale: Reduce the metre-block clunkiness while retaining unmistakable voxels and keeping first-person collision consistent with the rendered terrain.
 - Consequence: Generator version increases from 1 to 2; earlier seeds remain reusable text but produce different terrain and decorations. New terrain steps still require jumping. No old-world compatibility is promised.
 - Evidence: Seed/mesh/collision tests, 200 clear seeded starts, 15 production-controller resource routes, and focused browser interaction/layout checks in [experiment 004](testing/experiment-004.md). Full browser traversal and captured-look remain unverified.
+
+## D011 — Name the game Signal & Shelter
+
+- Date: 2026-09-19
+- Status: Accepted
+- Basis: The user approved Signal & Shelter as the game name and clarified that the label used by one interface prototype is not the name of the game or its world.
+- Decision: Use Signal & Shelter as the game title. Do not assign a proper name to the planet or island based on prototype labels.
+- Rationale: The title reflects the stranded ship's working data link and the longer-term goal of making a home, while allowing the game to expand beyond the opening island.
+- Consequence: Browser title, visible branding, package metadata, and default seed use the new title. Prototype labels remain only as neutral study letters in historical records.
+
+## D012 — Run project checks in GitHub Actions
+
+- Date: 2026-09-19
+- Status: Accepted; workflow added, remote run pending repository authentication
+- Basis: The user requested a public GitHub repository so GitHub Actions can run.
+- Decision: Run `npm run check` on pushes and pull requests using Node 26 with read-only repository permissions.
+- Rationale: Apply the project's existing local verification command to changes in the hosted repository.
+- Consequence: The first hosted run can start after the public remote is created and the current branch is pushed.

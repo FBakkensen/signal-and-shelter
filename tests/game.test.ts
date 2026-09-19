@@ -287,7 +287,7 @@ await test("all seeded resources are reachable by executing the controller along
   // Search cardinal cell routes, then actually traverse every selected route with
   // production walking/jumping. Candidate routes alone do not establish reachability.
   for (const seed of [
-    "stillwild",
+    "signal-and-shelter",
     "731",
     "robots",
     "ø-hop",
