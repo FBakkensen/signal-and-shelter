@@ -115,3 +115,7 @@ Movement capabilities are individual, potentially determined by actor type and u
 A click on known geometry preserves the chosen surface and height; an unexplored click retains a horizontal destination until a surface becomes known. If humanoid route execution fails, stop safely, retain the destination and recalculate from the actual position, excluding the failed transition from that recalculation. Existing nearest-reachable and exploration rules still apply.
 
 Upgrades require movement to be interrupted first; subsequent routing uses the updated individual capabilities. Robot job selection, blocked-job recovery, automatic resumption, retry frequency and any tick scheduler belong to a separate robot-design issue. Navigation reports movement outcomes; it does not decide job policy or scheduling.
+
+### Navigation design checkpoint accepted — 2026-09-19
+
+The user accepted the [consolidated navigation design](navigation-design.md), its acceptance criteria and two sequential playable production increments: automatic keyboard traversal with shared individual capabilities and lifecycle behavior, followed by time-aware click-to-move using the same movement logic. Both require production-code tests and integrated-browser validation. The prototype remains archived; production implementation is pending.
