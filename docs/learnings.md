@@ -20,6 +20,13 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Evidence: [Official AGENTS.md guidance](https://learn.chatgpt.com/docs/agent-configuration/agents-md) describes loading guidance along the project directory path.
 - Implication: Root guidance should explicitly instruct when to read supporting documents; a Markdown link alone is not an automatic import mechanism.
 
+## 2026-09-19 — Commit prototype boundaries and return before instruction changes
+
+- User requirement: commit pending work on the original wayfinder branch before creating a prototype branch; commit and push the finished prototype archive, then return to the previous branch. Prototype branches must never be merged. Local instruction changes belong on the previous branch.
+- Evidence: navigation design notes were committed on `codex/navigation-design` at `6da9585` before the prototype branch was created. When the user requested an explicit workflow correction, the unfinished experiment was checkpointed and pushed on `codex/navigation-prototype` at `3e02a72`, then the worktree returned to `codex/navigation-design` for the instruction edits.
+- Limitation: that prototype checkpoint is unfinished and has not received automated behavior tests, integrated-browser validation or user playtesting. Its ticket remains open.
+- The enforced sequence lives in [prototype handoff](agents/prototype-handoff.md), reached from AGENTS.md before branch creation, prototype completion and workflow instruction changes.
+
 ## Untested ideas
 
 - Chunk meshes with exposed faces should be a useful approach if we choose dense block terrain. Implemented with exposed terrain quads in experiment 001; no project benchmark exists yet.
