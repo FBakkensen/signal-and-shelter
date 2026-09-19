@@ -97,3 +97,40 @@ void test("map hit testing picks the nearest symbol and rejects empty ground", (
   assert.equal(pickMapMarker(markers, 10, 30), "ship");
   assert.equal(pickMapMarker(markers, 100, 100), null);
 });
+
+void test("map object parts match every production collider footprint without collapsing gaps", async () => {
+  const { mapFootprints, pickMapFootprint } =
+    await import("../src/strategic-map-prototype-model.ts");
+  for (const seed of ["signal-and-shelter", "map-check"]) {
+    const island = createIsland(seed);
+    const parts = mapFootprints(island);
+    assert.equal(parts.length, island.solids.length);
+    parts.forEach((part, i) => {
+      const solid = island.solids[i];
+      assert.ok(solid);
+      assert.deepEqual(
+        [part.minX, part.maxX, part.minZ, part.maxZ],
+        [solid.minX, solid.maxX, solid.minZ, solid.maxZ]
+      );
+    });
+    const ship = parts.filter((p) => p.id === "ship");
+    assert.ok(
+      Math.max(...ship.map((p) => p.maxZ)) -
+        Math.min(...ship.map((p) => p.minZ)) >
+        4
+    );
+  }
+  const shapes = [
+    {
+      id: "ship",
+      points: [
+        { x: 0, y: 0 },
+        { x: 40, y: 0 },
+        { x: 40, y: 20 },
+        { x: 0, y: 20 },
+      ],
+    },
+  ];
+  assert.equal(pickMapFootprint(shapes, 35, 10), "ship");
+  assert.equal(pickMapFootprint(shapes, 45, 10), null);
+});

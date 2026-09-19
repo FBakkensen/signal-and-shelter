@@ -1,6 +1,6 @@
 # Strategic map comparison — 2026-09-19
 
-Question: which distant presentation makes known deposits and routes readable without changing zoom or available actions? User feedback pending.
+Question: which distant presentation makes known deposits and routes readable without changing zoom or available actions? User selected A with world-scale object footprints; see the correction record below.
 
 ## Validation plan
 
@@ -23,6 +23,15 @@ Question: which distant presentation makes known deposits and routes readable wi
 - Transition starts at 62% zoom and finishes at 80%. Both variants keep selected camera B; the A/B switch now selects map treatment on `?study=map`. This is not automatic zoom.
 - Exploration marks 2 m cells within 8 m of the humanoid during active play; current game surveying still identifies deposits within 4 m. Pausing freezes exploration. These distances and the visibility rules are hypotheses for user feedback.
 - Atlas darkens unvisited ground; chart shows terrain contours in unvisited areas. Both hide unlocated deposit markers and use ? for located-but-unsurveyed deposits. Surveyed identities persist. Sample preview is presentation-only and never updates game discoveries.
-- The map samples terrain at 2 m for a rough chart and does not represent exact walkable gaps or full obstacle footprints. Detailed voxel rendering is unchanged. The crossfade exposes both representations briefly; its appearance needs user feedback. No performance benchmark was performed.
+- The map samples terrain at 2 m for a rough chart and does not represent exact walkable gaps ; object footprints were subsequently corrected below. Detailed voxel rendering is unchanged. The crossfade exposes both representations briefly; its appearance needs user feedback. No performance benchmark was performed.
 - The known held-key browser limitation still prevents claiming continuous exploration feel or live orbit/traversal verification. Actual unknown-to-surveyed movement on this UI was not browser-verified; production-code tests establish the separate exploration and discovery rules.
-- This ticket remains open awaiting human preference. It does not settle the full controls, obstruction handling or production design checkpoint.
+- The user selected A with the correction below. This does not settle the full controls, obstruction handling or production design checkpoint.
+
+## Footprint correction — 2026-09-19
+
+Validation plan: compare actual footprint bounds to island collision geometry across seeds; test inside/outside polygon picking; inspect full map and blended presentation, click the ship away from its symbol, and inspect narrow layout.
+
+- All 62 tests and `npm run check` passed. Every ship, vent and resource part matches its production collider's horizontal bounds on two seeded islands, preserving gaps. Polygon picking accepts an interior point and rejects an exterior point. Existing bundle-size warning remains.
+- Integrated browser, `map-check`: Far plus Preview explored island displayed ship, vents and deposits at world scale against the terrain grid. Clicking the ship hull below its symbol selected Stranded ship. Scrolling up reached 74% zoom and 76% map opacity; footprint alignment and the 3D blend were visually inspected. Surveyed remained 0/3.
+- 390×844 screenshot confirmed the ship and vent footprints scale with terrain. Existing guide-panel overlap and island cropping remain; no automatic zoom was introduced. Restored default viewport, left atlas preview open, and inspected empty warning/error logs.
+- This is a throwaway prototype correction, not the production control migration. Exact coverage/transition tuning and dense future-base labels remain for later design work.

@@ -2,6 +2,12 @@
 import type { Island, Point } from "./packages/island/index.ts";
 import type { PlayState } from "./packages/play/index.ts";
 import type { CameraFrame } from "./camera-prototype-model.ts";
+import {
+  SHIP_PARTS,
+  ventParts,
+  resourceParts,
+} from "./packages/island/geometry.ts";
+import type { BlockPart } from "./packages/island/geometry.ts";
 import * as THREE from "three";
 
 export type MapVariant = "A" | "B";
@@ -133,4 +139,56 @@ export function pickMapMarker(
         (a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y)
       )[0]?.id ?? null
   );
+}
+
+export function mapFootprints(island: Island) {
+  function place(id: string, origin: Point, parts: readonly BlockPart[]) {
+    return parts.map((part) => ({
+      id,
+      origin,
+      minX: origin.x + part.position[0] - part.size[0] / 2,
+      maxX: origin.x + part.position[0] + part.size[0] / 2,
+      minZ: origin.z + part.position[2] - part.size[2] / 2,
+      maxZ: origin.z + part.position[2] + part.size[2] / 2,
+      y: island.heightAt(origin.x, origin.z) + 0.03,
+      color: part.color,
+    }));
+  }
+  return [
+    ...island.vents.flatMap((v, i) =>
+      place(`vent-${String(i)}`, v, ventParts(v.height))
+    ),
+    ...place("ship", island.ship, SHIP_PARTS),
+    ...island.resources.flatMap((r) => place(r.id, r, resourceParts(r))),
+  ];
+}
+export interface ScreenFootprint {
+  id: string;
+  points: readonly { x: number; y: number }[];
+}
+export function pickMapFootprint(
+  footprints: readonly ScreenFootprint[],
+  x: number,
+  y: number
+) {
+  for (const footprint of [...footprints].reverse()) {
+    let inside = false;
+    const points = footprint.points;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+      const a = points[i],
+        b = points[j];
+      if (
+        a &&
+        b &&
+        a.y > y !== b.y > y &&
+        x < ((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x
+      ) {
+        inside = !inside;
+      }
+    }
+    if (inside) {
+      return footprint.id;
+    }
+  }
+  return null;
 }

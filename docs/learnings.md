@@ -142,3 +142,9 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 - Evidence: all 61 tests and full checks passed. Browser inspection covered two seeds, desktop/narrow visuals, map switching, deposit selection, manual zoom blend, example/actual modes, active jumping and terminal use/pause guard in map view. See [record](testing/strategic-map-prototype.md).
 - Hypotheses awaiting user feedback: 62–80% transition range, 8 m exploration coverage, unvisited-terrain disclosure, and persistent labels versus compact glyphs.
 - Limits: rough 2 m chart terrain and simple vent marks do not establish precise route safety. Narrow views crop the island and guide panels can cover markers; no automatic fit is applied. Held-key traversal and dense future-base marker layout remain unverified.
+
+## 2026-09-19 — Atlas selected; object scale corrected
+
+- User selected map A and required multi-block objects to match their size on the terrain grid. Replaced fixed vent marks and icon-only objects with footprints from actual block definitions; identity callouts remain separate.
+- Evidence: full checks passed with 62 tests, including exact footprint bounds against every production collider on two seeds and polygon selection inside/outside an object. Browser inspection verified full-map footprints, ship selection away from its icon, manual scroll blend and narrow rendering. Browser warnings/errors were empty.
+- Limits: terrain still uses the prototype's rough 2 m sampling; object footprints are dimensionally accurate in the horizontal plane, not a height-aware navigation map. Narrow views retain existing clipping and panel overlap.

@@ -65,3 +65,7 @@ The user requested design first, with prototypes, followed by implementation. Th
 ### Camera feedback — 2026-09-19
 
 The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
+
+### Strategic map feedback — 2026-09-19
+
+The user selected A, the exploration atlas, with a required correction: multi-block objects must occupy their matching world footprint on the visible terrain grid. Symbols and labels identify objects but must not replace their size. The prototype now projects all ship, vent and deposit block parts at their actual horizontal bounds. Exact exploration distance and transition thresholds remain tuning values for the design checkpoint.

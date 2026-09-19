@@ -10,10 +10,13 @@ import {
   mapProjector,
   pickMapMarker,
   MAP_CELL,
+  mapFootprints,
+  pickMapFootprint,
 } from "./strategic-map-prototype-model.ts";
 import type {
   MapVariant,
   ScreenMarker,
+  ScreenFootprint,
 } from "./strategic-map-prototype-model.ts";
 
 export function createStrategicMap(canvas: HTMLCanvasElement, island: Island) {
@@ -31,12 +34,16 @@ export function createStrategicMap(canvas: HTMLCanvasElement, island: Island) {
       }
     }
   }
+  const objects = mapFootprints(island);
+  let footprints: ScreenFootprint[] = [];
   let markers: ScreenMarker[] = [];
   let opacity = 0;
   return {
     exploration,
     pick: (x: number, y: number) =>
-      opacity >= 0.5 ? pickMapMarker(markers, x, y) : null,
+      opacity >= 0.5
+        ? (pickMapMarker(markers, x, y) ?? pickMapFootprint(footprints, x, y))
+        : null,
     render(
       state: PlayState,
       frame: CameraFrame,
@@ -114,20 +121,44 @@ export function createStrategicMap(canvas: HTMLCanvasElement, island: Island) {
           }
         }
       }
-      for (const vent of island.vents) {
-        if (!sample && !exploration.knows(vent)) {
+      footprints = [];
+      for (const object of objects) {
+        if (
+          object.id !== "ship" &&
+          !sample &&
+          !exploration.knows(object.origin) &&
+          !state.discovered.includes(object.id)
+        ) {
           continue;
         }
-        const p = project(
-          vent.x,
-          island.heightAt(vent.x, vent.z) + 0.2,
-          vent.z
-        );
-        if (!p.visible) {
+        const points = [
+          project(object.minX, object.y, object.minZ),
+          project(object.maxX, object.y, object.minZ),
+          project(object.maxX, object.y, object.maxZ),
+          project(object.minX, object.y, object.maxZ),
+        ];
+        if (!points.some((p) => p.visible)) {
           continue;
         }
-        ctx.fillStyle = variant === "A" ? "#5a3941" : "#87745f";
-        ctx.fillRect(p.x - 4, p.y - 4, 8, 8);
+        footprints.push({ id: object.id, points });
+        ctx.beginPath();
+        for (const [i, p] of points.entries()) {
+          if (i === 0) {
+            ctx.moveTo(p.x, p.y);
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+        ctx.closePath();
+        const resource = island.resources.find((r) => r.id === object.id);
+        ctx.fillStyle =
+          resource && !sample && !state.discovered.includes(object.id)
+            ? "#756578"
+            : object.color;
+        ctx.fill();
+        ctx.strokeStyle = "#49303b";
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
       }
       const labels: { x: number; y: number; w: number }[] = [];
       markers = [];
@@ -141,6 +172,15 @@ export function createStrategicMap(canvas: HTMLCanvasElement, island: Island) {
         );
         if (!p.visible || p.x < 0 || p.x > width || p.y < 0 || p.y > height) {
           continue;
+        }
+        if (marker.id !== "humanoid") {
+          ctx.strokeStyle = marker.color;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x, p.y - 26);
+          ctx.stroke();
+          p.y -= 42;
         }
         markers.push({ id: marker.id, x: p.x, y: p.y });
         ctx.fillStyle = marker.id === selected ? "#784357" : "#302b32";
