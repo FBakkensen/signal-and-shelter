@@ -1,3 +1,4 @@
+import { atlasBlend } from "./atlas.ts";
 import { GameApplication } from "./packages/play/index.ts";
 import type { ResumeResult } from "./packages/play/index.ts";
 import { ThirdPersonCamera } from "./camera.ts";
@@ -20,6 +21,7 @@ function element<T extends HTMLElement>(id: string, type: new () => T): T {
 const $ = (id: string): HTMLElement => element(id, HTMLElement);
 const startButton = element("start", HTMLButtonElement);
 const canvas = element("world", HTMLCanvasElement);
+const atlasCanvas = element("atlas", HTMLCanvasElement);
 const app = new GameApplication(
   createIsland(
     new URLSearchParams(location.search).get("seed") ?? DEFAULT_SEED
@@ -41,7 +43,7 @@ function updateWorldUI() {
       row.dataset.place = resource.id;
       const marker = document.createElement("span");
       const name = document.createElement("span");
-      name.textContent = resource.name;
+      name.textContent = "Undiscovered deposit";
       row.append(marker, name);
       return row;
     })
@@ -54,13 +56,10 @@ function updateWorldUI() {
 function sync() {
   $("welcome").hidden = app.started;
   $("pause-panel").hidden =
-    !app.started || !app.state.paused || app.state.overview || app.terminalOpen;
+    !app.started || !app.state.paused || app.terminalOpen;
 
   document.body.classList.toggle("in-menu", !app.started || app.state.paused);
-  $("overview").hidden = !app.started;
   $("pause").hidden = !app.started || app.state.paused;
-  $("overview").setAttribute("aria-pressed", String(app.state.overview));
-  $("overview-label").hidden = !app.state.overview;
   $("count").textContent =
     `${String(app.state.discovered.length)} / ${String(app.island.resources.length)}`;
   for (const p of app.island.resources) {
@@ -70,12 +69,17 @@ function sync() {
     }
     const found = app.state.discovered.includes(p.id);
     row.classList.toggle("found", found);
+    if (row.lastElementChild) {
+      row.lastElementChild.textContent = found
+        ? p.name
+        : "Undiscovered deposit";
+    }
     row.firstElementChild.textContent = found ? "◆" : "◇";
   }
   $("journal-note").textContent =
     app.state.discovered.length === app.island.resources.length
       ? "Starter resources surveyed. Gathering and building will come in a later experiment."
-      : "Explore the island. Walk close to an outcrop to record what you find.";
+      : "Explore within 8 m to reveal ground and identify deposits.";
   $("terminal-panel").hidden = !app.terminalOpen;
   $("interact").hidden = !app.canUseSelection;
   $("link-status").textContent = app.state.linkChecked
@@ -88,11 +92,11 @@ function sync() {
     ? "Check connection again"
     : "Check connection";
 }
-function release(overview = false) {
-  app.pause(overview);
+function release() {
+  app.pause();
   sync();
   if (app.started) {
-    element(overview ? "return" : "resume", HTMLButtonElement).focus();
+    element("resume", HTMLButtonElement).focus();
   }
 }
 function applyResume(result: ResumeResult) {
@@ -114,7 +118,7 @@ element("start-form", HTMLFormElement).onsubmit = (event) => {
   try {
     const nextIsland = createIsland(seed);
     world.dispose();
-    world = createScene(canvas, nextIsland, shipAsset);
+    world = createScene(canvas, nextIsland, shipAsset, atlasCanvas);
     seedInput.value = seed;
     const url = new URL(location.href);
     url.searchParams.set("seed", seed);
@@ -131,16 +135,8 @@ element("start-form", HTMLFormElement).onsubmit = (event) => {
   }
 };
 $("resume").onclick = resume;
-$("return").onclick = resume;
 $("pause").onclick = () => {
   release();
-};
-$("overview").onclick = () => {
-  if (app.state.overview) {
-    release();
-  } else {
-    release(true);
-  }
 };
 $("reset").onclick = () => {
   release();
@@ -184,11 +180,6 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "KeyF" && !editing && !e.repeat && !app.state.paused) {
     e.preventDefault();
     openTerminal();
-    return;
-  }
-  if (e.code === "KeyM" && app.started && !e.repeat && !editing) {
-    e.preventDefault();
-    release(!app.state.overview);
     return;
   }
   if (e.code === "Space" && e.target instanceof HTMLButtonElement) {
@@ -266,36 +257,46 @@ function tick(now: number) {
       ? "Stranded ship"
       : selected && app.state.discovered.includes(selected.id)
         ? selected.name
-        : "Unsurveyed deposit";
+        : "Undiscovered deposit";
   $("selection-help").textContent =
     app.selection === "ship"
       ? app.canUseTerminal
         ? "F · Use terminal"
         : "Walk closer to the terminal."
-      : "Approach to survey. Gathering is not available yet.";
+      : "Deposit identified. Gathering is not available yet.";
   $("camera-status").textContent =
-    `Zoom ${String(Math.round(camera.zoom * 100))}% · Orbit ${String(Math.round((app.state.yaw * 180) / Math.PI))}°`;
+    ` ${atlasBlend(camera.zoom) >= 0.5 ? "ATLAS · 2 m grid" : "CLOSE PLAY"} · Zoom ${String(Math.round(camera.zoom * 100))}% · Orbit ${String(Math.round((app.state.yaw * 180) / Math.PI))}°`;
   const pose = app.renderPose;
   world.render(
     app.state,
     pose,
     now / 1000,
     app.started,
-    app.started && !app.state.overview
+    app.started
       ? camera.frame(
           pose.eye,
           app.state.yaw,
           app.facing,
           innerWidth / innerHeight
         )
-      : undefined
+      : undefined,
+    app.exploration,
+    app.selection,
+    atlasBlend(camera.zoom),
+    [
+      ...document.querySelectorAll<HTMLElement>(
+        "header,footer,.journal,.panel,#interact,#camera-status,#seed-badge,#toast"
+      ),
+    ]
+      .filter((el) => !el.hidden && el.getClientRects().length > 0)
+      .map((el) => el.getBoundingClientRect())
   );
 
   requestAnimationFrame(tick);
 }
 try {
   shipAsset = await loadShip();
-  world = createScene(canvas, app.island, shipAsset);
+  world = createScene(canvas, app.island, shipAsset, atlasCanvas);
   updateWorldUI();
   startButton.disabled = false;
   startButton.textContent = "Begin your landing →";

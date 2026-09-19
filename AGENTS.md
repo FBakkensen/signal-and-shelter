@@ -56,4 +56,4 @@ Before creating a prototype ticket, beginning implementation after a prototype, 
 
 ### PR babysitting
 
-When asked to babysit a PR or handle its CI and Codex review feedback, use [.agents/skills/babysit-pr/SKILL.md](.agents/skills/babysit-pr/SKILL.md).
+When asked to babysit a PR or handle its CI and CodeRabbit review feedback, use [.agents/skills/babysit-pr/SKILL.md](.agents/skills/babysit-pr/SKILL.md).

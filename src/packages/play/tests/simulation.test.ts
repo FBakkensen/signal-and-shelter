@@ -51,7 +51,7 @@ function fits(
 }
 const eyeHeight = (state: GameState) =>
   viewPosition({ ...state, paused: true }).y - state.y;
-const { resources: RESOURCES, spawn: SPAWN } = DEFAULT_ISLAND;
+const { spawn: SPAWN } = DEFAULT_ISLAND;
 const flat = () => 3;
 const active = (): GameState => ({
   ...createGame(),
@@ -104,8 +104,8 @@ await test("mouse look wraps yaw, clamps pitch and ignores paused or invalid inp
   near(look(active(), 0, -100).pitch, -MAX_PITCH);
   const paused = createGame();
   assert.equal(look(paused, 1, 1), paused);
-  const overview = transition(active(), "overview");
-  assert.equal(look(overview, 1, 1), overview);
+  const afterPause = transition(active(), "pause");
+  assert.equal(look(afterPause, 1, 1), afterPause);
   const s = active();
   assert.equal(look(s, NaN, 0), s);
 });
@@ -243,9 +243,9 @@ await test("fixed-step physics agrees across frame rates; invalid times freeze a
     assert.equal(advance(s, input, dt, flat), s);
   }
 });
-await test("pause and overview freeze physics and look; capture resumes without catch-up", () => {
+await test("pause freezes physics and look; capture resumes without catch-up", () => {
   const airborne = move(active(), { jump: true }, 15);
-  for (const event of ["pause", "overview", "return"] as const) {
+  for (const event of ["pause", "return"] as const) {
     const s = transition(airborne, event);
     assert.equal(advance(s, { jump: true, forward: true }, 50, flat), s);
     assert.equal(look(s, 1, 1), s);
@@ -253,8 +253,7 @@ await test("pause and overview freeze physics and look; capture resumes without 
     near(s.velocityY, airborne.velocityY);
     near(transition(s, "capture").accumulator, 0);
   }
-  const s = transition(transition(airborne, "overview"), "return");
-  assert.equal(s.overview, false);
+  const s = transition(transition(airborne, "pause"), "return");
   assert.equal(s.paused, true);
   assert.equal(transition(transition(s, "pause"), "pause").paused, true);
   assert.equal(transition(s, "capture").paused, false);
@@ -284,24 +283,6 @@ await test("invalid positions recover to spawn preserving the journal; fresh res
   assert.equal(fresh.crouching, false);
   assert.equal(fresh.grounded, true);
   assert.deepEqual(fresh.discovered, []);
-});
-await test("stationary discovery respects four-metre boundary, persists and never duplicates", () => {
-  const p = RESOURCES[0];
-  assert.ok(p);
-  const s = { ...active(), x: p.x, z: p.z + 4 };
-  assert.deepEqual(advance(s, {}, STEP, flat).discovered, [p.id]);
-  assert.deepEqual(
-    advance({ ...s, z: p.z + 4.01 }, {}, STEP, flat).discovered,
-    []
-  );
-  const found = advance(s, {}, STEP, flat);
-  assert.deepEqual(found.discovered, [p.id]);
-  assert.deepEqual(s.discovered, []);
-  assert.deepEqual(
-    advance({ ...found, x: 20, z: 20 }, {}, STEP, flat).discovered,
-    [p.id]
-  );
-  assert.deepEqual(advance(found, {}, STEP, flat).discovered, [p.id]);
 });
 await test("terrain footprint includes diagonal cells and box collision uses vertical bounds", () => {
   const diagonal = (x: number, z: number) => (x >= 1 && z >= 1 ? 4 : 3);

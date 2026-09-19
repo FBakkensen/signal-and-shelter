@@ -18,7 +18,7 @@ Keep project knowledge in separate documents, with a compact AGENTS.md directing
 
 ## Current experiment: Seeded island arrival
 
-Experiment 004 implements seeded arrival: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover conductive seams (copper), ferric nodules (iron), and prismatic silica. These resource types are experimental choices, not a settled manufacturing design. First-person movement and the island overview remain available.
+Experiment 004 implements seeded arrival: enter a text seed (or leave it blank for a generated one), arrive beside a stranded spaceship on a small island, check its data connection at the terminal, and discover conductive seams (copper), ferric nodules (iron), and prismatic silica. These resource types are experimental choices, not a settled manufacturing design. Third-person movement and the active strategic atlas replace the earlier first-person/overview controls.
 
 The same seed and world-generation version reproduce terrain, decorations, resources, ship placement, and the initial player state. The chosen seed appears in the game, in a selectable pause-menu field, and in the URL. Restarting recreates the beginning; it does not load saved progress. Generator changes in future experiments may change a seed's island.
 
@@ -87,3 +87,7 @@ The user confirmed the [consolidated third-person design](third-person-design.md
 ### First production increment — 2026-09-19
 
 Third-person controls and localized fading are implemented on `codex/third-person-controls`, using the normal game entry. Manual zoom, free-pointer selection, F interaction, keyboard orbit and preserved camera settings replace first-person input. The separate overview remains only until the next atlas increment. Sustained movement/obstruction feel still needs human playtesting; see [evidence](testing/third-person-controls.md).
+
+### Consistent exploration — 2026-09-19
+
+During atlas implementation, the user rejected showing unexplored scenery in close play while obscuring it in the strategic view. One 8 m horizontal radius must uncover terrain, objects and deposit identities in both views; this supersedes the checkpoint's separate 4 m surveying rule. Exploration ignores obstructions and camera direction. Explored areas remain visible and active after leaving, with Factorio given as the user's reference for that behavior. Fog conceals unexplored terrain and objects at every zoom, while sky and atmosphere remain visible. Physical interaction ranges remain in force. Objects crossing the exploration boundary are revealed only in their explored portion; a deposit is identified as soon as any part is revealed. Fresh starts and resets reveal only the starting 8 m area, with no exception for the ship or island outline. The opening menu must conceal unexplored scenery too. The user confirmed the complete rule set. It is implemented on `codex/strategic-atlas-integration`; see [the atlas validation record](testing/active-strategic-atlas.md) for checks and remaining playtest limits.
