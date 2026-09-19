@@ -1,6 +1,6 @@
 # Architecture
 
-Last updated: 2026-09-19. Experiment 004's seeded island arrival is implemented; captured-look and full browser traversal validation remain incomplete.
+Last updated: 2026-09-19. Seeded arrival, third-person close-play controls and localized obstruction fading are implemented. Active strategic atlas integration and sustained browser traversal validation remain pending.
 
 ## Runtime and tooling
 
@@ -10,7 +10,7 @@ TypeScript, Three.js, and Vite power a local browser application. Dependency ver
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `src/packages/island/index.ts`    | Seed selection and complete island generation, including solid geometry                                                   |
 | `src/packages/island/geometry.ts` | Pure block descriptions, ship authoring dimensions, terrain quads and palette consumed by rendering                       |
-| `src/packages/play/index.ts`      | `GameApplication`: input, capture, terminal, pause/overview, restart and island replacement; read-only play observations  |
+| `src/packages/play/index.ts`      | `GameApplication`: orbit, facing, selection/use, terminal, pause/overview, restart and island replacement  |
 | `src/packages/play/simulation.ts` | Headless simulation bound to one island: initial state, movement, standability, look/transitions and camera interpolation |
 | `src/resources.ts`                | Three.js resource mesh adapter using island geometry                                                                      |
 | `src/scene.ts`                    | Three.js scene, lighting, asset loading, avatar, camera and render resource lifetime                                      |
@@ -31,21 +31,27 @@ Dependency-cruiser scans `src/` and `tests/`, enforcing root-entry imports, priv
 
 The bounded height field spans 96 by 96 metres, sampled on a half-metre grid (192 by 192 cells). Seeded coast size, shape and outer hills surround a connected level starter shelf. Ship and resource placements vary within safe areas; vents stay clear of the ship and deposits. This deliberately trades interior terrain variety for a forgiving, reachable opening. Terrain is voxel-style height-field geometry, not editable block storage. Thirty-six 16-by-16 chunks contain top and exposed side quads sampled across chunk boundaries. Vent placements and suspended haze grains also use the seed. Terrain top and side quads have axis-aligned normals; the geometry preserves voxels.
 
-The stranded ship includes an external terminal. Within 3.2 metres horizontally and less than one metre vertically, E or the interaction button opens a paused terminal panel. A connection check records `linkChecked`; it is fictional local game state, not a network request or actual software download. Three resource deposits are discovered within four metres. Gathering is not implemented.
+The stranded ship includes an external terminal. Within 3.2 metres horizontally and less than one metre vertically, F or the interaction button opens a paused terminal panel when the ship is selected or nothing is selected. A selected deposit never redirects use to the ship. A connection check records `linkChecked`; it is fictional local game state, not a network request or actual software download. Three resource deposits are discovered within four metres. Gathering is not implemented.
 
-Changing seeds disposes the old renderer, scene-owned geometry/materials, shadow map and resize listener, then creates a new world while reusing the loaded ship template. Restart resets the current seed's player/journal/link state. Invalid-position recovery uses that same island's spawn and retains discoveries and the connection result. The URL records the seed, not progress; saves and old-generator compatibility are not implemented.
+Changing seeds disposes the old renderer, scene-owned geometry/materials, shadow map and resize listener, then creates a new world while reusing the loaded ship template. Restart resets the current seed's player/journal/link state and selection while preserving heading and zoom; replacing the seed preserves the same camera settings. Invalid-position recovery uses that same island's spawn and retains discoveries and the connection result. The URL records the seed, not progress; saves and old-generator compatibility are not implemented.
 
 The player walks at 4.3 m/s, sprints forward at 5.6 m/s, and sneaks at 1.3 m/s. Sneak overrides sprint. Horizontal diagonals normalize, and movement uses yaw independently of camera pitch. Physics runs at 120 Hz with bounded accumulated time and separate-axis collision resolution. Gravity is 24 m/s², terminal fall speed is 35 m/s, and jump takeoff targets a 1.25-metre apex. Space can repeat after landing, but cannot add an airborne jump. A 120 ms jump buffer preserves quick taps between frames and presses just before landing.
 
 The square player footprint is 0.6 metres wide; body height is 1.8 metres standing and 1.5 metres crouched. Collision samples every overlapped terrain cell. Terrain rises require jumping, drops permit falling, and grounded sneak requires support beneath each footprint corner. Vents, resource deposits and ship parts have finite box colliders. `ventParts` defines every tier, rim segment and core for both scene rendering and collision; the wider formations replace the old narrow trunks. `resourceParts` likewise supplies resource meshes and colliders; automated tests compare actual rendered bounds and colors for all three deposits. The asset integration test compares all seventeen ship mesh bounds to production colliders. The haze edge and the finite boundary block horizontal movement even in midair. Invalid/out-of-world positions recover to spawn while keeping discoveries; falls do not cause damage.
 
-The first-person camera uses a 70-degree vertical FOV, immediate yaw/pitch, and interpolation between simulation positions. Standing eye height is 1.62 metres, crouched eye height is 1.27 metres. Pitch is clamped short of vertical. The local avatar is visible only in overview. No head bob, sprint FOV effect, or trailing camera lag is applied.
+## Camera, controls and interaction
 
-In mouse mode, capture is requested only by explicit user action and active play begins after success. Keyboard mode starts directly. Capture failure leaves the game paused and keeps the action labeled Keep wandering. Keyboard play is explicitly selectable and does not request capture. WASD moves and arrows look in both active modes, including while the mouse is locked. Pause/resume, overview return and reset retain the mode until reload. The pause panel can switch modes. Drag-to-look is not supported. Escape, blur, visibility loss, and leaving captured mode clear held keys and queued jumps. Pause/overview freeze physics and clear accumulated time; returning requires a click. Settings live in the pause panel and persist across resets, but not reloads. A proximity check adds unique resource IDs even without movement. Reset clears view, physics, journal and terminal progress.
+The normal entry uses `GameApplication` in third-person mode. `camera.ts` owns the shoulder framing: manual wheel zoom from 3.5 to 70 metres, a fixed 55° FOV and tilt derived from zoom. It follows the interpolated humanoid anchor and adapts shoulder offset to portrait aspect ratios. Obstructions never adjust zoom, heading, tilt or FOV. The avatar is visible during play and faces its movement direction.
 
-`GameApplication` owns lifecycle transitions and its private control session, with automated coverage for terminal resume guards, capture cancellation, stale failures, seed replacement and input clearing. The DOM adapter applies its results to browser capture and panels. An open terminal rejects canvas and ordinary resume requests; its explicit return closes it before resuming. See [review fixes](testing/review-fixes.md).
+WASD moves relative to camera heading; Q/E or Left/Right orbit, Home restores starting heading without changing zoom, and Space/Ctrl/Shift retain jump/sprint/sneak physics. The pointer stays free. Wheel over the world zooms; wheel over UI does not. Gameplay shortcuts leave form-field typing alone. Pointer capture and keyboard-look settings are absent from the production UI; legacy capture APIs remain covered by regression tests inside play.
 
-Current browser evidence is in [experiment 004](testing/experiment-004.md); control history is in [experiment 002](testing/experiment-002.md). Pointer lock returned an internal Chromium error in the integrated browser, so actual locked relative input and lock-loss behavior remain unverified there; earlier traversal evidence used a now-removed drag mode and does not verify the current capture-only entry flow.
+Left-click selects visible ship or deposit geometry. `picking.ts` owns the production raycast and accepts canvas bounds without constructing a WebGL renderer. It ignores avatar descendants, resolves selectable ancestors from the nearest remaining hit and allows unselectable foreground geometry to block selection, including visually faded scenery. The scene adapter supplies current canvas bounds and rendered scene/camera transforms. Play owns selection validity and physical interaction reach; selection alone never moves or pauses the humanoid.
+
+`GameApplication` owns lifecycle transitions and held input. Terminal opening, Esc, blur and visibility loss pause play and clear movement, orbit aliases and queued jumps. Resume is explicit; clicking the world does not resume. The terminal's Return button closes it and resumes; Esc or focus loss closes it into the ordinary pause menu. Pause/resume preserves heading and zoom. The separate paused overview and M shortcut remain temporarily until the active atlas increment replaces them.
+
+`occlusion.ts` clones scenery materials, probes obstruction and smoothly fades fragments within a tapered camera-to-humanoid opening. Dithered coverage preserves depth writing and avoids whole-chunk transparency sorting. Visibility handling never feeds camera framing back to the camera. Original materials are restored on scene disposal.
+
+The entry HTML loads `main.ts` directly in development and production. Prototype query parameters do not select alternate routes, and the renderer contains no comparison treatments or fixture hooks. Current input and rendering evidence is in [third-person controls](testing/third-person-controls.md) and [prototype cleanup](testing/prototype-cleanup.md). Sustained traversal/orbit feel and rendering performance remain unverified; historical capture-only validation limits do not describe the current input flow.
 
 ## Blender asset pipeline
 
@@ -68,7 +74,7 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 
 ## Current boundaries
 
-Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 634 kB uncompressed JavaScript bundle, which includes Three.js.
+Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 640 kB uncompressed JavaScript bundle, which includes Three.js.
 
 ## Current presentation — 2026-09-19
 
@@ -78,26 +84,13 @@ The user selected the warm console interface from study B. `scene.ts` applies th
 
 The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-prototypes`, then removed from the playable implementation. `index.html` again loads `main.ts` directly. The prototype URL parameter no longer changes the game. See [experiment 004](testing/experiment-004.md) for validation and remaining limitations.
 
-## Camera study branch — 2026-09-19
+## Archived design evidence
 
-The throwaway `codex/third-person-camera-prototype` branch adds a development-only `?variant=A|B` entry through `src/entry.ts`. `camera-prototype.ts` and its model wrap the existing `GameApplication` and seeded renderer; the optional scene camera frame supplies third-person framing and movement-facing avatar presentation. The study reuses real play/collision/terminal rules and adds pointer selection to the rendering adapter. It does not replace the production first-person control contract. The distant strategic map is not implemented. See [validation](testing/camera-prototype.md); selection and final design remain pending.
+The comparison source, styles, tests and run commands are preserved on experiment branches, separate from the current implementation:
 
-### Camera feedback — 2026-09-19
+- `codex/third-person-camera-prototype`: raised/shoulder comparison; the user chose shoulder B and exclusively manual zoom. [Camera evidence](testing/camera-prototype.md).
+- `codex/strategic-map-prototype`: atlas/chart comparison; the user chose atlas A with actual multi-block footprints and gaps. This presentation is accepted but not yet integrated into production. [Map evidence](testing/strategic-map-prototype.md).
+- `codex/occlusion-prototype`: silhouette/fade/manual-orbit comparison; the user chose fading B. Whole-chunk fading was an experiment limitation, replaced by the localized production adapter. [Occlusion evidence](testing/occlusion-prototype.md).
+- Local archive `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`: exact pre-cleanup snapshot including the production-fade render fixtures used for historical validation.
 
-The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
-
-## Strategic map study — 2026-09-19
-
-On `codex/strategic-map-prototype`, the existing development study supports `?study=map&variant=A|B`. Both map variants use camera B. A separate canvas chart projects sampled terrain, world-scale object footprints and fixed-size identification callouts through the same perspective camera and crossfades at user-selected zoom. A prototype exploration set controls marker disclosure; it never mutates `GameApplication` discoveries. The labeled sample mode is presentation-only. Production entry remains first-person. See [validation and limits](testing/strategic-map-prototype.md).
-
-Strategic footprints reuse the island geometry entry point's ship, vent and resource parts. Each rectangle preserves its world-space horizontal bounds and gaps; pointer selection accepts both footprints and their callouts. Footprints are flattened onto their object's ground plane; they do not encode obstacle height or prove route safety.
-
-## Occlusion study — 2026-09-19
-
-`codex/occlusion-prototype` adds development-only `?study=occlusion&variant=A|B|C` for silhouette, mesh fading and manual-orbit comparisons. The scene opts into an obstruction adapter only in this study. Materials are cloned for fading and restored after rendering; the silhouette is excluded from pointer picking. Explicit fixture poses render against real seeded geometry without moving the playable humanoid. See [validation and limits](testing/occlusion-prototype.md). The user subsequently selected B (fading); this remains a prototype, with production integration pending the final design checkpoint.
-
-## Third-person production increment — 2026-09-19
-
-On `codex/third-person-controls`, the normal entry uses `GameApplication` in third-person mode. Play owns orbit aliases, facing, selection/reach and lifecycle/reset semantics; legacy capture APIs remain for historical tests and development studies. `camera.ts` owns input-only framing. `occlusion.ts` clones scenery materials, probes obstruction and smoothly fades fragments within a tapered camera-to-humanoid opening. Dithered coverage preserves depth writing and avoids whole-chunk transparency sorting. Camera framing is not passed back from visibility handling. Original materials are restored on scene disposal.
-
-The production DOM removes capture settings and adds selection/zoom feedback. The paused overview remains temporarily; atlas integration is the next increment. Development obstruction poses can exercise the actual production adapter with `production=1`. See [validation](testing/third-person-controls.md).
+The [accepted design](third-person-design.md) owns the behavior contract and remaining increments. First-person control history is retained in [experiment 002](testing/experiment-002.md) and [experiment 004](testing/experiment-004.md).

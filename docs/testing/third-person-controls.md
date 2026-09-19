@@ -17,10 +17,12 @@ Scope: first accepted production increment. Atlas integration and final combined
 - Seed replacement through the real UI changed map-check to signal-and-shelter, cleared selection/progress and retained 35% zoom. Reset/seed heading preservation at a nonzero heading is covered by production-code tests, not claimed from browser taps.
 - 390×844 production view inspected: avatar, controls and selection information visible. Fixed selection inheriting the journal's left position; panels now occupy separate sides and selection help remains visible. Restored viewport.
 - Production adapter exercised via `?study=occlusion&variant=B&seed=map-check&production=1`: localized ship opening, inside-ship opening and terrain opening inspected. The first untapered corridor revealed too much near-camera scenery; tapering it preserves geometry outside the local opening. Camera values stay fixed. The fixture is render-only and not gameplay traversal.
-- Browser warning/error logs from the production and fixture tabs are empty. GLSL compiled and rendered in the actual browser. Original comparison UI remains development-only.
+- Browser warning/error logs from the production and fixture tabs are empty. GLSL compiled and rendered in the actual browser. At this validation snapshot, comparison UI remained development-only. It was subsequently removed; see [prototype cleanup](prototype-cleanup.md).
 
 ## Limits
 
 The fade deliberately uses stippled fragment coverage rather than sorting entire translucent chunks. This texture and the aperture's size can be tuned during integrated playtesting. Inside-terrain views retain solid surrounding surfaces and a local opening; the camera is never relocated. No frame-rate benchmark or continuous obstruction traversal is claimed.
 
 Browser short key presses do not faithfully establish sustained walking, sprint/sneak or orbit feel. The real controller tests cover those semantics and existing traversal tests still pass; human held-control playtesting remains for the combined validation increment. The temporary paused overview is retained as agreed. No new strategic-map or click-to-move implementation is included here.
+
+Historical fixture evidence above refers to commit `41ab0d5`, preserved on `codex/third-person-prototype-archive-41ab0d5`; those URLs no longer expose fixtures on the implementation branch.

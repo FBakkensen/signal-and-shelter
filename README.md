@@ -67,15 +67,10 @@ The game is **Signal & Shelter**. The warm console interface from study B was se
 
 Three interface and visual studies were captured at commit `8df36f9` on `codex/alien-visual-prototypes`. That branch supports `/?variant=A`, `B` or `C` in development. The playable game removes the comparison route and switcher; open `/` to play. No prototype state is migrated.
 
-## Camera comparison on this throwaway branch
+## Archived design prototypes
 
-Run `npm run prototype:camera` to open the A/B study, or use the verified development command `npm run dev -- --port 5173` and visit `http://127.0.0.1:5173/?variant=A` (raised) or `?variant=B` (shoulder). The comparison is development-only; `/` and production builds retain the current game. A/B selection and seed survive URL reloads; zoom and play state do not.
+This is the production implementation branch. `npm run dev` opens normal third-person play; old `variant`, `study` and `production` query parameters do not select experiments.
 
-WASD moves relative to the view; Q/R temporarily orbit it; the pointer stays free for inspection. Scroll or Close/Far controls zoom, E uses a nearby terminal, Space jumps, Escape pauses, and the bottom arrows (or left/right arrow keys) switch variants. Compare walking around the ship and zooming out. Strategic-map rendering is a separate study. These bindings and camera settings are experimental, pending user feedback. See [camera-study validation and limitations](docs/testing/camera-prototype.md).
+The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
-## Strategic-map comparison on this throwaway branch
-
-Run `npm run prototype:map`, or the verified `npm run dev -- --port 5173` and open `http://127.0.0.1:5173/?study=map&variant=A`. Map A is an exploration atlas; map B is a terrain chart. Both use the selected shoulder camera B with manual zoom only. Scroll out (or click Far) to compare. Preview explored island shows example discovery information without changing actual progress. [Validation and assumptions](docs/testing/strategic-map-prototype.md).
-
-Occlusion comparison (throwaway development study): `npm run prototype:occlusion`.
-Use A/B/C for silhouette, fading or manual orbit; fixture buttons compare real seeded obstructions at the same zoom. See [validation](docs/testing/occlusion-prototype.md).
+The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play camera and controls are implemented; strategic atlas integration remains pending.

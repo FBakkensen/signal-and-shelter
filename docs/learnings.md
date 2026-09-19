@@ -164,3 +164,16 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Tests caught heading loss during reset because the old look function ignores paused states; preservation now explicitly updates the new state's heading. Independent orbit aliases remain held until both are released. Browser inspection caught and corrected selection/journal overlap.
 - Evidence: 68 tests and full required checks pass. Browser exercised normal start, ship selection, terminal/check/paused background guard/resume, jumping, manual zoom, UI scroll isolation, restart and new seed. Production fading inspected on real seeded ship, terrain and inside-ship render fixtures. Desktop/narrow inspection passed; browser warning/error logs empty.
 - Limits: fade uses visible stippling and a small local opening, not full-object alpha transparency. Camera-inside views retain surrounding solid surfaces. Continuous traversal/orbit feel and frame-rate targets are unverified; fixtures establish rendering, not route traversal. See [validation](testing/third-person-controls.md).
+
+## 2026-09-19 — Separate wayfinder experiments before implementation
+
+- The first third-person implementation incorrectly inherited throwaway study routes, source and renderer hooks. Development guards hid the comparisons from builds but left production adapters coupled to experiments.
+- Preserved the original prototype branches and the exact pre-cleanup fixture snapshot, then removed the comparison code, styles, tests, scripts and dispatch. Normal play now loads directly in development and builds.
+- Durable workflow: AGENTS.md points to the prototype handoff instructions before prototype tickets, implementation transitions and increment handoffs. Separation is required at each increment rather than deferred to final polish.
+- Evidence: production checks and all 54 production tests passed; old study URLs loaded normal play and zoom/terminal integration passed browser checks. See [cleanup validation](testing/prototype-cleanup.md).
+
+## 2026-09-19 — Pointer selection review findings resolved
+
+- Extracted the production raycast into `picking.ts`; the scene delegates to this same implementation. Real geometry tests now cover nested ship/resource identifiers, offset canvas projection, avatar exclusion, nearest-hit ordering, faded scenery blocking and no-selection cases.
+- Replaced obsolete active-control descriptions in architecture and consolidated prototype details into archived evidence links.
+- Evidence: full checks and all 58 tests passed. Integrated-browser ship selection, F use, explicit return and ground deselection passed; visual inspection and browser logs were clear. See [review-fix validation](testing/picking-review-fixes.md).

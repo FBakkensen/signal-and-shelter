@@ -114,7 +114,7 @@ element("start-form", HTMLFormElement).onsubmit = (event) => {
   try {
     const nextIsland = createIsland(seed);
     world.dispose();
-    world = createScene(canvas, nextIsland, shipAsset, false, true);
+    world = createScene(canvas, nextIsland, shipAsset);
     seedInput.value = seed;
     const url = new URL(location.href);
     url.searchParams.set("seed", seed);
@@ -294,7 +294,7 @@ function tick(now: number) {
 }
 try {
   shipAsset = await loadShip();
-  world = createScene(canvas, app.island, shipAsset, false, true);
+  world = createScene(canvas, app.island, shipAsset);
   updateWorldUI();
   startButton.disabled = false;
   startButton.textContent = "Begin your landing →";

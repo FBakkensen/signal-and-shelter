@@ -1,6 +1,6 @@
 # Third-person play and strategic zoom
 
-Status: accepted design, 2026-09-19. The user confirmed the defaults, fading refinements and delivery sequence. Production remains first-person; the camera, atlas and occlusion studies are throwaway evidence, not the production implementation.
+Status: accepted design, 2026-09-19. The user confirmed the defaults, fading refinements and delivery sequence. The first production increment implements third-person controls and localized fading; atlas integration remains pending. Camera, atlas and occlusion studies are archived throwaway evidence, separate from the production implementation.
 
 Owning checkpoint: [Settle the design and define playable implementation increments](https://github.com/FBakkensen/signal-and-shelter/issues/9). The [wayfinder map](https://github.com/FBakkensen/signal-and-shelter/issues/5) indexes decision rationale.
 

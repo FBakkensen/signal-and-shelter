@@ -49,3 +49,7 @@ Domain documentation uses a single-context layout. See `docs/agents/domain.md`.
 ### Package modules
 
 Packages are deep modules — see [src/packages/README.md](./src/packages/README.md) before adding or importing one.
+
+### Wayfinder prototypes and implementation
+
+Before creating a prototype ticket, beginning implementation after a prototype, or handing off a wayfinder increment, read [docs/agents/prototype-handoff.md](docs/agents/prototype-handoff.md). Prototype source stays on archived experiment branches; implementation branches contain production code and decision records.
