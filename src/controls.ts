@@ -29,7 +29,7 @@ export function mouseLook(
   dx: number,
   dy: number,
   sensitivity: number,
-  invertY: boolean,
+  invertY: boolean
 ) {
   const scale =
     (Number.isFinite(sensitivity)

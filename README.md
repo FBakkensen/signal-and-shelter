@@ -17,20 +17,20 @@ Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires 
 
 ## Controls
 
-| Input | Action |
-| --- | --- |
-| Begin your landing / Keep wandering | Enter first-person play with the selected controls |
-| Mouse | Look horizontally and vertically |
-| W A S D | Walk / strafe relative to your view |
-| Arrow keys | Look left/right/up/down, including while mouse look is active |
-| Ctrl + forward movement | Sprint |
-| Space | Jump; hold to jump again after landing |
-| Shift | Sneak, lower your viewpoint, and avoid walking off ledges |
-| M or Overview | Pause in the island overview |
-| Escape or pause button | Pause and release the mouse |
-| E near the ship console | Open the terminal; gameplay pauses while it is open |
-| Restart this island | Reset this seed's position, view, discoveries and data-link check |
-| Choose another seed | Return to the seed-entry screen |
+| Input                               | Action                                                            |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| Begin your landing / Keep wandering | Enter first-person play with the selected controls                |
+| Mouse                               | Look horizontally and vertically                                  |
+| W A S D                             | Walk / strafe relative to your view                               |
+| Arrow keys                          | Look left/right/up/down, including while mouse look is active     |
+| Ctrl + forward movement             | Sprint                                                            |
+| Space                               | Jump; hold to jump again after landing                            |
+| Shift                               | Sneak, lower your viewpoint, and avoid walking off ledges         |
+| M or Overview                       | Pause in the island overview                                      |
+| Escape or pause button              | Pause and release the mouse                                       |
+| E near the ship console             | Open the terminal; gameplay pauses while it is open               |
+| Restart this island                 | Reset this seed's position, view, discoveries and data-link check |
+| Choose another seed                 | Return to the seed-entry screen                                   |
 
 Mouse sensitivity and invert-Y are available in the pause panel. **Use keyboard controls** starts play without mouse capture; WASD moves and arrow keys look around. Keyboard controls remain active while the mouse is locked too. The pause panel can switch back to mouse controls. Keep wandering, overview return, and reset preserve the selected mode until reload. Escape pauses either mode. The integrated browser currently rejects mouse capture; keyboard play and its resume flow have been checked there. Captured mouse look still needs a standalone-browser playtest. Drag-to-look is not supported.
 
@@ -44,7 +44,9 @@ This experiment targets keyboard-and-mouse play. Narrow layouts are supported vi
 npm run check
 ```
 
-Runs strict TypeScript checking, type-aware ESLint with zero warnings, automated tests, Prettier verification, and a production build. Individual commands are `npm run typecheck`, `npm run lint`, `npm test`, `npm run format:check`, and `npm run build`. Use `npm run format` to format code.
+Runs strict TypeScript checking, package entry-point checks, type-aware ESLint with zero warnings, automated tests, Prettier verification, and a production build. Individual commands are `npm run typecheck`, `npm run lint:boundaries`, `npm run lint`, `npm test`, `npm run format:check`, and `npm run build`. Use `npm run format` to format code.
+
+Git commits also format staged files with Prettier, then run typechecking and tests.
 
 GitHub Actions runs the same checks for pushes and pull requests.
 

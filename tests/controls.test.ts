@@ -9,7 +9,7 @@ await test("WASD moves while arrow keys are reserved for look", () => {
   assert.equal(wasd.left, true);
   assert.equal(wasd.right, true);
   const arrows = inputFromKeys(
-    new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]),
+    new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"])
   );
   assert.ok(Object.values(arrows).every((value) => value === false));
 });
@@ -22,7 +22,7 @@ await test("Ctrl sprints, Shift sneaks, Space jumps; clearing releases all inten
     assert.equal(input.jump, true);
     keys.clear();
     assert.ok(
-      Object.values(inputFromKeys(keys)).every((value) => value === false),
+      Object.values(inputFromKeys(keys)).every((value) => value === false)
     );
   }
   assert.equal(inputFromKeys(new Set(["ShiftLeft"])).run, false);
@@ -36,15 +36,15 @@ await test("relative mouse look uses sensitivity, pitch inversion and safe bound
   assert.deepEqual(mouseLook(-100, 50, 2, true), { yaw: 0.4, pitch: 0.2 });
   assert.deepEqual(
     mouseLook(100, 50, NaN, false),
-    mouseLook(100, 50, 1, false),
+    mouseLook(100, 50, 1, false)
   );
   assert.deepEqual(
     mouseLook(100, 50, 100, false),
-    mouseLook(100, 50, 3, false),
+    mouseLook(100, 50, 3, false)
   );
   assert.deepEqual(
     mouseLook(100, 50, -1, false),
-    mouseLook(100, 50, 0.2, false),
+    mouseLook(100, 50, 0.2, false)
   );
   assert.deepEqual(mouseLook(NaN, Infinity, 1, false), { yaw: 0, pitch: 0 });
 });

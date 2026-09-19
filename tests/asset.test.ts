@@ -9,7 +9,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 await test("Blender ship exports load through the actual Three.js loader at metre scale", async () => {
   const buffer = await readFile(
-    new URL("../public/assets/ship.glb", import.meta.url),
+    new URL("../public/assets/ship.glb", import.meta.url)
   );
   const array = new Uint8Array(buffer).buffer;
   const asset = await new GLTFLoader().parseAsync(array, "");
@@ -21,7 +21,7 @@ await test("Blender ship exports load through the actual Three.js loader at metr
       meshCount++;
       const box = new Box3().setFromObject(object);
       box.translate(
-        new Vector3(beacon.x, heightAt(beacon.x, beacon.z), beacon.z),
+        new Vector3(beacon.x, heightAt(beacon.x, beacon.z), beacon.z)
       );
       assert.ok(
         colliders.some(
@@ -31,9 +31,9 @@ await test("Blender ship exports load through the actual Three.js loader at metr
             Math.abs(c.minY - box.min.y) < 0.001 &&
             Math.abs(c.maxY - box.max.y) < 0.001 &&
             Math.abs(c.minZ - box.min.z) < 0.001 &&
-            Math.abs(c.maxZ - box.max.z) < 0.001,
+            Math.abs(c.maxZ - box.max.z) < 0.001
         ),
-        `Collider must match ${object.name}`,
+        `Collider must match ${object.name}`
       );
     }
   });
@@ -46,7 +46,7 @@ await test("Blender ship exports load through the actual Three.js loader at metr
   assert.ok(size.z > 7);
   assert.ok(asset.scene.getObjectByName("Ship_Data_light"));
   const source = await readFile(
-    new URL("../assets/ship.blend", import.meta.url),
+    new URL("../assets/ship.blend", import.meta.url)
   );
   assert.ok(source.length > 1000);
 });

@@ -22,7 +22,7 @@ export function boxCollider(
   z: number,
   width: number,
   height: number,
-  depth: number,
+  depth: number
 ): Obstacle {
   return {
     minX: x - width / 2,
@@ -71,14 +71,14 @@ export function fits(
   y: number,
   height: number,
   sample: HeightSampler,
-  obstacles: readonly Obstacle[],
+  obstacles: readonly Obstacle[]
 ) {
   return (
     onIsland(p, sample) &&
     terrainHeights(p, sample).every((h) => h <= y + EPSILON) &&
     !obstacles.some(
       (o) =>
-        overlaps(p, o) && y < o.maxY - EPSILON && y + height > o.minY + EPSILON,
+        overlaps(p, o) && y < o.maxY - EPSILON && y + height > o.minY + EPSILON
     )
   );
 }
@@ -86,7 +86,7 @@ export function support(
   p: Point,
   y: number,
   sample: HeightSampler,
-  obstacles: readonly Obstacle[],
+  obstacles: readonly Obstacle[]
 ) {
   let floor = Math.max(...terrainHeights(p, sample));
   for (const o of obstacles) {
@@ -100,7 +100,7 @@ export function ledgeSafe(
   p: Point,
   y: number,
   sample: HeightSampler,
-  obstacles: readonly Obstacle[],
+  obstacles: readonly Obstacle[]
 ) {
   // Each corner must have support, so diagonal movement cannot slip off a corner.
   return [-RADIUS + EPSILON, RADIUS - EPSILON].every((dx) =>
@@ -115,10 +115,10 @@ export function ledgeSafe(
             x <= o.maxX &&
             z >= o.minZ &&
             z <= o.maxZ &&
-            Math.abs(o.maxY - y) < 0.05,
+            Math.abs(o.maxY - y) < 0.05
         )
       );
-    }),
+    })
   );
 }
 export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
@@ -135,8 +135,8 @@ export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
           vent.z + z,
           width,
           height,
-          depth,
-        ),
+          depth
+        )
       );
     }
   }
@@ -150,8 +150,8 @@ export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
         ship.z + z,
         width,
         height,
-        depth,
-      ),
+        depth
+      )
     );
   }
   for (const resource of island.resources) {
@@ -165,8 +165,8 @@ export function makeObstacles(island: Island = DEFAULT_ISLAND): Obstacle[] {
           resource.z + z,
           width,
           height,
-          depth,
-        ),
+          depth
+        )
       );
     }
   }

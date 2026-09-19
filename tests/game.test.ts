@@ -40,7 +40,7 @@ const active = (): GameState => ({
 const near = (actual: number, expected: number, tolerance = 1e-8) => {
   assert.ok(
     Math.abs(actual - expected) < tolerance,
-    `${String(actual)} != ${String(expected)}`,
+    `${String(actual)} != ${String(expected)}`
   );
 };
 function move(
@@ -50,7 +50,7 @@ function move(
   dt = STEP,
   sample: HeightSampler = flat,
   obstacles: readonly Obstacle[] = [],
-  island: Island = DEFAULT_ISLAND,
+  island: Island = DEFAULT_ISLAND
 ) {
   for (let i = 0; i < frames; i++) {
     s = advance(s, input, dt, sample, obstacles, island);
@@ -62,7 +62,7 @@ await test("walk, forward sprint, sneak priority and backward sprint restriction
   near(move(active(), { forward: true, run: true }).distance, RUN_SPEED);
   near(
     move(active(), { forward: true, run: true, sneak: true }).distance,
-    SNEAK_SPEED,
+    SNEAK_SPEED
   );
   near(move(active(), { back: true, run: true }).distance, WALK_SPEED);
   near(move(active(), { right: true, run: true }).distance, WALK_SPEED);
@@ -120,7 +120,7 @@ await test("one-block terrace requires a jump; taller walls block and permit sli
     { right: true, forward: true, jump: true, run: true },
     120,
     STEP,
-    wall,
+    wall
   );
   assert.ok(slid.x <= 0.7);
   assert.ok(slid.z < -3);
@@ -138,7 +138,7 @@ await test("walking off a cliff falls and lands; sneak protects edges and corner
     { right: true, back: true, sneak: true },
     240,
     STEP,
-    cliff,
+    cliff
   );
   assert.ok(sneaking.x <= 0.7 && sneaking.z <= 0.7);
   near(sneaking.y, 6);
@@ -147,7 +147,7 @@ await test("walking off a cliff falls and lands; sneak protects edges and corner
     { right: true, sneak: true, jump: true },
     70,
     STEP,
-    cliff,
+    cliff
   );
   assert.ok(leap.x > 1);
   assert.equal(leap.grounded, false);
@@ -160,7 +160,7 @@ await test("solid boxes stop sprinting, support landing and stop upward head mot
     120,
     STEP,
     flat,
-    [wall],
+    [wall]
   );
   assert.ok(s.x < 1.11);
   assert.ok(s.z < -3);
@@ -171,7 +171,7 @@ await test("solid boxes stop sprinting, support landing and stop upward head mot
     60,
     STEP,
     flat,
-    [platform],
+    [platform]
   );
   near(landed.y, 4);
   assert.equal(landed.grounded, true);
@@ -213,7 +213,7 @@ await test("fixed-step physics agrees across frame rates; invalid times freeze a
   }
   near(
     advance(active(), { forward: true }, 100, flat).distance,
-    WALK_SPEED * 0.1,
+    WALK_SPEED * 0.1
   );
   for (const dt of [0, -1, NaN, Infinity]) {
     const s = active();
@@ -246,7 +246,7 @@ await test("invalid positions recover to spawn preserving the journal; fresh res
     const s = advance(
       { ...active(), ...bad, discovered: ["copper"] },
       {},
-      STEP,
+      STEP
     );
     near(s.x, SPAWN.x);
     near(s.z, SPAWN.z);
@@ -276,7 +276,7 @@ await test("stationary discovery respects four-metre boundary, persists and neve
 await test("terrain footprint includes diagonal cells and box collision uses vertical bounds", () => {
   assert.deepEqual(
     terrainHeights({ x: 1, z: 1 }, (x, z) => Math.floor(x) * 2 + Math.floor(z)),
-    [0, 1, 2, 3],
+    [0, 1, 2, 3]
   );
   const box = boxCollider(0.5, 5, 0.5, 1, 1, 1);
   assert.equal(fits(active(), 3, STANDING_HEIGHT, flat, [box]), true);
@@ -353,12 +353,12 @@ await test("all seeded resources are reachable by executing the controller along
             STEP,
             heightAt,
             obstacles,
-            island,
+            island
           );
         }
         assert.ok(
           Math.hypot(s.x - point.x, s.z - point.z) <= 0.035,
-          `Stuck on route to ${resource.id} at ${String(s.x)},${String(s.z)}`,
+          `Stuck on route to ${resource.id} at ${String(s.x)},${String(s.z)}`
         );
         s = move(s, {}, 100, STEP, heightAt, obstacles, island);
       }
@@ -396,7 +396,7 @@ await test("terminal interaction is proximity-limited, remembers connection and 
     STEP,
     island.heightAt,
     makeObstacles(island),
-    island,
+    island
   );
   assert.equal(recovered.x, island.spawn.x);
   assert.equal(recovered.z, island.spawn.z);
@@ -409,7 +409,7 @@ await test("footprint catches a raised half-cell between old one-metre sample po
   const halfCell = (x: number) => (x >= 0.5 && x < 1 ? 3.5 : 3);
   assert.equal(
     fits({ x: 0.55, z: 0.25 }, 3, STANDING_HEIGHT, halfCell, []),
-    false,
+    false
   );
   const state = { ...active(), x: 0.1, z: 0.25 };
   const stopped = move(state, { right: true }, 120, STEP, halfCell);

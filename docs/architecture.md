@@ -6,21 +6,25 @@ Last updated: 2026-09-19. Experiment 004's seeded island arrival is implemented;
 
 TypeScript, Three.js, and Vite power a local browser application. Dependency versions are pinned in package.json and package-lock.json. The compiler uses strict mode, unchecked-index protection, exact optional properties, unused-code checks, and no implicit returns. ESLint applies its recommended rules plus TypeScript's strict and stylistic type-aware presets, consistent type imports, mandatory braces, and zero-warning validation.
 
-| File | Responsibility |
-| --- | --- |
-| `src/world.ts` | Seed normalization, versioned island generation, terrain, regions, vents, resource deposits, and exposed terrain quads |
-| `src/game.ts` | Seed-specific initial/recovery state, movement, resource discovery, terminal proximity/data-link state, and view transitions |
-| `src/collision.ts` | Player footprint, terrain support, ledge protection and finite solid obstacle boxes |
-| `src/application.ts` | Game/session lifecycle: entry, capture outcomes, terminal, pause/overview, reset and seed replacement |
-| `src/session.ts` | Capture request lifecycle, held inputs, quick-jump buffering and keyboard play |
-| `src/controls.ts` | Keyboard-to-intent mapping and relative mouse sensitivity/inversion |
-| `src/blocks.ts` | Common typed block-part definition |
-| `src/resources.ts` | Shared resource parts and their production mesh factory |
-| `src/ship.ts` | Shared ship block dimensions, colors, and positions for collision and Blender authoring |
-| `src/world-visuals.ts` | World palette and block dimensions shared by vent rendering and collision |
-| `src/scene.ts` | Three.js rendering, geometry, lighting, authored asset loading, avatar and camera |
-| `src/main.ts` | Seed form/URL, world replacement, DOM/input adapters, terminal panel, journal, and animation loop |
-| `tests/` | Production-logic tests and a real GLTFLoader asset integration test |
+| File                   | Responsibility                                                                                                               |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `src/world.ts`         | Seed normalization, versioned island generation, terrain, regions, vents, resource deposits, and exposed terrain quads       |
+| `src/game.ts`          | Seed-specific initial/recovery state, movement, resource discovery, terminal proximity/data-link state, and view transitions |
+| `src/collision.ts`     | Player footprint, terrain support, ledge protection and finite solid obstacle boxes                                          |
+| `src/application.ts`   | Game/session lifecycle: entry, capture outcomes, terminal, pause/overview, reset and seed replacement                        |
+| `src/session.ts`       | Capture request lifecycle, held inputs, quick-jump buffering and keyboard play                                               |
+| `src/controls.ts`      | Keyboard-to-intent mapping and relative mouse sensitivity/inversion                                                          |
+| `src/blocks.ts`        | Common typed block-part definition                                                                                           |
+| `src/resources.ts`     | Shared resource parts and their production mesh factory                                                                      |
+| `src/ship.ts`          | Shared ship block dimensions, colors, and positions for collision and Blender authoring                                      |
+| `src/world-visuals.ts` | World palette and block dimensions shared by vent rendering and collision                                                    |
+| `src/scene.ts`         | Three.js rendering, geometry, lighting, authored asset loading, avatar and camera                                            |
+| `src/main.ts`          | Seed form/URL, world replacement, DOM/input adapters, terminal panel, journal, and animation loop                            |
+| `tests/`               | Production-logic tests and a real GLTFLoader asset integration test                                                          |
+
+## TypeScript package modules
+
+Reusable packages live under `src/packages/<name>/` as deep modules: root files are the package's entry points, while every subfolder is private implementation or test material. `src/packages/example/` is a copy-me starter, not an extracted game system. Dependency-cruiser scans all of `src/`, so it checks app imports into packages as well as package imports, and rejects dependency cycles; `npm run lint:boundaries` is part of `npm run check`. See [the package guide](../src/packages/README.md) for the interface and test conventions.
 
 ## World and movement
 

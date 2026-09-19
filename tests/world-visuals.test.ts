@@ -12,7 +12,7 @@ await test("vent tiers retain block geometry, a square open rim and finite bound
     for (const part of parts) {
       assert.ok(part.position.every(Number.isFinite));
       assert.ok(
-        part.size.every((value) => value > 0 && Number.isFinite(value)),
+        part.size.every((value) => value > 0 && Number.isFinite(value))
       );
     }
     for (const tier of tiers) {
@@ -26,8 +26,8 @@ await test("vent tiers retain block geometry, a square open rim and finite bound
       rim.every(
         (part) =>
           Math.abs(part.position[0]) >= part.size[0] / 2 ||
-          Math.abs(part.position[2]) >= part.size[2] / 2,
-      ),
+          Math.abs(part.position[2]) >= part.size[2] / 2
+      )
     );
   }
   for (const invalid of [NaN, Infinity, 0, -1, 8]) {
@@ -47,9 +47,9 @@ await test("all rendered vent block definitions have matching production collide
         vent.z + z,
         width,
         height,
-        depth,
+        depth
       );
-    }),
+    })
   );
   assert.deepEqual(makeObstacles(island).slice(0, expected.length), expected);
 });
