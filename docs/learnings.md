@@ -153,3 +153,7 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 
 - Compared through-wall silhouette, obstructing-mesh fading and manual orbit with fixed user zoom. A silhouette preserves scenery but cannot restore surrounding context when the camera is inside it; whole-mesh fading can reveal large terrain interiors. These are observed prototype tradeoffs, not accepted design decisions.
 - All 63 tests and required checks passed; integrated-browser ship/vent/inside-geometry comparisons and narrow inspection are recorded in [validation](testing/occlusion-prototype.md). Clear-view silhouette tint was found and corrected. Continuous traversal and performance remain unmeasured.
+
+### Occlusion selection — 2026-09-19
+
+The user selected B (fade obstructing scenery) after the comparison. Broad terrain fading, exposed undersides and abrupt opacity changes remain known prototype limitations, not settled production quality. Camera zoom/framing remains entirely independent of obstruction. The next design checkpoint must turn this direction into implementation acceptance checks. No code or browser behavior changed in recording this selection.

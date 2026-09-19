@@ -75,3 +75,7 @@ The user selected A, the exploration atlas, with a required correction: multi-bl
 The user accepted the [third-person control contract](https://github.com/FBakkensen/signal-and-shelter/issues/8): keyboard orbit, free-pointer selection and explicit use, movement at every zoom, explicit pause/resume, and retirement of the separate paused overview. This is a design decision; production and prototype bindings have not yet been migrated.
 
 [Click-to-move and shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) is the agreed next effort after camera/map delivery. Right-click terrain requests a route; WASD cancels it immediately; unreachable destinations show feedback. Humanoid and future robots should share pathfinding with appropriate movement capabilities. Robot gameplay remains separate.
+
+### Occlusion feedback — 2026-09-19
+
+The user selected B: fade scenery that blocks the humanoid. Preserve user-selected zoom and camera framing; obstruction must never trigger camera pull-in, zoom-out or FOV compensation. This chooses the treatment direction. The prototype's abrupt 18% opacity and whole-terrain-chunk fading remain rough implementation details to refine at the final design checkpoint. See the [occlusion decision](https://github.com/FBakkensen/signal-and-shelter/issues/10).

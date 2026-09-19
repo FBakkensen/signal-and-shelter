@@ -1,6 +1,6 @@
 # Occlusion comparison — 2026-09-19
 
-Question: how should camera B show an obstructed humanoid without changing zoom? Human selection pending.
+Question: how should camera B show an obstructed humanoid without changing zoom? User selected B (fade obstructing scenery) after comparison.
 
 ## Validation plan
 
@@ -20,3 +20,7 @@ Exercise real Three.js geometry for clear, blocked and camera-inside cases; veri
 Fixtures use render-only humanoid poses around actual island geometry; they are explicitly labeled examples, not traversed routes or discoveries. Free play retains camera B. Temporary controls are Q/R and arrows for comparison, not the accepted final bindings. No terminal interaction is implemented in this isolated comparison.
 
 Fading probes three points on the humanoid and switches whole meshes abruptly to 18% opacity; thin edge occlusions can be missed, terrain chunks may disappear broadly, and transparency sorting remains rough. Silhouette uses a depth-tested duplicate and may show overlapping body parts when blocked. No performance claim or final visual tuning. Scenery continues to block picking even when faded. The strategic atlas remains a separate study.
+
+## Selection — 2026-09-19
+
+User chose B. This is acceptance of the fading direction, not new validation or acceptance of every rough visual artifact. Existing evidence and limitations above remain applicable.
