@@ -18,13 +18,12 @@ export interface Position extends Point {
 export interface Tuning {
   setup: number;
   recovery: number;
-  climb: number;
-  drop: number;
+  jumpHeight: number;
 }
 export const PRESETS: Record<string, Tuning> = {
-  brisk: { setup: 0.12, recovery: 0.12, climb: 1, drop: 1 },
-  deliberate: { setup: 0.25, recovery: 0.3, climb: 1, drop: 1 },
-  weighty: { setup: 0.45, recovery: 0.5, climb: 1, drop: 1 },
+  brisk: { setup: 0.12, recovery: 0.12, jumpHeight: 1 },
+  deliberate: { setup: 0.25, recovery: 0.3, jumpHeight: 1 },
+  weighty: { setup: 0.45, recovery: 0.5, jumpHeight: 1 },
 };
 export const BOUNDS = { minX: -10, maxX: 18, minZ: -8, maxZ: 8 };
 const SPEED = WALK_SPEED;
@@ -165,7 +164,7 @@ export class NavigationStudy {
   readonly nodes = new Map<string, Position>();
   readonly edges = new Map<string, Edge[]>();
   position: Position;
-  tuning: Tuning = { setup: 0.25, recovery: 0.3, climb: 1, drop: 1 };
+  tuning: Tuning = { setup: 0.12, recovery: 0.12, jumpHeight: 1 };
   destination: Point | undefined;
   plan: Plan | undefined;
   phase: "idle" | "walking" | "setup" | "flight" | "recovery" = "idle";
@@ -290,7 +289,7 @@ export class NavigationStudy {
       return undefined;
     }
     const rise = to.y - from.y;
-    if (rise > this.tuning.climb || -rise > this.tuning.drop) {
+    if (rise > this.tuning.jumpHeight || -rise > this.tuning.jumpHeight) {
       return undefined;
     }
     if (this.walkable(from, to)) {
@@ -318,7 +317,7 @@ export class NavigationStudy {
         }
       }
     }
-    if (highest - from.y > this.tuning.climb + 0.001) {
+    if (highest - from.y > this.tuning.jumpHeight + 0.001) {
       return undefined;
     }
     const apex = from.y + (JUMP_SPEED * JUMP_SPEED) / (2 * GRAVITY);

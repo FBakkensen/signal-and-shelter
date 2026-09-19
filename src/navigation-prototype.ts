@@ -21,8 +21,8 @@ document.body.innerHTML = `
 <h1>How should a jump feel?</h1>
 <p>Try short preparation and landing pauses. A faster walking detour can beat a jumping shortcut.</p>
 <label>Course<select id="course"><option value="terraces">1 · Terraces</option><option value="detour">2 · Jump or detour</option><option value="frontier">3 · Explore toward a target</option><option value="clearance">4 · Low ceiling</option></select></label>
-<label>Timing<select id="timing"><option value="brisk">A · Brisk — 0.12 / 0.12 s</option><option value="deliberate" selected>B · Deliberate — 0.25 / 0.30 s</option><option value="weighty">C · Weighty — 0.45 / 0.50 s</option></select></label>
-<label>Maximum climb<select id="climb"><option value="0.5">0.5 m</option><option value="1" selected>1.0 m</option></select></label>
+<label>Timing<select id="timing"><option value="brisk" selected>A · Brisk — 0.12 / 0.12 s</option><option value="deliberate">B · Deliberate — 0.25 / 0.30 s</option><option value="weighty">C · Weighty — 0.45 / 0.50 s</option></select></label>
+<label>Maximum jump up / down<select id="jump-height"><option value="0.5">0.5 m</option><option value="1" selected>1.0 m</option></select></label>
 <div class="actions"><button id="reset-study">Restart course</button><button id="terminal-study">Use terminal</button></div>
 <details><summary>What to try</summary><p id="guide"></p><p>Right-click the world, including fog. WASD takes over. Q/E orbit; scroll to zoom. Space, Ctrl and Shift have no gameplay action.</p><p>The cube beside your starting point is a test terminal. Approach within 3.2 m to use it.</p></details>
 <details><summary>Study limitations</summary><p>Custom courses use the game’s movement, gravity, body collisions, keyboard mapping and camera. The navigation planner and automatic-jump controller are experimental. Airborne steering is limited. This study does not establish whole-world routing or final navigation architecture.</p></details>
@@ -167,7 +167,10 @@ function buildWorld() {
 function configure() {
   const preset = PRESETS[select("timing").value];
   if (preset) {
-    study.configure({ ...preset, climb: Number(select("climb").value) });
+    study.configure({
+      ...preset,
+      jumpHeight: Number(select("jump-height").value),
+    });
   }
 }
 const keys = new Set<string>();
@@ -184,7 +187,7 @@ function restart() {
 }
 select("course").onchange = restart;
 select("timing").onchange = configure;
-select("climb").onchange = configure;
+select("jump-height").onchange = configure;
 element("reset-study").onclick = restart;
 element("pause-study").onclick = () => {
   study.pause();

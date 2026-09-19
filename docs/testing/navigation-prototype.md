@@ -1,6 +1,6 @@
 # Automatic navigation prototype — 2026-09-19
 
-Status: playable study prepared for human feedback; no user-selected timing or traversal verdict yet. This is archived experiment evidence, not production validation.
+Status: user reports the revised prototype feels great and selected timing A with a shared 1 m maximum jump up/down. Prototype remains open for further playtesting. This is archived experiment evidence, not production validation.
 
 ## Scope and run
 
@@ -8,7 +8,7 @@ Archive branch: `codex/navigation-prototype`. Return branch: `codex/navigation-d
 
 Run `npm ci` then `npm run dev -- --port 5173`. `npm run check` validates types, boundaries, lint, tests, formatting and the build. Both commands were exercised. A copy of the built site is served from `/tmp/signal-navigation-prototype-preview` on `http://127.0.0.1:5174/` for this session, independently of branch checkout.
 
-Four controlled courses cover terraces, a low bar versus a walking detour, progressive exploration with a tall wall and uncrossable gap, and a low ceiling. Timing presets use setup/recovery seconds: A 0.12/0.12, B 0.25/0.30, C 0.45/0.50. Maximum climb can be 0.5 or 1.0 m; default maximum drop is 1.0 m. These are hypotheses for playtesting.
+Four controlled courses cover terraces, a low bar versus a walking detour, progressive exploration with a tall wall and uncrossable gap, and a low ceiling. Timing presets use setup/recovery seconds: A 0.12/0.12, B 0.25/0.30, C 0.45/0.50. The shared maximum jump up/down can be 0.5 or 1.0 m. The user selected 1.0 m and timing A; both are now defaults.
 
 ## Validation plan
 
@@ -72,3 +72,9 @@ The experiment still uses a course-specific planner and test UI, with one highes
 Distant zoom uses course geometry rather than the production atlas. Unknown-target picking projects onto a reference plane and does not consult hidden terrain height. The test terminal is a fixture, not the authored spaceship. The timer continues independently of rendering but caps a delayed update at five seconds; true hidden-tab throttling and OS sleep remain unverified. Earlier responsive-layout observations were not repeated because this correction did not change layout.
 
 Do not infer final navigation architecture, whole-world reachability, performance, or acceptance of timings from these checks. The prototype ticket remains open until the user plays it and supplies a verdict.
+
+## Selected tuning — 2026-09-19
+
+User feedback: the revised prototype seems great; maximum jump down must equal maximum jump up, with 1 m selected, and timing A selected (0.12 s setup plus 0.12 s recovery). The controller and planner now use one `jumpHeight` field for both directions, so the values cannot diverge. The model and initial UI default to A and 1 m. Carry this selection into the design branch when the user finishes the prototype; no branch switch was made for this addition.
+
+Validation: added a real traversal regression covering forward and return routes at both 0.5 m and 1 m, checking ascending and descending graph edges against the same limit. `npm run check` passed all 14 test files, including 18 prototype cases, with the existing bundle-size warning. Reloaded the integrated-browser preview, observed A and 1.0 m selected, clicked Restart course, and confirmed both remained selected. Screenshot inspection confirmed the shared “Maximum jump up / down” label and course display. This focused check reuses the prior movement/landing evidence.

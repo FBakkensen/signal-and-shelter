@@ -4,7 +4,7 @@
 
 This branch is a throwaway navigation study and must never be merged. Its normal entry opens four controlled voxel courses. Run `npm ci`, then `npm run dev -- --port 5173`; run `npm run check` for validation. The production README below describes the baseline, not this experiment.
 
-Right-click requests a destination, including unknown ground. WASD cancels it; Q/E or Left/Right arrows orbit, Home restores heading, and the mouse wheel zooms. Jumping is automatic; Space, Ctrl and Shift have no gameplay action. Compare A/B/C setup and recovery timings, try the 0.5/1.0 m climb limits, and use the terminal near spawn to check running versus explicit pause.
+Right-click requests a destination, including unknown ground. WASD cancels it; Q/E or Left/Right arrows orbit, Home restores heading, and the mouse wheel zooms. Jumping is automatic; Space, Ctrl and Shift have no gameplay action. Timing A (0.12 s setup / 0.12 s recovery) and a shared 1.0 m maximum jump up/down are the selected defaults. Compare A/B/C timings, try the shared 0.5/1.0 m limits, and use the terminal near spawn to check running versus explicit pause.
 
 Start with **Terraces**, then **Jump or detour**. Brisk timing can jump the low bar while weighty timing makes the walking detour cheaper. **Explore toward a target** includes a wall and an uncrossable gap; **Low ceiling** exercises body clearance. Only the requested destination is marked.
 

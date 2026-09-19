@@ -141,7 +141,7 @@ await test("prototype traversal respects production body clearance and bounded d
   assert.equal(study.destination, undefined);
   assert.equal(study.completedJumps, 0);
   const terraces = new NavigationStudy();
-  terraces.configure({ setup: 0.1, recovery: 0.1, climb: 0.5, drop: 0.5 });
+  terraces.configure({ setup: 0.1, recovery: 0.1, jumpHeight: 0.5 });
   terraces.request({ x: 8.25, z: 0.25 });
   run(terraces, 15);
   assert.equal(terraces.destination, undefined);
@@ -312,4 +312,27 @@ await test("automatic jump follows game gravity and lands without teleporting", 
   assert.ok(airborne);
   assert.equal(study.phase, "recovery");
   assert.equal(study.position.y, 2.5);
+});
+
+await test("chosen defaults are timing A and the same 1 m jump limit in both directions", () => {
+  const study = new NavigationStudy();
+  assert.deepEqual(study.tuning, {
+    setup: 0.12,
+    recovery: 0.12,
+    jumpHeight: 1,
+  });
+  for (const jumpHeight of [0.5, 1]) {
+    study.configure({ ...study.tuning, jumpHeight });
+    study.request({ x: 8.25, z: 0.25 });
+    run(study, 15);
+    study.request({ x: -6.75, z: 0.25 });
+    run(study, 15);
+    assert.equal(study.destination, undefined);
+    const jumps = [...study.edges.values()].flat().filter((edge) => edge.jump);
+    assert.ok(jumps.some((edge) => edge.to.y > edge.from.y));
+    assert.ok(jumps.some((edge) => edge.to.y < edge.from.y));
+    for (const edge of jumps) {
+      assert.ok(Math.abs(edge.to.y - edge.from.y) <= jumpHeight);
+    }
+  }
 });
