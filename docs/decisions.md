@@ -110,8 +110,9 @@ Record significant choices with date, status, rationale, and consequences. Use p
 ## D012 — Run project checks in GitHub Actions
 
 - Date: 2026-09-19
-- Status: Accepted; workflow added, remote run pending repository authentication
+- Status: Implemented; public repository created and CI required on `main`
 - Basis: The user requested a public GitHub repository so GitHub Actions can run.
 - Decision: Run `npm run check` on pushes and pull requests using Node 26 with read-only repository permissions.
 - Rationale: Apply the project's existing local verification command to changes in the hosted repository.
-- Consequence: The first hosted run can start after the public remote is created and the current branch is pushed.
+- Consequence: The `check` job is required before merging pull requests into `main`, with the rule enforced for administrators.
+- Evidence: The first hosted run passed on 2026-09-19 ([Actions run](https://github.com/FBakkensen/signal-and-shelter/actions/runs/35440373710)); GitHub branch protection requires the `check` status.
