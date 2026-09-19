@@ -26,7 +26,7 @@ Robots, gathering, power management, manufacturing, software delivery, and inter
 
 See [experiment 004's validation record](testing/experiment-004.md) for actual checks and limitations. No performance target has been agreed. Procedural footsteps, quiet wind, and interaction sounds remain untested suggestions.
 
-## Open questions
+## Accepted navigation and control direction
 
 ### Shared navigation direction — 2026-09-19
 
@@ -43,6 +43,8 @@ The user accepted the navigation prototype on 2026-09-19: one shared maximum ele
 These are accepted upcoming requirements, not implemented behavior. They supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Production still implements those earlier behaviors; background execution has not yet been validated.
 
 2026-09-19: the user approved implementation of [experiment 002's controls plan](controls-plan.md). The controls are implemented; speed, sensitivity, jump weight, and comfort still await user feedback. The user rejects drag-to-look and explicitly requested a keyboard alternative: WASD movement with arrow-key look. Keyboard input must also work while mouse look is locked. Keyboard play now bypasses mouse capture; captured look remains unverified in the integrated browser.
+
+## Open questions
 
 - Voxel visuals are required. Should blocks also become editable?
 - Does repairing the spaceship and leaving become a goal, or does building a home remain the focus?

@@ -1,6 +1,6 @@
-# Wayfinder prototype handoff
+# Prototype experiments and handoff
 
-Apply the experiment guidance to all prototypes in this project. Apply the branch and handoff workflow when a wayfinder map uses prototypes, including maps whose Notes authorize later implementation.
+Apply the experiment guidance and commit, push, archive and return-to-branch workflow to every prototype in this project. Wayfinder-specific ticket and checkpoint steps apply when the prototype belongs to a wayfinder map.
 
 ## Design a representative experiment
 
