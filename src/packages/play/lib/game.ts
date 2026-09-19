@@ -31,6 +31,8 @@ export interface GameState extends Point {
   linkChecked: boolean;
 }
 export interface Input {
+  /** World-space walking intent, magnitude clamped to one. */
+  direction?: Point;
   forward?: boolean;
   back?: boolean;
   left?: boolean;
@@ -38,6 +40,23 @@ export interface Input {
   run?: boolean;
   sneak?: boolean;
   jump?: boolean;
+}
+export function movementDirection(input: Input, yaw: number): Point {
+  if (input.direction) {
+    const { x, z } = input.direction;
+    if (!Number.isFinite(x) || !Number.isFinite(z)) {
+      return { x: 0, z: 0 };
+    }
+    const scale = Math.max(1, Math.hypot(x, z));
+    return { x: x / scale, z: z / scale };
+  }
+  const forward = Number(Boolean(input.forward)) - Number(Boolean(input.back));
+  const right = Number(Boolean(input.right)) - Number(Boolean(input.left));
+  const length = Math.hypot(forward, right) || 1;
+  return {
+    x: (right * Math.cos(yaw) - forward * Math.sin(yaw)) / length,
+    z: (-forward * Math.cos(yaw) - right * Math.sin(yaw)) / length,
+  };
 }
 export const WALK_SPEED = 4.3;
 export const RUN_SPEED = 5.6;
@@ -112,21 +131,14 @@ function simulate(
     }
   }
   const forward = Number(Boolean(input.forward)) - Number(Boolean(input.back));
-  const right = Number(Boolean(input.right)) - Number(Boolean(input.left));
-  const length = Math.hypot(forward, right) || 1;
   const speed = s.crouching
     ? SNEAK_SPEED
     : input.run && forward > 0
       ? RUN_SPEED
       : WALK_SPEED;
-  const dx =
-    ((right * Math.cos(s.yaw) - forward * Math.sin(s.yaw)) / length) *
-    speed *
-    STEP;
-  const dz =
-    ((-forward * Math.cos(s.yaw) - right * Math.sin(s.yaw)) / length) *
-    speed *
-    STEP;
+  const direction = movementDirection(input, s.yaw);
+  const dx = direction.x * speed * STEP;
+  const dz = direction.z * speed * STEP;
   const protect = s.grounded && s.crouching;
   for (const [axis, delta] of [
     ["x", dx],

@@ -2,7 +2,13 @@
 import { DEFAULT_ISLAND } from "./packages/island/index.ts";
 import type { Island, Point } from "./packages/island/index.ts";
 import type { Obstacle } from "./packages/island/geometry.ts";
-import { createSimulation } from "./packages/play/simulation.ts";
+import {
+  createSimulation,
+  WALK_SPEED,
+  GRAVITY,
+  JUMP_SPEED,
+  STEP,
+} from "./packages/play/simulation.ts";
 import { exploredAt } from "./packages/play/exploration.ts";
 
 export type Course = "terraces" | "detour" | "frontier" | "clearance";
@@ -21,7 +27,7 @@ export const PRESETS: Record<string, Tuning> = {
   weighty: { setup: 0.45, recovery: 0.5, climb: 1, drop: 1 },
 };
 export const BOUNDS = { minX: -10, maxX: 18, minZ: -8, maxZ: 8 };
-const SPEED = 4.3;
+const SPEED = WALK_SPEED;
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.z - b.z);
 const key = (p: Point) =>
   `${String(Math.floor(p.x * 2))},${String(Math.floor(p.z * 2))}`;
@@ -93,6 +99,7 @@ interface Edge {
   to: Position;
   jump: boolean;
   duration: number;
+  apex: number;
 }
 interface Motion {
   edge: Edge;
@@ -151,6 +158,7 @@ class Queue {
 export class NavigationStudy {
   readonly island: Island;
   readonly simulation: ReturnType<typeof createSimulation>;
+  private state: ReturnType<ReturnType<typeof createSimulation>["createState"]>;
   exploration: ReturnType<
     ReturnType<typeof createSimulation>["createState"]
   >["exploration"];
@@ -174,10 +182,12 @@ export class NavigationStudy {
   private dirty = false;
   constructor(readonly course: Course = "terraces") {
     this.island = makeCourse(course);
+    const bounds = BOUNDS;
     this.simulation = createSimulation(this.island);
-    this.exploration = this.simulation.createState().exploration;
-    for (let x = BOUNDS.minX + 0.25; x < BOUNDS.maxX; x += 0.5) {
-      for (let z = BOUNDS.minZ + 0.25; z < BOUNDS.maxZ; z += 0.5) {
+    this.state = { ...this.simulation.createState(), paused: false };
+    this.exploration = this.state.exploration;
+    for (let x = bounds.minX + 0.25; x < bounds.maxX; x += 0.5) {
+      for (let z = bounds.minZ + 0.25; z < bounds.maxZ; z += 0.5) {
         const p = { x, z };
         const levels = [
           this.island.heightAt(x, z),
@@ -198,7 +208,7 @@ export class NavigationStudy {
           }
         }
         const y = Math.max(...levels);
-        if (this.simulation.canStandAt(p, y)) {
+        if (this.supported({ ...p, y })) {
           this.nodes.set(key(p), { ...p, y });
         }
       }
@@ -207,7 +217,7 @@ export class NavigationStudy {
     if (!spawn) {
       throw new Error("Study spawn must be standable");
     }
-    this.position = { ...spawn };
+    this.position = { x: this.state.x, y: this.state.y, z: this.state.z };
     this.buildEdges();
   }
   known(p: Point) {
@@ -218,77 +228,194 @@ export class NavigationStudy {
       [-0.3, 0, 0.3].every((dz) => this.known({ x: p.x + dx, z: p.z + dz }))
     );
   }
+  private surface(p: Point) {
+    let y = this.island.heightAt(p.x, p.z);
+    for (const solid of this.island.solids) {
+      if (
+        p.x >= solid.minX &&
+        p.x <= solid.maxX &&
+        p.z >= solid.minZ &&
+        p.z <= solid.maxZ
+      ) {
+        y = Math.max(y, solid.maxY);
+      }
+    }
+    return y;
+  }
+  private supported(p: Position) {
+    return (
+      this.simulation.canStandAt(p, p.y) &&
+      [-0.299, 0, 0.299].every((dx) =>
+        [-0.299, 0, 0.299].every(
+          (dz) =>
+            Math.abs(this.surface({ x: p.x + dx, z: p.z + dz }) - p.y) < 0.001
+        )
+      )
+    );
+  }
   private trajectory(edge: Edge, t: number): Position {
-    const y = edge.from.y + (edge.to.y - edge.from.y) * t;
-    // Conservative parabolic jump, separate from production flight integration.
-    const lift = edge.jump
-      ? 4 * (0.35 + Math.abs(edge.to.y - edge.from.y) * 0.65) * t * (1 - t)
-      : 0;
+    // One ballistic arc, with zero vertical velocity at its apex.
+    const gravity = GRAVITY;
+    const up = JUMP_SPEED;
+    const time = t * edge.duration;
     return {
       x: edge.from.x + (edge.to.x - edge.from.x) * t,
       z: edge.from.z + (edge.to.z - edge.from.z) * t,
-      y: y + lift,
+      y: edge.jump
+        ? edge.from.y + up * time - (gravity * time * time) / 2
+        : edge.from.y,
     };
   }
+  private walkable(from: Position, to: Position) {
+    if (Math.abs(to.y - from.y) > 0.001) {
+      return false;
+    }
+    const count = Math.max(2, Math.ceil(distance(from, to) / 0.05));
+    for (let i = 0; i <= count; i++) {
+      const t = i / count;
+      if (
+        !this.supported({
+          x: from.x + (to.x - from.x) * t,
+          z: from.z + (to.z - from.z) * t,
+          y: from.y,
+        })
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
   private edge(from: Position, to: Position): Edge | undefined {
+    if (!this.supported(from) || !this.supported(to)) {
+      return undefined;
+    }
     const rise = to.y - from.y;
     if (rise > this.tuning.climb || -rise > this.tuning.drop) {
       return undefined;
     }
-    const jump = Math.abs(rise) > 0.01;
-    const e = {
-      from,
-      to,
-      jump,
-      duration: jump
-        ? Math.max(0.38, distance(from, to) / SPEED)
-        : distance(from, to) / SPEED,
-    };
-    for (let i = 0; i <= 24; i++) {
-      const p = this.trajectory(e, i / 24);
-      if (!this.simulation.canStandAt(p, p.y)) {
-        return undefined;
+    if (this.walkable(from, to)) {
+      return {
+        from,
+        to,
+        jump: false,
+        duration: distance(from, to) / SPEED,
+        apex: from.y,
+      };
+    }
+    // Jump only over low solid geometry. Missing terrain is never a jumpable gap.
+    let highest = Math.max(from.y, to.y);
+    const samples = Math.ceil(distance(from, to) / 0.04);
+    for (let i = 0; i <= samples; i++) {
+      const t = i / samples,
+        x = from.x + (to.x - from.x) * t,
+        z = from.z + (to.z - from.z) * t;
+      for (const dx of [-0.299, 0, 0.299]) {
+        for (const dz of [-0.299, 0, 0.299]) {
+          if (this.island.heightAt(x + dx, z + dz) < 1.2) {
+            return undefined;
+          }
+          highest = Math.max(highest, this.surface({ x: x + dx, z: z + dz }));
+        }
       }
     }
-    return e;
+    if (highest - from.y > this.tuning.climb + 0.001) {
+      return undefined;
+    }
+    const apex = from.y + (JUMP_SPEED * JUMP_SPEED) / (2 * GRAVITY);
+    const duration =
+      (JUMP_SPEED + Math.sqrt(JUMP_SPEED * JUMP_SPEED - 2 * GRAVITY * rise)) /
+      GRAVITY;
+    if (distance(from, to) / duration > SPEED) {
+      return undefined;
+    }
+    const edge = { from, to, jump: true, duration, apex };
+    // Execute the real simulation for candidate jumps, including axis collision and landing.
+    let state = { ...this.simulation.createState(), ...from, paused: false };
+    for (let time = 0; time < duration + STEP * 2; time += STEP) {
+      const remaining = Math.max(STEP, duration - time);
+      const intent = {
+        x: (to.x - state.x) / (remaining * SPEED),
+        z: (to.z - state.z) / (remaining * SPEED),
+      };
+      state = this.simulation.advance(
+        state,
+        {
+          direction: time < duration ? intent : { x: 0, z: 0 },
+          jump: time === 0,
+        },
+        STEP
+      );
+      if (time > STEP && state.grounded) {
+        return distance(state, to) < 0.04 &&
+          Math.abs(state.y - to.y) < 0.001 &&
+          this.supported(state)
+          ? edge
+          : undefined;
+      }
+    }
+    return undefined;
   }
   private buildEdges() {
     this.edges.clear();
-    for (const [id, from] of this.nodes) {
-      const edges: Edge[] = [];
-      // Four directions deliberately expose the coarse prototype's steering limits.
-      for (const [dx, dz] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ]) {
-        if (dx === undefined || dz === undefined) {
+  }
+  private outgoing(from: Position) {
+    const id = key(from),
+      existing = this.edges.get(id);
+    if (existing && same(existing[0]?.from ?? from, from)) {
+      return existing;
+    }
+    const edges: Edge[] = [];
+    // Eight directions with swept body checks; diagonals cannot cut obstacle corners.
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+      [1, 1],
+      [-1, 1],
+      [1, -1],
+      [-1, -1],
+    ]) {
+      if (dx === undefined || dz === undefined) {
+        continue;
+      }
+      for (const length of [0.5, 1, 1.5, 2]) {
+        const to = this.nodes.get(
+          key({ x: from.x + dx * length, z: from.z + dz * length })
+        );
+        if (!to) {
           continue;
         }
-        for (const length of [0.5, 1, 1.5]) {
-          const to = this.nodes.get(
-            key({ x: from.x + dx * length, z: from.z + dz * length })
-          );
-          if (!to) {
-            continue;
-          }
-          if (length > 0.5 && Math.abs(to.y - from.y) < 0.01) {
-            continue;
-          }
-          const edge = this.edge(from, to);
-          if (edge) {
-            edges.push(edge);
-          }
+        const edge = this.edge(from, to);
+        if (edge && (length === 0.5 || edge.jump)) {
+          edges.push(edge);
+        }
+        // If a supported walking step exists, walk closer before considering takeoff.
+        if (length === 0.5 && edge && !edge.jump) {
+          break;
+        }
+        // Land at the first supported surface that clears the obstruction.
+        if (edge?.jump) {
+          break;
         }
       }
-      this.edges.set(id, edges);
     }
+    this.edges.set(id, edges);
+    return edges;
   }
   configure(tuning: Tuning) {
     this.tuning = { ...tuning };
     this.buildEdges();
     this.dirty = true;
+  }
+  cancelDestination() {
+    this.destination = undefined;
+    this.plan = undefined;
+    this.dirty = false;
+    if (this.phase === "walking" || this.phase === "setup") {
+      this.motion = undefined;
+      this.phase = "idle";
+    }
   }
   request(target: Point) {
     if (
@@ -300,6 +427,10 @@ export class NavigationStudy {
       return;
     }
     this.destination = { ...target };
+    if (this.phase === "walking") {
+      this.motion = undefined;
+      this.phase = "idle";
+    }
     this.manual = undefined;
     this.dirty = true;
     if (this.phase === "setup") {
@@ -317,13 +448,29 @@ export class NavigationStudy {
     }
     if (direction) {
       this.message = "Direct control";
+      if (this.phase === "walking") {
+        this.motion = undefined;
+        this.phase = "idle";
+      }
       this.destination = undefined;
       this.plan = undefined;
       this.dirty = false;
     }
     const wasManual = this.manual !== undefined;
-    const changed = !direction || !this.manual || !same(direction, this.manual);
-    this.manual = direction;
+    const directionLength = direction
+      ? Math.hypot(direction.x, direction.z)
+      : 0;
+    const normalized =
+      direction && directionLength > 0
+        ? { x: direction.x / directionLength, z: direction.z / directionLength }
+        : undefined;
+    const changed =
+      !normalized || !this.manual || !same(normalized, this.manual);
+    const length = direction ? Math.hypot(direction.x, direction.z) : 0;
+    this.manual =
+      direction && length > 0
+        ? { x: direction.x / length, z: direction.z / length }
+        : undefined;
     if (this.phase === "setup" && changed && (wasManual || direction)) {
       this.motion = undefined;
       this.phase = "idle";
@@ -366,10 +513,13 @@ export class NavigationStudy {
       return;
     }
     this.recalculations++;
-    const start = this.nodes.get(key(this.position));
-    if (!start) {
-      return;
-    }
+    const start = { ...this.position };
+    const entry = [...this.nodes.values()]
+      .filter((p) => distance(p, start) < 1.1)
+      .map((p) => this.edge(start, p))
+      .filter(
+        (e): e is Edge => e !== undefined && !e.jump && this.knownEdge(e)
+      );
     const queue = new Queue();
     queue.push(start, 0);
     const costs = new Map<string, number>([[key(start), 0]]);
@@ -391,7 +541,9 @@ export class NavigationStudy {
         bestDistance = d;
         bestCost = cost;
       }
-      for (const edge of this.edges.get(key(node)) ?? []) {
+      for (const edge of same(node, start)
+        ? [...entry, ...this.outgoing(node).filter((e) => same(e.from, start))]
+        : this.outgoing(node)) {
         if (!this.knownEdge(edge)) {
           continue;
         }
@@ -436,9 +588,17 @@ export class NavigationStudy {
     // Background timer elapsed time is processed in small steps; OS suspension is not guaranteed.
     let remaining = Math.min(seconds, 5);
     while (remaining > 0.00001) {
-      const dt = Math.min(remaining, 1 / 60);
+      const dt = Math.min(remaining, STEP);
       remaining -= dt;
       this.step(dt);
+    }
+  }
+  private move(direction: Point, dt: number, jump = false) {
+    this.state = this.simulation.advance(this.state, { direction, jump }, dt);
+    this.position = { x: this.state.x, y: this.state.y, z: this.state.z };
+    if (this.state.exploration !== this.exploration) {
+      this.exploration = this.state.exploration;
+      this.dirty = true;
     }
   }
   private step(dt: number) {
@@ -457,18 +617,54 @@ export class NavigationStudy {
       let next: Edge | undefined;
       if (this.manual) {
         const direction = this.manual;
-        next = (this.edges.get(key(this.position)) ?? []).find(
-          (e) =>
-            (e.to.x - e.from.x) * direction.x +
-              (e.to.z - e.from.z) * direction.z >
-            0.01
-        );
+        const target = {
+          x: this.position.x + direction.x * SPEED * dt,
+          z: this.position.z + direction.z * SPEED * dt,
+          y: this.position.y,
+        };
+        const ahead = {
+          ...target,
+          x: target.x + direction.x * 0.35,
+          z: target.z + direction.z * 0.35,
+        };
+        if (this.walkable(this.position, ahead)) {
+          this.move(direction, dt);
+          this.phase = "walking";
+          return;
+        }
+        // Stop at the solid edge, then find the first fully supported landing ahead.
+        for (let length = 0.35; length <= 2.05; length += 0.05) {
+          const p = {
+            x: this.position.x + direction.x * length,
+            z: this.position.z + direction.z * length,
+          };
+          const landing = { ...p, y: this.surface(p) };
+          next = this.edge(this.position, landing);
+          if (next?.jump) {
+            break;
+          }
+          next = undefined;
+        }
       } else if (this.destination) {
-        const target = this.plan?.points[0];
+        const points = this.plan?.points ?? [];
+        const target = points[0];
         if (target) {
-          next = (this.edges.get(key(this.position)) ?? []).find((e) =>
-            same(e.to, target)
-          );
+          next = this.edge(this.position, target);
+          // String-pull flat runs into a straight swept segment, not stair-step diagonals.
+          for (let i = 1; i < points.length; i++) {
+            const farther = points[i];
+            if (!farther || !this.walkable(this.position, farther)) {
+              break;
+            }
+            const direct = this.edge(this.position, farther);
+            if (!direct || direct.jump || !this.knownEdge(direct)) {
+              break;
+            }
+            next = direct;
+            if (this.plan) {
+              this.plan.points = points.slice(i);
+            }
+          }
         } else if (distance(this.position, this.destination) <= 0.36) {
           this.destination = undefined;
           this.plan = undefined;
@@ -491,40 +687,22 @@ export class NavigationStudy {
       }
       return;
     }
-    motion.time += dt;
-    const t = Math.min(1, motion.time / motion.edge.duration);
-    const base = this.trajectory(motion.edge, t);
+    const remaining = Math.max(dt, motion.edge.duration - motion.time);
+    const direction = {
+      x: (motion.edge.to.x - this.position.x) / (remaining * SPEED),
+      z: (motion.edge.to.z - this.position.z) / (remaining * SPEED),
+    };
     if (motion.edge.jump && this.manual) {
-      const steer = Math.sin(Math.PI * t) * 0.18;
-      const steered = {
-        ...base,
-        x: base.x + this.manual.x * steer,
-        z: base.z + this.manual.z * steer,
-      };
-      this.position = this.simulation.canStandAt(steered, steered.y)
-        ? steered
-        : base;
-    } else {
-      this.position = base;
+      direction.x += this.manual.x * 0.12;
+      direction.z += this.manual.z * 0.12;
     }
-    // Reuse production exploration reveal via its headless simulation seam.
-    const state = this.simulation.createState();
-    const revealed = this.simulation.advance(
-      {
-        ...state,
-        ...this.position,
-        exploration: this.exploration,
-        paused: false,
-      },
-      {},
-      1 / 120
-    ).exploration;
-    if (revealed !== this.exploration) {
-      this.exploration = revealed;
-      this.dirty = true;
-    }
-    if (t >= 1) {
-      this.position = { ...motion.edge.to };
+    this.move(direction, dt, motion.edge.jump && motion.time === 0);
+    motion.time += dt;
+    if (
+      motion.edge.jump
+        ? this.state.grounded
+        : distance(this.position, motion.edge.to) < 0.001
+    ) {
       this.motion = undefined;
       this.plan?.points.shift();
       if (motion.edge.jump) {

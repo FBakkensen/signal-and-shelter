@@ -8,6 +8,11 @@ import {
 import type { Course } from "./navigation-prototype-model.ts";
 import { ThirdPersonCamera } from "./camera.ts";
 import "./navigation-prototype.css";
+import {
+  inputFromKeys,
+  movementDirection,
+  keyboardLook,
+} from "./packages/play/simulation.ts";
 
 document.body.innerHTML = `
 <canvas id="study-world" tabindex="0" aria-label="Navigation study. Right-click to move; WASD walk; Q E orbit; wheel zoom; Escape pause."></canvas>
@@ -20,7 +25,7 @@ document.body.innerHTML = `
 <label>Maximum climb<select id="climb"><option value="0.5">0.5 m</option><option value="1" selected>1.0 m</option></select></label>
 <div class="actions"><button id="reset-study">Restart course</button><button id="terminal-study">Use terminal</button></div>
 <details><summary>What to try</summary><p id="guide"></p><p>Right-click the world, including fog. WASD takes over. Q/E orbit; scroll to zoom. Space, Ctrl and Shift have no gameplay action.</p><p>The cube beside your starting point is a test terminal. Approach within 3.2 m to use it.</p></details>
-<details><summary>Study limitations</summary><p>Controlled course; four-direction grid movement and a simplified collision-checked jump arc. Airborne steering is limited to a small collision-checked deflection, returning to the selected landing. This does not establish production physics, seeded-island traversal or final navigation architecture.</p></details>
+<details><summary>Study limitations</summary><p>Custom courses use the game’s movement, gravity, body collisions, keyboard mapping and camera. The navigation planner and automatic-jump controller are experimental. Airborne steering is limited. This study does not establish whole-world routing or final navigation architecture.</p></details>
 </aside>
 <footer><strong id="status"></strong><span id="stats"></span><span id="hint">Right-click a destination · WASD walk · Q/E orbit · scroll zoom</span></footer>
 <section id="pause-dialog" class="dialog" hidden><h2>Paused</h2><p>Position, destination and jump phase are preserved.</p><button id="resume-study">Resume</button></section>
@@ -252,12 +257,24 @@ window.addEventListener("keydown", (event) => {
     return;
   }
   if (
-    ["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "Space"].includes(
-      event.code
-    )
+    [
+      "KeyW",
+      "KeyA",
+      "KeyS",
+      "KeyD",
+      "KeyQ",
+      "KeyE",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "Space",
+    ].includes(event.code)
   ) {
     event.preventDefault();
     keys.add(event.code);
+    if (event.code === "Home") {
+      heading = 0;
+    }
     if (["KeyW", "KeyA", "KeyS", "KeyD"].includes(event.code)) {
       updateDirectInput();
     }
@@ -265,6 +282,7 @@ window.addEventListener("keydown", (event) => {
 });
 window.addEventListener("keyup", (event) => {
   keys.delete(event.code);
+  updateDirectInput();
 });
 window.addEventListener("blur", () => {
   keys.clear();
@@ -277,16 +295,9 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 function updateDirectInput() {
-  const forward = Number(keys.has("KeyW")) - Number(keys.has("KeyS"));
-  const right = Number(keys.has("KeyD")) - Number(keys.has("KeyA"));
-  const x = right * Math.cos(heading) - forward * Math.sin(heading),
-    z = -forward * Math.cos(heading) - right * Math.sin(heading);
+  const direction = movementDirection(inputFromKeys(keys), heading);
   study.direct(
-    forward || right
-      ? Math.abs(x) > Math.abs(z)
-        ? { x: Math.sign(x), z: 0 }
-        : { x: 0, z: Math.sign(z) }
-      : undefined
+    Math.hypot(direction.x, direction.z) > 0 ? direction : undefined
   );
 }
 let last = performance.now(),
@@ -296,8 +307,14 @@ function advance() {
     dt = Math.max(0, (now - last) / 1000);
   last = now;
   if (!study.paused && !study.terminal) {
-    heading +=
-      ((keys.has("KeyQ") ? 1 : 0) - (keys.has("KeyE") ? 1 : 0)) * dt * 1.8;
+    const orbit = new Set(keys);
+    if (keys.has("KeyQ")) {
+      orbit.add("ArrowLeft");
+    }
+    if (keys.has("KeyE")) {
+      orbit.add("ArrowRight");
+    }
+    heading += keyboardLook(orbit, dt).yaw;
     updateDirectInput();
   }
   study.tick(dt);
@@ -318,6 +335,7 @@ function advance() {
 }
 // A timer continues model ticks in background tabs where animation frames are suspended.
 window.setInterval(advance, 25);
+let lastDrawnPosition = { ...study.position };
 function render() {
   const width = innerWidth,
     height = innerHeight;
@@ -330,6 +348,12 @@ function render() {
     camera.updateProjectionMatrix();
   }
   const position = study.position;
+  const dx = position.x - lastDrawnPosition.x,
+    dz = position.z - lastDrawnPosition.z;
+  if (Math.hypot(dx, dz) > 0.001) {
+    body.rotation.y = Math.atan2(-dx, -dz);
+  }
+  lastDrawnPosition = { ...position };
   body.position.set(position.x, position.y, position.z);
   body.scale.y =
     study.phase === "setup" ? 0.87 : study.phase === "recovery" ? 0.92 : 1;

@@ -16,3 +16,12 @@ export function createSimulation(island: Island = DEFAULT_ISLAND) {
       fits(point, y, STANDING_HEIGHT, island.heightAt, island.solids),
   };
 }
+
+export {
+  movementDirection,
+  WALK_SPEED,
+  GRAVITY,
+  JUMP_SPEED,
+  STEP,
+} from "./lib/game.ts";
+export { inputFromKeys, keyboardLook } from "./lib/controls.ts";
