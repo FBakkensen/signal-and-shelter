@@ -4,16 +4,22 @@ import "./style.css";
 import "./camera-prototype.css";
 import { createIsland, DEFAULT_SEED } from "./packages/island/index.ts";
 import { CameraStudy, readVariant } from "./camera-prototype-model.ts";
+import { createStrategicMap } from "./strategic-map-prototype.ts";
+import { mapOpacity } from "./strategic-map-prototype-model.ts";
 import { createScene, loadShip } from "./scene.ts";
 
 const params = new URLSearchParams(location.search);
+const mapMode = params.get("study") === "map";
+let mapVariant = readVariant(params.get("variant"));
+let sample = false;
 const study = new CameraStudy(
   createIsland(params.get("seed") ?? DEFAULT_SEED),
-  readVariant(params.get("variant"))
+  mapMode ? "B" : readVariant(params.get("variant"))
 );
-document.body.className = "camera-study";
+document.body.className = mapMode ? "camera-study map-study" : "camera-study";
 document.body.innerHTML = `
   <canvas id="study-world" tabindex="0" aria-label="Camera comparison island"></canvas>
+  <canvas id="strategic-map" aria-label="Strategic island chart"></canvas>
   <header><a class="brand" href="/">◈ Signal &amp; Shelter</a><span>CAMERA STUDY · THROWAWAY</span><a href="/">Return to current game ↗</a></header>
   <aside class="study-info">
     <span class="eyebrow">CLOSE PLAY → ISLAND SURVEY</span>
@@ -44,6 +50,33 @@ function reportError() {
 window.addEventListener("error", reportError);
 window.addEventListener("unhandledrejection", reportError);
 let selection: string | null = null;
+const mapCanvas = el("strategic-map");
+if (!(mapCanvas instanceof HTMLCanvasElement)) {
+  throw new Error("Missing map canvas");
+}
+const strategicMap = mapMode
+  ? createStrategicMap(mapCanvas, study.app.island)
+  : null;
+if (mapMode) {
+  const sampleButton = document.createElement("button");
+  sampleButton.id = "map-sample";
+  sampleButton.textContent = "Preview explored island";
+  sampleButton.onclick = () => {
+    sample = !sample;
+    selection = null;
+    sampleButton.textContent = sample
+      ? "Return to actual exploration"
+      : "Preview explored island";
+    sync();
+  };
+  document.querySelector(".study-switcher")?.append(sampleButton);
+  const help = document.querySelector(".study-info details");
+  if (help) {
+    help.innerHTML =
+      "<summary>What to compare</summary><p>Scroll past 62% to blend into a map; fully mapped at 80%. Both treatments keep camera B and your chosen distance. Walk to reveal an 8 m radius; deposits still need the existing 4 m survey. These are experimental rules.</p><p>Preview explored island reveals a clearly labeled example without changing gameplay discoveries. Click map symbols to inspect. Cu copper · Fe iron · Si silica · ? unsurveyed. Robot and building symbols are deferred until those systems exist.</p>";
+  }
+}
+
 function sync() {
   const a = study.variant === "A";
   el("study-title").textContent = a
@@ -53,13 +86,34 @@ function sync() {
   el("study-description").textContent = a
     ? "A downward view keeps your feet, nearby terrain and working space in sight. Zoom out toward an overhead survey."
     : "A low, offset view puts the humanoid beside your sightline. Zooming out lifts the camera toward the same overhead survey.";
+  if (mapMode) {
+    el("study-title").textContent =
+      mapVariant === "A" ? "A · Exploration atlas" : "B · Terrain chart";
+    el("study-label").textContent =
+      mapVariant === "A" ? "A · Atlas" : "B · Chart";
+    el("study-description").textContent =
+      (sample
+        ? "EXAMPLE PREVIEW · All deposits shown; actual progress unchanged. "
+        : "ACTUAL EXPLORATION · ") +
+      (mapVariant === "A"
+        ? "Dark unvisited ground; elevation colors and labels on explored ground."
+        : "Terrain contours remain visible; known deposits use compact symbols. Click a symbol for its name.");
+    const banner = document.querySelector("header > span");
+    if (banner) {
+      banner.textContent = "STRATEGIC MAP STUDY · CAMERA B";
+    }
+  }
   const url = new URL(location.href);
-  url.searchParams.set("variant", study.variant);
+  url.searchParams.set("variant", mapMode ? mapVariant : study.variant);
   url.searchParams.set("seed", study.app.island.seed);
   history.replaceState(null, "", url);
 }
 function switchVariant() {
-  study.switchVariant();
+  if (mapMode) {
+    mapVariant = mapVariant === "A" ? "B" : "A";
+  } else {
+    study.switchVariant();
+  }
   sync();
 }
 el("study-prev").onclick = switchVariant;
@@ -72,6 +126,13 @@ el("study-far").onclick = () => {
 };
 el("study-reset").onclick = () => {
   study.restart();
+  strategicMap?.exploration.clear();
+  sample = false;
+  const sampleButton = document.getElementById("map-sample");
+  if (sampleButton) {
+    sampleButton.textContent = "Preview explored island";
+  }
+  sync();
   selection = null;
   canvas.focus();
 };
@@ -145,7 +206,10 @@ try {
     if (study.app.state.paused) {
       return;
     }
-    selection = world.pick(e.clientX, e.clientY);
+    selection =
+      strategicMap && mapOpacity(study.zoom) >= 0.5
+        ? strategicMap.pick(e.clientX, e.clientY)
+        : world.pick(e.clientX, e.clientY);
     canvas.focus();
   });
   let previous = performance.now();
@@ -155,8 +219,16 @@ try {
     const { app } = study;
     const frame = study.frame(innerWidth / innerHeight);
     world.render(app.state, app.viewPosition, now / 1000, true, frame);
+    strategicMap?.render(
+      app.state,
+      frame,
+      study.zoom,
+      mapVariant,
+      sample,
+      selection
+    );
     el("study-state").textContent =
-      `${app.state.paused ? "PAUSED" : "PLAYING"} · Zoom ${String(Math.round(study.zoom * 100))}% · Boom ${frame.distance.toFixed(1)} / ${frame.requestedDistance.toFixed(1)} m · Tilt ${frame.elevation.toFixed(0)}° · Orbit ${((app.state.yaw * 180) / Math.PI).toFixed(0)}° · Manual zoom only\nPosition ${app.state.x.toFixed(2)}, ${app.state.y.toFixed(2)}, ${app.state.z.toFixed(2)} · ${app.state.grounded ? "Grounded" : "Airborne"} · Surveyed ${String(app.state.discovered.length)}/${String(app.island.resources.length)} · Seed ${app.island.seed}`;
+      `${app.state.paused ? "PAUSED" : "PLAYING"} · Zoom ${String(Math.round(study.zoom * 100))}% · Boom ${frame.distance.toFixed(1)} / ${frame.requestedDistance.toFixed(1)} m · Tilt ${frame.elevation.toFixed(0)}° · Orbit ${((app.state.yaw * 180) / Math.PI).toFixed(0)}° · Manual zoom only${mapMode ? ` · Map ${String(Math.round(mapOpacity(study.zoom) * 100))}%${sample ? " · EXAMPLE PREVIEW" : ""}` : ""}\nPosition ${app.state.x.toFixed(2)}, ${app.state.y.toFixed(2)}, ${app.state.z.toFixed(2)} · ${app.state.grounded ? "Grounded" : "Airborne"} · Surveyed ${String(app.state.discovered.length)}/${String(app.island.resources.length)} · Seed ${app.island.seed}`;
     el("study-modal").hidden = !app.state.paused;
     el("modal-title").textContent = app.terminalOpen
       ? "Ship communications"
@@ -177,7 +249,7 @@ try {
             ? "Stranded ship · Terminal within reach."
             : "Stranded ship · Walk closer to its terminal to use it."
         : resource
-          ? app.state.discovered.includes(resource.id)
+          ? app.state.discovered.includes(resource.id) || (mapMode && sample)
             ? resource.name
             : "Unsurveyed deposit · Approach to identify it."
           : "Click the ship or a resource deposit.";

@@ -15,7 +15,8 @@
     "format:check": "prettier --check src tests index.html package.json tsconfig.json eslint.config.js .dependency-cruiser.cjs .prettierrc .lintstagedrc",
     "format": "prettier --write src tests index.html package.json tsconfig.json eslint.config.js .dependency-cruiser.cjs .prettierrc .lintstagedrc",
     "prepare": "husky",
-    "prototype:camera": "vite --host 127.0.0.1 --port 5173 --open /?variant=A"
+    "prototype:camera": "vite --host 127.0.0.1 --port 5173 --open /?variant=A",
+    "prototype:map": "vite --host 127.0.0.1 --port 5173 --open \"/?study=map&variant=A\""
   },
   "dependencies": {
     "three": "0.186.0"

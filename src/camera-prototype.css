@@ -162,3 +162,32 @@
     padding: 6px 10px;
   }
 }
+
+#strategic-map {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+.camera-study header,
+.study-info,
+.study-selection,
+.study-status,
+.study-switcher {
+  z-index: 2;
+}
+.study-switcher {
+  max-width: calc(100% - 24px);
+}
+
+@media (max-width: 760px) {
+  .map-study .study-info {
+    opacity: 0.96;
+  }
+  .map-study .study-info > p:first-of-type {
+    max-height: 48px;
+    overflow-y: auto;
+  }
+}

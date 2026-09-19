@@ -85,3 +85,7 @@ The throwaway `codex/third-person-camera-prototype` branch adds a development-on
 ### Camera feedback — 2026-09-19
 
 The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
+
+## Strategic map study — 2026-09-19
+
+On `codex/strategic-map-prototype`, the existing development study supports `?study=map&variant=A|B`. Both map variants use camera B. A separate canvas chart projects sampled terrain and fixed-size markers through the same perspective camera and crossfades at user-selected zoom. A prototype exploration set controls marker disclosure; it never mutates `GameApplication` discoveries. The labeled sample mode is presentation-only. Production entry remains first-person. See [validation and limits](testing/strategic-map-prototype.md).

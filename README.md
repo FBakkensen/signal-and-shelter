@@ -73,3 +73,7 @@ Three interface and visual studies were captured at commit `8df36f9` on `codex/a
 Run `npm run prototype:camera` to open the A/B study, or use the verified development command `npm run dev -- --port 5173` and visit `http://127.0.0.1:5173/?variant=A` (raised) or `?variant=B` (shoulder). The comparison is development-only; `/` and production builds retain the current game. A/B selection and seed survive URL reloads; zoom and play state do not.
 
 WASD moves relative to the view; Q/R temporarily orbit it; the pointer stays free for inspection. Scroll or Close/Far controls zoom, E uses a nearby terminal, Space jumps, Escape pauses, and the bottom arrows (or left/right arrow keys) switch variants. Compare walking around the ship and zooming out. Strategic-map rendering is a separate study. These bindings and camera settings are experimental, pending user feedback. See [camera-study validation and limitations](docs/testing/camera-prototype.md).
+
+## Strategic-map comparison on this throwaway branch
+
+Run `npm run prototype:map`, or the verified `npm run dev -- --port 5173` and open `http://127.0.0.1:5173/?study=map&variant=A`. Map A is an exploration atlas; map B is a terrain chart. Both use the selected shoulder camera B with manual zoom only. Scroll out (or click Far) to compare. Preview explored island shows example discovery information without changing actual progress. [Validation and assumptions](docs/testing/strategic-map-prototype.md).

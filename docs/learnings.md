@@ -135,3 +135,10 @@ Record durable observations with date, evidence, implications, and limitations. 
 ### Camera feedback — 2026-09-19
 
 The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.
+
+## 2026-09-19 — Strategic map comparison prepared
+
+- Implemented on a throwaway branch: an explored-area atlas and a terrain chart, blending from camera B without changing zoom or FOV. Fixed-size symbols and optional labels expose known deposits; an explicit example mode previews explored content without changing gameplay discoveries.
+- Evidence: all 61 tests and full checks passed. Browser inspection covered two seeds, desktop/narrow visuals, map switching, deposit selection, manual zoom blend, example/actual modes, active jumping and terminal use/pause guard in map view. See [record](testing/strategic-map-prototype.md).
+- Hypotheses awaiting user feedback: 62–80% transition range, 8 m exploration coverage, unvisited-terrain disclosure, and persistent labels versus compact glyphs.
+- Limits: rough 2 m chart terrain and simple vent marks do not establish precise route safety. Narrow views crop the island and guide panels can cover markers; no automatic fit is applied. Held-key traversal and dense future-base marker layout remain unverified.
