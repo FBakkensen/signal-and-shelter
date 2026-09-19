@@ -156,7 +156,7 @@ try {
     const frame = study.frame(innerWidth / innerHeight);
     world.render(app.state, app.viewPosition, now / 1000, true, frame);
     el("study-state").textContent =
-      `${app.state.paused ? "PAUSED" : "PLAYING"} · Zoom ${String(Math.round(study.zoom * 100))}% · Boom ${frame.distance.toFixed(1)} / ${frame.requestedDistance.toFixed(1)} m · Tilt ${frame.elevation.toFixed(0)}° · Orbit ${((app.state.yaw * 180) / Math.PI).toFixed(0)}° · ${frame.occluded ? "Camera pulled in by scenery" : "Clear camera"}\nPosition ${app.state.x.toFixed(2)}, ${app.state.y.toFixed(2)}, ${app.state.z.toFixed(2)} · ${app.state.grounded ? "Grounded" : "Airborne"} · Surveyed ${String(app.state.discovered.length)}/${String(app.island.resources.length)} · Seed ${app.island.seed}`;
+      `${app.state.paused ? "PAUSED" : "PLAYING"} · Zoom ${String(Math.round(study.zoom * 100))}% · Boom ${frame.distance.toFixed(1)} / ${frame.requestedDistance.toFixed(1)} m · Tilt ${frame.elevation.toFixed(0)}° · Orbit ${((app.state.yaw * 180) / Math.PI).toFixed(0)}° · Manual zoom only\nPosition ${app.state.x.toFixed(2)}, ${app.state.y.toFixed(2)}, ${app.state.z.toFixed(2)} · ${app.state.grounded ? "Grounded" : "Airborne"} · Surveyed ${String(app.state.discovered.length)}/${String(app.island.resources.length)} · Seed ${app.island.seed}`;
     el("study-modal").hidden = !app.state.paused;
     el("modal-title").textContent = app.terminalOpen
       ? "Ship communications"

@@ -131,3 +131,7 @@ Record durable observations with date, evidence, implications, and limitations. 
 - Evidence: 56 tests and full checks passed; real integrated-browser switching, zooming, ship selection, jumping, terminal use at both zoom extremes, pause, restart and reload were exercised. Desktop and narrow visuals inspected; warning/error logs empty. See [camera-study record](testing/camera-prototype.md).
 - Correction: a fixed shoulder offset clipped the avatar in a 390×844 viewport. Scaling the offset with portrait aspect ratio restored full-avatar framing, with a new regression test.
 - Limits: browser D/R taps did not visibly move/orbit; held-control feel and camera collision during live traversal need user playtesting. The distant view remains detailed 3D; strategic-map readability is the next prototype ticket.
+
+### Camera feedback — 2026-09-19
+
+The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.

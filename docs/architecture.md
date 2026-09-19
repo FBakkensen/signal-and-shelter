@@ -81,3 +81,7 @@ The comparison and its tests were captured at `8df36f9` on `codex/alien-visual-p
 ## Camera study branch — 2026-09-19
 
 The throwaway `codex/third-person-camera-prototype` branch adds a development-only `?variant=A|B` entry through `src/entry.ts`. `camera-prototype.ts` and its model wrap the existing `GameApplication` and seeded renderer; the optional scene camera frame supplies third-person framing and movement-facing avatar presentation. The study reuses real play/collision/terminal rules and adds pointer selection to the rendering adapter. It does not replace the production first-person control contract. The distant strategic map is not implemented. See [validation](testing/camera-prototype.md); selection and final design remain pending.
+
+### Camera feedback — 2026-09-19
+
+The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.

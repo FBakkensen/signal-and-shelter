@@ -29,17 +29,17 @@ void test("scroll accepts pixels, lines and pages, clamps both ends, and ignores
   assert.equal(readVariant("invalid"), "A");
 });
 void test("raised and shoulder framing differ nearby and converge overhead continuously", () => {
-  const a = cameraFrame("A", 0, 0, 0, anchor, flat, []);
-  const b = cameraFrame("B", 0, 0, 0, anchor, flat, []);
+  const a = cameraFrame("A", 0, 0, 0, anchor);
+  const b = cameraFrame("B", 0, 0, 0, anchor);
   assert.ok(a.position.y > b.position.y + 1);
   assert.equal(a.target.x, 0);
   assert.equal(b.target.x, 0.65);
   assert.equal(a.requestedDistance, 3.5);
-  const farA = cameraFrame("A", 1, 0, 0, anchor, flat, []);
-  const farB = cameraFrame("B", 1, 0, 0, anchor, flat, []);
+  const farA = cameraFrame("A", 1, 0, 0, anchor);
+  const farB = cameraFrame("B", 1, 0, 0, anchor);
   assert.deepEqual(farA, farB);
   assert.equal(farA.distance, 70);
-  const nearFar = cameraFrame("B", 0.9999, 0, 0, anchor, flat, []);
+  const nearFar = cameraFrame("B", 0.9999, 0, 0, anchor);
   assert.ok(
     Math.hypot(
       farB.position.y - nearFar.position.y,
@@ -48,30 +48,37 @@ void test("raised and shoulder framing differ nearby and converge overhead conti
   );
 });
 void test("orbit rotates the boom and shoulder offset around the same player anchor", () => {
-  const frame = cameraFrame("B", 0, Math.PI / 2, 1, anchor, flat, []);
+  const frame = cameraFrame("B", 0, Math.PI / 2, 1, anchor);
   assert.ok(frame.position.x > 3);
   assert.ok(Math.abs(frame.position.z + 0.65) < 0.00001);
   assert.equal(frame.facing, 1);
 });
-void test("camera pulls in before a solid or voxel ridge and restores requested distance when clear", () => {
-  const wall = { minX: -2, maxX: 2, minY: 0, maxY: 8, minZ: 2, maxZ: 2.5 };
-  const blocked = cameraFrame("B", 0.35, 0, 0, anchor, flat, [wall]);
-  assert.equal(blocked.occluded, true);
-  assert.ok(blocked.position.z < wall.minZ - 0.28);
-  const ridge = cameraFrame(
-    "B",
-    0.35,
-    0,
-    0,
-    anchor,
-    (_x, z) => (z >= 2 ? 12 : 4),
-    []
-  );
-  assert.equal(ridge.occluded, true);
-  assert.ok(ridge.position.z < 2 - 0.28);
-  const clear = cameraFrame("B", 0.35, 0, 0, anchor, flat, []);
-  assert.equal(clear.occluded, false);
-  assert.equal(clear.distance, clear.requestedDistance);
+void test("terrain and objects never change camera distance, framing or FOV", () => {
+  const wall = { minX: -2, maxX: 2, minY: 0, maxY: 20, minZ: 2, maxZ: 2.5 };
+  for (const variant of ["A", "B"] as const) {
+    const clear = new CameraStudy(island, variant);
+    const blocked = new CameraStudy(
+      { ...island, solids: [wall], heightAt: (_x, z) => (z >= 2 ? 20 : 4) },
+      variant
+    );
+    for (const zoom of [0, 0.35, 1]) {
+      clear.zoom = zoom;
+      blocked.zoom = zoom;
+      assert.deepEqual(blocked.frame(), clear.frame());
+      assert.equal(blocked.frame().distance, blocked.frame().requestedDistance);
+      assert.equal(blocked.frame().fov, 55);
+      blocked.key("KeyQ", true);
+      clear.key("KeyQ", true);
+      for (let i = 0; i < 10; i++) {
+        blocked.tick(0.1);
+        clear.tick(0.1);
+      }
+      blocked.key("KeyQ", false);
+      clear.key("KeyQ", false);
+      assert.deepEqual(blocked.frame(), clear.frame());
+      assert.equal(blocked.zoom, zoom);
+    }
+  }
 });
 void test("actual controller moves screen-relative, faces travel, clears held input on pause and retains play through zoom/switch", () => {
   const study = new CameraStudy(island, "A");
@@ -132,7 +139,7 @@ void test("terminal interaction works at both zoom limits and stays paused behin
 
 void test("narrow shoulder framing keeps the avatar footprint inside the camera width", () => {
   const aspect = 390 / 844;
-  const frame = cameraFrame("B", 0, 0, 0, anchor, flat, [], aspect);
+  const frame = cameraFrame("B", 0, 0, 0, anchor, aspect);
   const halfWidth =
     frame.distance * Math.tan((frame.fov * Math.PI) / 360) * aspect;
   assert.ok(frame.target.x + 0.3 < halfWidth);

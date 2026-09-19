@@ -61,3 +61,7 @@ The user agreed to replace first-person play with third-person play anchored to 
 Compare raised and over-the-shoulder close-camera prototypes before choosing the camera. Exploration should reveal resource deposit identities, and discovered deposits should remain recognizable across zoom levels. Exact map symbols, exploration coverage, transition behavior and remaining controls will be settled through prototypes and discussion. The strategic view is intended to support active play; the existing separate overview currently pauses it.
 
 The user requested design first, with prototypes, followed by implementation. The canonical [Third-person play and strategic zoom: design through implementation](https://github.com/FBakkensen/signal-and-shelter/issues/5) map tracks that effort and its decision tickets. New robot orders, construction and other future gameplay systems remain separate efforts. D007 records the existing first-person implementation; its replacement control specification is pending this design work.
+
+### Camera feedback — 2026-09-19
+
+The user selected camera B (over the shoulder) and explicitly rejected automatic zoom changes when the humanoid is behind an object. Zoom is exclusively user-controlled. The camera-study branch removes all terrain/solid distance adjustment and keeps FOV fixed. This updates the prototype only; production first-person controls remain until the design handoff. How to show an occluded humanoid without changing zoom remains a separate decision. The earlier sampled pull-in behavior is rejected, not a retained option.

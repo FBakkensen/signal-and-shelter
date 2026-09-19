@@ -25,3 +25,11 @@ Question: raised camera or over-the-shoulder camera for close play, scrolling to
 - The distant view is still a perspective rendering of the island, not the planned simplified strategic map. Deposit selection hides unsurveyed names; this study does not implement exploration fog, map symbols or robots.
 - Q/R orbit are temporary comparison bindings, while left/right arrows switch variants. They do not settle the replacement control contract. Mouse remains free; no mouse capture or drag-to-look is used.
 - Human selection of raised versus shoulder framing is pending. Keep the ticket open; do not promote either option into production before the map's design checkpoint.
+
+## User correction: manual zoom only — 2026-09-19
+
+The user selected B and explicitly rejected all automatic zoom changes behind objects. Removed the terrain/solid boom pull-in entirely; the camera solver no longer receives scenery. FOV remains fixed. Objects can obscure the humanoid or intersect the camera for now; a separate design decision must choose how to address this without changing zoom. Earlier pull-in evidence above describes the rejected version.
+
+Validation plan: regression compares clear and obstructed island camera frames at close/middle/far zoom and while orbiting, including FOV and retained user zoom. Run full checks. In the integrated browser inspect B, exercise manual scroll and verify the distance readout; continuous movement behind an object still requires held-key playtesting if the tool cannot provide it.
+
+Result: `npm run check` passed all 56 tests and required checks. The new clear-versus-obstructed camera regression covers both variants, three zoom levels and orbit, with identical camera frames and fixed FOV. In the integrated browser, camera B loaded at 35% (10 m); a real scroll reached 100% (70 m), with unchanged humanoid position. Visual inspection passed. Held-key traversal behind scenery remains unverified by browser tools; no claim of that interaction is made.
