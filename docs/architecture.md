@@ -91,3 +91,7 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 On `codex/strategic-map-prototype`, the existing development study supports `?study=map&variant=A|B`. Both map variants use camera B. A separate canvas chart projects sampled terrain, world-scale object footprints and fixed-size identification callouts through the same perspective camera and crossfades at user-selected zoom. A prototype exploration set controls marker disclosure; it never mutates `GameApplication` discoveries. The labeled sample mode is presentation-only. Production entry remains first-person. See [validation and limits](testing/strategic-map-prototype.md).
 
 Strategic footprints reuse the island geometry entry point's ship, vent and resource parts. Each rectangle preserves its world-space horizontal bounds and gaps; pointer selection accepts both footprints and their callouts. Footprints are flattened onto their object's ground plane; they do not encode obstacle height or prove route safety.
+
+## Occlusion study — 2026-09-19
+
+`codex/occlusion-prototype` adds development-only `?study=occlusion&variant=A|B|C` for silhouette, mesh fading and manual-orbit comparisons. The scene opts into an obstruction adapter only in this study. Materials are cloned for fading and restored after rendering; the silhouette is excluded from pointer picking. Explicit fixture poses render against real seeded geometry without moving the playable humanoid. See [validation and limits](testing/occlusion-prototype.md). No treatment has been accepted.

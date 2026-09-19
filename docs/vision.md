@@ -69,3 +69,9 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 ### Strategic map feedback — 2026-09-19
 
 The user selected A, the exploration atlas, with a required correction: multi-block objects must occupy their matching world footprint on the visible terrain grid. Symbols and labels identify objects but must not replace their size. The prototype now projects all ship, vent and deposit block parts at their actual horizontal bounds. Exact exploration distance and transition thresholds remain tuning values for the design checkpoint.
+
+### Controls agreed — 2026-09-19
+
+The user accepted the [third-person control contract](https://github.com/FBakkensen/signal-and-shelter/issues/8): keyboard orbit, free-pointer selection and explicit use, movement at every zoom, explicit pause/resume, and retirement of the separate paused overview. This is a design decision; production and prototype bindings have not yet been migrated.
+
+[Click-to-move and shared navigation](https://github.com/FBakkensen/signal-and-shelter/issues/11) is the agreed next effort after camera/map delivery. Right-click terrain requests a route; WASD cancels it immediately; unreachable destinations show feedback. Humanoid and future robots should share pathfinding with appropriate movement capabilities. Robot gameplay remains separate.

@@ -18,6 +18,6 @@ _Avoid_: Landmark (when referring to a resource deposit)
 
 **Ship terminal**: The stranded ship's communications console. Checking its data link records a successful connection without restoring flight or delivering software.
 
-**Overview**: The existing separate, paused view of the island. It is distinct from the planned strategic view.
+**Overview**: The existing separate, paused view of the island. It is distinct from the planned strategic view and will be retired by the accepted third-person control design.
 
 **Strategic view**: The planned distant-zoom presentation of the island, anchored to the humanoid, with simplified terrain and recognizable information about explored resource deposits. It changes presentation without changing which actions are available.

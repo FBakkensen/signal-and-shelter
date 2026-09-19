@@ -1,3 +1,7 @@
+import {
+  createOcclusionStudy,
+  type OcclusionVariant,
+} from "./occlusion-prototype-model.ts";
 import type { CameraFrame } from "./camera-prototype-model.ts";
 import { createResourceGroup } from "./resources.ts";
 import { WORLD_PALETTE, ventParts } from "./packages/island/geometry.ts";
@@ -18,7 +22,8 @@ export async function loadShip() {
 export function createScene(
   canvas: HTMLCanvasElement,
   island: Island,
-  shipAsset: THREE.Group
+  shipAsset: THREE.Group,
+  occlusionEnabled = false
 ) {
   const { heightAt, hash } = island;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -195,6 +200,10 @@ export function createScene(
   block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
   const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
+  const occlusion =
+    import.meta.env.DEV && occlusionEnabled
+      ? createOcclusionStudy(scene, avatar)
+      : null;
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
@@ -207,7 +216,8 @@ export function createScene(
     view: { x: number; y: number; z: number },
     time: number,
     started: boolean,
-    study?: CameraFrame
+    study?: CameraFrame,
+    treatment?: OcclusionVariant
   ) {
     const y = state.y;
     avatar.position.set(state.x, y, state.z);
@@ -232,10 +242,15 @@ export function createScene(
       camera.rotation.set(state.pitch, state.yaw, 0, "YXZ");
     }
     grains.position.y = Math.sin(time * 0.25) * 0.15;
+    const blockers =
+      treatment && occlusion ? occlusion.apply(camera, treatment) : 0;
     renderer.render(scene, camera);
+    occlusion?.restore();
+    return blockers;
   }
   function dispose() {
     window.removeEventListener("resize", resize);
+    occlusion?.dispose();
     // The shared ship template owns its geometry/materials across world rebuilds.
     scene.remove(ship);
     scene.traverse((object) => {
@@ -280,7 +295,9 @@ export function createScene(
   }
   function isAvatar(object: THREE.Object3D): boolean {
     return (
-      object === avatar || (object.parent !== null && isAvatar(object.parent))
+      object === avatar ||
+      object.name === "occlusion-ghost" ||
+      (object.parent !== null && isAvatar(object.parent))
     );
   }
   return { render, dispose, pick };

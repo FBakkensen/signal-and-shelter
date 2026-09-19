@@ -148,3 +148,8 @@ The user selected camera B (over the shoulder) and explicitly rejected automatic
 - User selected map A and required multi-block objects to match their size on the terrain grid. Replaced fixed vent marks and icon-only objects with footprints from actual block definitions; identity callouts remain separate.
 - Evidence: full checks passed with 62 tests, including exact footprint bounds against every production collider on two seeds and polygon selection inside/outside an object. Browser inspection verified full-map footprints, ship selection away from its icon, manual scroll blend and narrow rendering. Browser warnings/errors were empty.
 - Limits: terrain still uses the prototype's rough 2 m sampling; object footprints are dimensionally accurate in the horizontal plane, not a height-aware navigation map. Narrow views retain existing clipping and panel overlap.
+
+## 2026-09-19 — Occlusion treatments prepared
+
+- Compared through-wall silhouette, obstructing-mesh fading and manual orbit with fixed user zoom. A silhouette preserves scenery but cannot restore surrounding context when the camera is inside it; whole-mesh fading can reveal large terrain interiors. These are observed prototype tradeoffs, not accepted design decisions.
+- All 63 tests and required checks passed; integrated-browser ship/vent/inside-geometry comparisons and narrow inspection are recorded in [validation](testing/occlusion-prototype.md). Clear-view silhouette tint was found and corrected. Continuous traversal and performance remain unmeasured.

@@ -77,3 +77,6 @@ WASD moves relative to the view; Q/R temporarily orbit it; the pointer stays fre
 ## Strategic-map comparison on this throwaway branch
 
 Run `npm run prototype:map`, or the verified `npm run dev -- --port 5173` and open `http://127.0.0.1:5173/?study=map&variant=A`. Map A is an exploration atlas; map B is a terrain chart. Both use the selected shoulder camera B with manual zoom only. Scroll out (or click Far) to compare. Preview explored island shows example discovery information without changing actual progress. [Validation and assumptions](docs/testing/strategic-map-prototype.md).
+
+Occlusion comparison (throwaway development study): `npm run prototype:occlusion`.
+Use A/B/C for silhouette, fading or manual orbit; fixture buttons compare real seeded obstructions at the same zoom. See [validation](docs/testing/occlusion-prototype.md).

@@ -191,3 +191,9 @@
     overflow-y: auto;
   }
 }
+
+@media (max-width: 600px) {
+  .occlusion-study .study-status {
+    bottom: 140px;
+  }
+}
