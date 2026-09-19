@@ -41,7 +41,7 @@ void test("explicit pause freezes and resumes setup, flight and recovery without
     }
     assert.equal(app.state.traversal.phase, "walking");
     assert.equal(app.state.y, 4);
-    assert.ok(app.state.x > 1.3 && app.state.x < 1.5);
+    assert.ok(app.state.x >= 1 && app.state.x < 1.3);
     const x = app.state.x;
     app.tick(0.1);
     assert.equal(app.state.x, x);
@@ -122,4 +122,64 @@ void test("restart and seed replacement clear traversal and old intent", () => {
     assert.equal(app.state.y, 4);
     assert.equal(app.state.traversal.phase, "walking");
   }
+});
+
+void test("reported seeded terrace permits W, A and W+A through actual camera-relative input", () => {
+  for (const keys of [["KeyW"], ["KeyA"], ["KeyW", "KeyA"]]) {
+    const island = {
+      ...createIsland("signal-and-shelter"),
+      spawn: { x: 30.8, z: 13.8 },
+    };
+    const app = new GameApplication(island, true);
+    app.start(island, true);
+    for (const key of keys) {
+      app.press(key);
+    }
+    for (let i = 0; i < 240; i++) {
+      app.tick(1 / 120);
+    }
+    assert.ok(
+      Math.hypot(app.state.x - 30.8, app.state.z - 13.8) > 0.6,
+      `${keys.join("+")} did not traverse the reported terrace`
+    );
+  }
+});
+
+void test("movement reports preserve the failed attempt through pause and clear it on restart or new seed", () => {
+  const island = {
+    ...createIsland("report-seed"),
+    spawn: { x: 0.5, z: 0.5 },
+    heightAt: (x: number) => (x >= 1 ? 5 : 3),
+    solids: [],
+  };
+  const app = new GameApplication(island, true);
+  app.start(island, true);
+  app.press("KeyD");
+  for (let i = 0; i < 20; i++) {
+    app.tick(1 / 60);
+  }
+  app.release("KeyD");
+  app.pause();
+  const report = app.movementReport;
+  assert.equal(report.seed, "report-seed");
+  assert.notEqual(report.position.x, Number(report.position.x.toFixed(1)));
+  assert.ok(JSON.stringify(report).includes(String(report.position.x)));
+  assert.equal(report.generatorVersion, 2);
+  assert.equal(report.reportVersion, 1);
+  assert.equal(report.paused, true);
+  assert.deepEqual(report.position, {
+    x: app.state.x,
+    y: app.state.y,
+    z: app.state.z,
+  });
+  assert.equal(report.blockedAttempts.at(-1)?.direction.x, 1);
+  assert.equal(Math.abs(report.blockedAttempts.at(-1)?.direction.z ?? NaN), 0);
+  assert.match(JSON.stringify(report), /elevationRejected/);
+  app.tick(1);
+  assert.deepEqual(app.movementReport, report);
+  app.restart();
+  assert.deepEqual(app.movementReport.blockedAttempts, []);
+  app.start(createIsland("new-report-seed"), true);
+  assert.equal(app.movementReport.seed, "new-report-seed");
+  assert.deepEqual(app.movementReport.blockedAttempts, []);
 });

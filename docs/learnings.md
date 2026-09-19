@@ -213,3 +213,10 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Browser testing caught a stale clock variable during start and a journal overlapping the now-live terminal. Both were corrected and the relevant flow rechecked.
 - The integrated browser exposes brief presses but no held-key operation. Sustained traversal, jump timing/feel and airborne lifecycle interactions cannot be established with those presses. No internal state mutation or synthetic gameplay event was substituted.
 - Opening another integrated-browser tab left the game document `visible` and `hidden=false`. This cannot validate hidden-tab scheduling. The elapsed-time clock tests validate delayed callbacks deterministically, not browser scheduling.
+
+## 2026-09-19 — Body clearance is not a flat-footprint support requirement
+
+- Human evidence: W, A and W+A were blocked on ordinary half-metre terrain at the screenshot's rounded 30.8, 13.8 position on `signal-and-shelter`. A deterministic production reproduction and a minimal staircase went red.
+- Cause: the 0.6 m collision footprint had been required to lie entirely on one supported elevation, wider than the 0.5 m treads. Simple isolated-step tests and resource routes did not expose that terrain representation mismatch.
+- Correction: check centre support separately from full-body clearance, retaining jump limits, timing and gap checks. Both reproductions advance after the correction; permanent tests include all three reported directions. See [evidence](testing/automatic-keyboard-traversal.md).
+- Reporting: F8 captures exact floating-point state and bounded rejection history. HUD coordinates are rounded presentation only; never call a screenshot-based reconstruction an exact state replay. Human acceptance of the corrected feel remains pending.

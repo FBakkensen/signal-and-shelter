@@ -4,7 +4,7 @@ Status: implemented on `codex/automatic-keyboard-traversal`; automated checks pa
 
 ## Validation plan
 
-- Production navigation tests: walk/diagonal/release behavior; automatic up/down transitions at 1 m and rejection beyond; finite body clearance, full-footprint support, narrow obstacles, gaps and world edges. Observe positions and traversal phases through the public module.
+- Production navigation tests: walk/diagonal/release behavior; automatic up/down transitions at 1 m and rejection beyond; finite body clearance, centre support with full-body clearance, narrow obstacles, gaps and world edges. Observe positions and traversal phases through the public module.
 - Capability tests: compare body sizes, speeds and a non-jumping actor using the same world and production code; reject invalid profiles.
 - Lifecycle tests: release/redirect setup, airborne steering/release, recovery, pause/resume during every phase, live terminal with keyboard disabled, focus loss without pause, reset and seed changes.
 - Run `npm run check` and the existing seeded resource traversal scenarios.
@@ -34,4 +34,16 @@ Public navigation tests cover symmetric 0.5/1 m transitions and rejection at 1.5
 
 The browser tools provide discrete key presses without held-key events. Do not substitute repeated taps or state mutations for a sustained traversal playtest. A human should hold WASD across eligible terraces and low obstacles, release/turn during preparation, steer during flight, and pause/resume each phase. Check terminal/focus behavior during a jump. Then switch away so the game page is actually hidden and verify its running state on return. The two-second clock cap means long browser/OS suspensions are not replayed; there is no offline progression guarantee.
 
-No human acceptance of traversal feel, performance benchmark or real hidden-tab result has been claimed. Click-to-move and destination feedback remain the next ticket. The prototype archive was not merged; runtime, HTML and task scripts contain no prototype entry points or comparison fixtures.
+Human playtesting found the staircase defect recorded below; acceptance of the corrected traversal feel, performance benchmarks and real hidden-tab results remain pending. Click-to-move and destination feedback remain the next ticket. The prototype archive was not merged; runtime, HTML and task scripts contain no prototype entry points or comparison fixtures.
+
+## Human-found staircase regression and reporting — 2026-09-19
+
+The user reported inability to move with W, A or W+A on ordinary terrain, with a screenshot showing seed `signal-and-shelter`, heading 0°, and HUD coordinates 30.8, 13.8. Those are rounded display coordinates, not an exact state capture. Production movement at that displayed point reproduced zero progress in all three directions after 240 fixed steps. Removing scenery retained the failure; a minimal series of 0.5 m treads also failed.
+
+The real planner rejected all 32 landing samples for W/A as unsupported; the diagonal rejected 31 samples as unsupported and the remaining one on travel speed. The cause was requiring the full 0.6 m body footprint to occupy one flat supported height. A half-metre tread cannot satisfy that assumption. Splitting centre support from unchanged full-body collision fixes this rule. The same seeded reproduction then moved approximately 6.119 m (W), 1.805 m (A) and 2.369 m (W+A) in two simulated seconds; the minimal staircase advanced approximately 1.322 m. These are controller measurements, not browser timings or measurements from the user's exact position.
+
+Permanent regressions execute the real GameApplication with the seeded point and all three key combinations, plus a minimal staircase through navigation. Existing gap/drop/clearance/no-jump tests remain; assertions about stopping before drops now check that the supported centre remains on the near side, allowing safe body overhang. No collision dimensions, elevation limit, preparation/recovery timing or gap exclusion was relaxed.
+
+Added bounded movement reports: last eight rejected attempts, repeated-attempt counts, exact position/direction, capabilities and planner rejection categories. Tests check actual rejection reasons, bounded history, copied data isolation, retention through pause, full coordinate precision and reset on restart/seed replacement. In the integrated browser, F8 opened the report, paused play and showed the clipboard-success message; the report textarea contained the correct seed, version, phase and full numeric state. The browser provider's clipboard reader returned an empty string despite the page write succeeding, so cross-application clipboard transfer is not claimed verified; selected text remains available for manual copy.
+
+The correction passed `npm run check` with **86 tests**. The focused red/green command was `node --import tsx --test --test-name-pattern 'ordinary half-metre|reported seeded' src/packages/navigation/tests/movement.test.ts src/packages/play/tests/traversal-lifecycle.test.ts`: both regressions failed before the support correction and passed afterward. Browser checks also exercised the pause-menu report button, return to play, and readable report controls at 390×844; the viewport was restored. Only the earlier resolved startup error remained in the inspected browser log.

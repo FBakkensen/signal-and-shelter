@@ -57,6 +57,9 @@ function updateWorldUI() {
 }
 function sync() {
   $("welcome").hidden = app.started;
+  if (!app.state.paused || !app.started) {
+    $("movement-report-panel").hidden = true;
+  }
   $("pause-panel").hidden =
     !app.started || !app.state.paused || app.terminalOpen;
 
@@ -173,7 +176,36 @@ $("check-link").onclick = () => {
 $("terminal-return").onclick = () => {
   applyResume(app.resume("terminal"));
 };
+async function copyMovementReport() {
+  if (!app.started) {
+    return;
+  }
+  const report = JSON.stringify(app.movementReport, null, 2);
+  release();
+  const field = element("movement-report-text", HTMLTextAreaElement);
+  field.value = report;
+  $("movement-report-panel").hidden = false;
+  $("movement-report-status").textContent = "Copying movement report…";
+  field.focus();
+  field.select();
+  try {
+    await navigator.clipboard.writeText(report);
+    $("movement-report-status").textContent =
+      "Copied. Paste this into the chat so we can replay where you got stuck.";
+  } catch {
+    $("movement-report-status").textContent =
+      "The browser could not copy automatically. Copy the selected text and paste it into the chat.";
+  }
+}
+$("movement-report").onclick = () => {
+  void copyMovementReport();
+};
 window.addEventListener("keydown", (e) => {
+  if (e.code === "F8" && app.started && !e.repeat) {
+    e.preventDefault();
+    void copyMovementReport();
+    return;
+  }
   if (e.code === "Escape" && app.started) {
     e.preventDefault();
     release();

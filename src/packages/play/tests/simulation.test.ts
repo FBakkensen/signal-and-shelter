@@ -118,7 +118,7 @@ await test("eligible terraces jump automatically while excessive rises and drops
     STEP,
     cliff
   );
-  assert.ok(stopped.x <= 0.7);
+  assert.ok(stopped.x < 1);
   near(stopped.y, 6);
 });
 await test("airborne movement cannot cross the haze boundary or the finite world boundary", () => {

@@ -35,6 +35,8 @@ Explore within eight metres to reveal terrain and resource deposits; there is no
 
 The terminal leaves simulation running while disabling gameplay keys. Focus loss clears held input without pausing; only explicit pause freezes play. A shared elapsed-time clock uses animation callbacks while visible and a timer while hidden. Browser/OS suspension beyond two seconds is not replayed. Actual hidden-tab scheduling and sustained automatic traversal still need human browser validation; see [the traversal evidence](docs/testing/automatic-keyboard-traversal.md). Click-to-move is the next increment.
 
+If movement gets stuck unexpectedly, push toward the blocked direction, then press **F8** (or Escape → **Copy movement report**) and paste the report into the chat. Reports retain exact decimal positions; the HUD only rounds their display. If automatic copying fails, the report text is selected for manual copying.
+
 This experiment targets keyboard-and-mouse play. Narrow layouts are supported visually; touch movement, sound, terrain editing, swimming, and saved progress are not implemented.
 
 ## Validation

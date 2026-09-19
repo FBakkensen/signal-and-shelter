@@ -11,6 +11,7 @@ import { createSimulation } from "../simulation.ts";
 import { mouseLook } from "./controls.ts";
 import type { GameState } from "./game.ts";
 import type { Island } from "../../island/index.ts";
+import { GENERATOR_VERSION } from "../../island/index.ts";
 
 export type PlayState = Readonly<
   Pick<
@@ -43,6 +44,20 @@ export class GameApplication {
   private terminal = false;
   private captureGeneration: number | null = null;
 
+  get movementReport() {
+    return {
+      reportVersion: 1,
+      movementVersion: "automatic-traversal-v2",
+      seed: this.island.seed,
+      generatorVersion: GENERATOR_VERSION,
+      position: { x: this.state.x, y: this.state.y, z: this.state.z },
+      heading: this.state.yaw,
+      traversal: this.state.traversal,
+      paused: this.state.paused,
+      terminalOpen: this.terminalOpen,
+      ...this.simulation.movementDiagnostics(),
+    };
+  }
   get exploration() {
     return this.currentState.exploration;
   }

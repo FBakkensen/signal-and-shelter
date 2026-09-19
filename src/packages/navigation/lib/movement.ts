@@ -1,6 +1,5 @@
 import type { HeightSampler, Point } from "../../island/index.ts";
 import type { Obstacle } from "../../island/geometry.ts";
-import { CELL_SIZE } from "../../island/geometry.ts";
 import {
   fits,
   onIsland,
@@ -61,6 +60,26 @@ export interface MovementState extends Position {
   readonly traversal: Traversal;
 }
 
+export interface JumpAssessment {
+  jumpAvailable: boolean;
+  takeoffSupported: boolean;
+  landingSamples: number;
+  samplesWithoutSupportedLanding: number;
+  elevationRejected: number;
+  gapOrInterveningHeightRejected: number;
+  speedRejected: number;
+  clearanceRejected: number;
+  firstBlockedArcPosition: Position | null;
+}
+export interface BlockedMovementAttempt {
+  readonly atSimulationSeconds: number;
+  readonly position: Position;
+  readonly direction: Point;
+  readonly afterSliding: Position;
+  readonly assessment: JumpAssessment;
+  readonly repeatedFrames: number;
+}
+
 // A world-bound movement module shared by direct input and future route execution.
 // Each step is exactly 1/120 s. Callers freeze by not stepping; capabilities are
 // immutable for the lifetime of this actor's movement module.
@@ -83,65 +102,54 @@ export function createMovement(
     );
   }
   const { heightAt, solids } = world;
+  let simulationSeconds = 0;
+  const blockedAttempts: BlockedMovementAttempt[] = [];
+  function recordBlocked(
+    position: Position,
+    direction: Point,
+    afterSliding: Position,
+    assessment: JumpAssessment
+  ) {
+    const previous = blockedAttempts.at(-1);
+    const repeated =
+      previous?.position.x === position.x &&
+      previous.position.y === position.y &&
+      previous.position.z === position.z &&
+      previous.direction.x === direction.x &&
+      previous.direction.z === direction.z;
+    if (repeated) {
+      blockedAttempts.pop();
+    }
+    blockedAttempts.push({
+      atSimulationSeconds: simulationSeconds,
+      position: { x: position.x, y: position.y, z: position.z },
+      direction: { ...direction },
+      afterSliding: { x: afterSliding.x, y: afterSliding.y, z: afterSliding.z },
+      assessment,
+      repeatedFrames: repeated ? previous.repeatedFrames + 1 : 1,
+    });
+    if (blockedAttempts.length > 8) {
+      blockedAttempts.shift();
+    }
+  }
   const clear = (p: Position) =>
     fits(p, p.y, c.height, heightAt, solids, c.radius);
-  // Partition the entire footprint at terrain and box edges, checking every
-  // rectangle. Corner-only checks miss holes and narrow unsupported strips.
+  // Body clearance and ground support are different constraints. The body may
+  // overhang a tread while its centre remains supported; requiring the entire
+  // 0.6 m collision footprint on one height makes 0.5 m stairs impossible.
   function supported(p: Position) {
-    if (!clear(p)) {
-      return false;
-    }
-    const nearby = solids.filter((o) => overlaps(p, o, c.radius));
-    const xs = [p.x - c.radius, p.x + c.radius];
-    const zs = [p.z - c.radius, p.z + c.radius];
-    for (const [axis, values] of [
-      ["x", xs],
-      ["z", zs],
-    ] as const) {
-      const low = p[axis] - c.radius,
-        high = p[axis] + c.radius;
-      for (
-        let v = Math.ceil(low / CELL_SIZE) * CELL_SIZE;
-        v < high;
-        v += CELL_SIZE
-      ) {
-        if (v > low) {
-          values.push(v);
-        }
-      }
-      for (const box of nearby) {
-        for (const v of axis === "x"
-          ? [box.minX, box.maxX]
-          : [box.minZ, box.maxZ]) {
-          if (v > low && v < high) {
-            values.push(v);
-          }
-        }
-      }
-      values.sort((a, b) => a - b);
-    }
-    for (let i = 1; i < xs.length; i++) {
-      for (let j = 1; j < zs.length; j++) {
-        const x = ((xs[i - 1] ?? 0) + (xs[i] ?? 0)) / 2;
-        const z = ((zs[j - 1] ?? 0) + (zs[j] ?? 0)) / 2;
-        if (Math.abs(heightAt(x, z) - p.y) <= EPSILON) {
-          continue;
-        }
-        if (
-          !nearby.some(
-            (o) =>
-              x > o.minX - EPSILON &&
-              x < o.maxX + EPSILON &&
-              z > o.minZ - EPSILON &&
-              z < o.maxZ + EPSILON &&
-              Math.abs(o.maxY - p.y) <= EPSILON
-          )
-        ) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return (
+      clear(p) &&
+      (Math.abs(heightAt(p.x, p.z) - p.y) <= EPSILON ||
+        solids.some(
+          (o) =>
+            p.x >= o.minX &&
+            p.x <= o.maxX &&
+            p.z >= o.minZ &&
+            p.z <= o.maxZ &&
+            Math.abs(o.maxY - p.y) <= EPSILON
+        ))
+    );
   }
   function surfaces(p: Point): Position[] {
     const heights = new Set(terrainHeights(p, heightAt, c.radius));
@@ -169,19 +177,27 @@ export function createMovement(
           : f.start.y + f.velocity * t - (GRAVITY * t * t) / 2,
     };
   }
-  function validFlight(f: Flight, from = 0) {
+  function validFlight(f: Flight, from = 0, assessment?: JumpAssessment) {
     if (!supported(f.end)) {
       return false;
     }
     for (let t = from; t < f.duration; t += MOVEMENT_STEP / 2) {
       if (!clear(pose(f, t))) {
+        if (assessment && !assessment.firstBlockedArcPosition) {
+          assessment.firstBlockedArcPosition = pose(f, t);
+        }
         return false;
       }
     }
     return true;
   }
-  function plan(start: Position, direction: Point): Flight | undefined {
-    if (!c.canJump || !supported(start)) {
+  function plan(
+    start: Position,
+    direction: Point,
+    assessment: JumpAssessment
+  ): Flight | undefined {
+    assessment.takeoffSupported = supported(start);
+    if (!c.canJump || !assessment.takeoffSupported) {
       return undefined;
     }
     // Search only a short local transition. A future route planner composes these
@@ -195,8 +211,14 @@ export function createMovement(
         x: start.x + direction.x * distance,
         z: start.z + direction.z * distance,
       };
-      for (const end of surfaces(point)) {
+      const landings = surfaces(point);
+      assessment.landingSamples++;
+      if (landings.length === 0) {
+        assessment.samplesWithoutSupportedLanding++;
+      }
+      for (const end of landings) {
         if (Math.abs(end.y - start.y) > c.elevationLimit + EPSILON) {
+          assessment.elevationRejected++;
           continue;
         }
         let high = Math.max(start.y, end.y);
@@ -230,6 +252,7 @@ export function createMovement(
           high = Math.max(high, floor);
         }
         if (!continuous) {
+          assessment.gapOrInterveningHeightRejected++;
           continue;
         }
         const apex = high + 0.25;
@@ -246,11 +269,17 @@ export function createMovement(
           moveEnd: topTime + window,
         };
         if (
-          distance / (flight.moveEnd - flight.moveStart) <= c.speed + EPSILON &&
-          validFlight(flight)
+          distance / (flight.moveEnd - flight.moveStart) >
+          c.speed + EPSILON
         ) {
-          return flight;
+          assessment.speedRejected++;
+          continue;
         }
+        if (!validFlight(flight, 0, assessment)) {
+          assessment.clearanceRejected++;
+          continue;
+        }
+        return flight;
       }
     }
     return undefined;
@@ -270,7 +299,18 @@ export function createMovement(
         traversal: { phase: "walking" },
       };
     }
-    const flight = plan(s, direction);
+    const assessment: JumpAssessment = {
+      jumpAvailable: c.canJump,
+      takeoffSupported: false,
+      landingSamples: 0,
+      samplesWithoutSupportedLanding: 0,
+      elevationRejected: 0,
+      gapOrInterveningHeightRejected: 0,
+      speedRejected: 0,
+      clearanceRejected: 0,
+      firstBlockedArcPosition: null,
+    };
+    const flight = plan(s, direction, assessment);
     if (flight) {
       return {
         ...s,
@@ -285,9 +325,11 @@ export function createMovement(
         result = next;
       }
     }
+    recordBlocked(s, direction, result, assessment);
     return { ...result, traversal: { phase: "walking" } };
   }
   function step(state: MovementState, intent: Point): MovementState {
+    simulationSeconds += MOVEMENT_STEP;
     const length = Math.hypot(intent.x, intent.z);
     const direction =
       Number.isFinite(length) && length > 0
@@ -399,11 +441,31 @@ export function createMovement(
     return active ? walk(state, direction) : state;
   }
   return {
-    createState: (position: Position): MovementState => ({
-      ...position,
-      grounded: true,
-      velocityY: 0,
-      traversal: { phase: "walking" },
+    createState: (position: Position): MovementState => {
+      blockedAttempts.length = 0;
+      simulationSeconds = 0;
+      return {
+        ...position,
+        grounded: true,
+        velocityY: 0,
+        traversal: { phase: "walking" },
+      };
+    },
+    diagnostics: () => ({
+      capabilities: { ...c },
+      simulationSeconds,
+      blockedAttempts: blockedAttempts.map((attempt) => ({
+        ...attempt,
+        position: { ...attempt.position },
+        direction: { ...attempt.direction },
+        afterSliding: { ...attempt.afterSliding },
+        assessment: {
+          ...attempt.assessment,
+          firstBlockedArcPosition: attempt.assessment.firstBlockedArcPosition
+            ? { ...attempt.assessment.firstBlockedArcPosition }
+            : null,
+        },
+      })),
     }),
     step,
     supported,

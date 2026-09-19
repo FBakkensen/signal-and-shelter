@@ -125,3 +125,7 @@ The user accepted the [consolidated navigation design](navigation-design.md), it
 ### Automatic keyboard traversal implementation — 2026-09-19
 
 The first accepted increment is implemented on `codex/automatic-keyboard-traversal`: shared individual movement capabilities, automatic traversal, explicit pause and a live terminal. Click-to-move remains pending. Automated checks pass; sustained human traversal and real hidden-tab scheduling remain unverified. See [the evidence](testing/automatic-keyboard-traversal.md).
+
+### Coordinate representation and scaling concern — 2026-09-19
+
+The user questioned decimal coordinate arithmetic and favors integer coordinates for scaling. Integer voxel/navigation coordinates, actor sub-voxel representation (floating point versus fixed-point integer units), and the performance evidence needed to choose between them remain to be settled. No scaling benchmark or integer-coordinate migration has been completed. The half-metre staircase defect was separately traced to the ground-support rule and corrected without changing the actor's coordinate representation.

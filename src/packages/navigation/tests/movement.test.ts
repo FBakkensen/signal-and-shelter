@@ -73,7 +73,7 @@ void test("automatic up/down limit is symmetric and excludes a non-jumping actor
         assert.ok(end.x > 2, `Failed ${String(change)}: ${String(end.x)}`);
         assert.equal(end.y, 3 + change);
       } else {
-        assert.ok(end.x <= 0.7);
+        assert.ok(end.x < (change < 0 ? 1 : 0.7 + 1e-7));
         assert.equal(end.y, 3);
       }
     }
@@ -131,7 +131,7 @@ void test("clearance, unsupported strips, gaps, and tall solids reject traversal
   const gap = scenario((x) => (x >= 1 && x < 1.5 ? 1 : 3));
   assert.ok(steps(gap.movement, gap.state, 240).x <= 0.7);
   const narrowGap = scenario((x) => (x >= 1 && x < 1.5 ? 2.5 : 3));
-  assert.ok(steps(narrowGap.movement, narrowGap.state, 240).x <= 0.7);
+  assert.ok(steps(narrowGap.movement, narrowGap.state, 240).x < 1);
   const wall = scenario(() => 3, [boxCollider(1.5, 3, 0.5, 0.5, 1.5, 4)]);
   assert.ok(steps(wall.movement, wall.state, 240).x < 1);
   const hole = createMovement(
@@ -207,4 +207,70 @@ void test("finite world edges, invalid intent and invalid capability profiles", 
     );
   }
   assert.equal(MOVEMENT_STEP, 1 / 120);
+});
+
+void test("ordinary half-metre staircase supports the actor without requiring its whole body footprint to be flat", () => {
+  const { movement, state } = scenario(
+    (x) => 3 + Math.max(0, Math.floor((x - 0.5) / 0.5)) * 0.5
+  );
+  const end = steps(movement, state, 240);
+  assert.ok(end.x > state.x + 0.6, `Staircase stopped at ${String(end.x)}`);
+  assert.ok(end.y > state.y);
+});
+
+void test("movement diagnostics retain actual rejection reasons, collapse repeats and reset with the actor", () => {
+  const { movement, state } = scenario((x) => (x >= 1 ? 5 : 3));
+  let stopped = steps(movement, state, 30);
+  stopped = steps(movement, stopped, 60);
+  const report = movement.diagnostics();
+  assert.equal(report.blockedAttempts.length, 1);
+  const rejected = report.blockedAttempts[0];
+  assert.ok(rejected);
+  assert.equal(rejected.assessment.takeoffSupported, true);
+  assert.ok(rejected.assessment.elevationRejected > 0);
+  assert.ok(rejected.repeatedFrames > 60);
+  assert.equal(rejected.position.x, stopped.x);
+  assert.deepEqual(rejected.direction, right);
+  assert.equal(rejected.afterSliding.x, stopped.x);
+  report.capabilities.radius = 99;
+  rejected.assessment.elevationRejected = 0;
+  assert.equal(movement.diagnostics().capabilities.radius, 0.3);
+  assert.ok(
+    (movement.diagnostics().blockedAttempts[0]?.assessment.elevationRejected ??
+      0) > 0
+  );
+  movement.step(stopped, idle);
+  assert.equal(movement.diagnostics().blockedAttempts.length, 1);
+  movement.createState({ x: 0.5, y: 3, z: 0.5 });
+  assert.deepEqual(movement.diagnostics().blockedAttempts, []);
+});
+
+void test("reports bound distinct rejections and identify clearance and unavailable jumps", () => {
+  const { movement, state } = scenario((x) => (x >= 1 ? 5 : 3));
+  let stopped = steps(movement, state, 30);
+  for (let i = 1; i <= 20; i++) {
+    stopped = movement.step(stopped, { x: 1, z: i / 100 });
+  }
+  assert.equal(movement.diagnostics().blockedAttempts.length, 8);
+  const low = scenario(
+    (x) => (x >= 1 ? 3.5 : 3),
+    [boxCollider(1, 5.4, 0.5, 4, 0.2, 4)]
+  );
+  steps(low.movement, low.state, 100);
+  const clearance = low.movement
+    .diagnostics()
+    .blockedAttempts.at(-1)?.assessment;
+  assert.ok(clearance);
+  assert.ok(clearance.clearanceRejected > 0);
+  assert.ok(clearance.firstBlockedArcPosition);
+  const noJump = scenario((x) => (x >= 1 ? 3.5 : 3), [], {
+    ...HUMANOID_CAPABILITIES,
+    canJump: false,
+  });
+  steps(noJump.movement, noJump.state, 100);
+  assert.equal(
+    noJump.movement.diagnostics().blockedAttempts.at(-1)?.assessment
+      .jumpAvailable,
+    false
+  );
 });

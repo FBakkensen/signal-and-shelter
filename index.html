@@ -71,6 +71,19 @@
       <button id="resume" class="primary">Keep wandering →</button
       ><button id="reset" class="subtle">Restart this island</button>
       <button id="new-island" class="subtle">Choose another seed</button>
+      <button id="movement-report" class="subtle">
+        Copy movement report · F8
+      </button>
+      <div id="movement-report-panel" hidden>
+        <p id="movement-report-status" role="status"></p>
+        <label for="movement-report-text">Movement report</label>
+        <textarea
+          id="movement-report-text"
+          rows="5"
+          readonly
+          spellcheck="false"
+        ></textarea>
+      </div>
       <label class="seed-label" for="current-seed">World seed</label>
       <input id="current-seed" type="text" readonly />
       <small id="seed-version"></small>
@@ -114,7 +127,7 @@
       <div class="controls">
         <span><kbd>W A S D</kbd> walk · auto-jump</span
         ><span id="look-help">Q/E orbit · Scroll zoom · Home heading</span
-        ><span><kbd>ESC</kbd> pause</span>
+        ><span><kbd>ESC</kbd> pause · <kbd>F8</kbd> report stuck movement</span>
       </div>
       <div class="edition">ISLAND SURVEY<span>EXPERIMENT 004</span></div>
     </footer>

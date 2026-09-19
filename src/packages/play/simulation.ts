@@ -14,7 +14,12 @@ export function createSimulation(
 ) {
   const movement = createMovement(island, capabilities);
   return {
-    createState: () => createGame(island),
+    createState: () => {
+      const state = createGame(island);
+      movement.createState(state);
+      return state;
+    },
+    movementDiagnostics: movement.diagnostics,
     advance: (state: GameState, input: Input, seconds: number) =>
       advance(state, input, seconds, island, movement),
     canStandAt: (point: Point, y: number) =>

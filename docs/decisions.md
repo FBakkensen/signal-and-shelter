@@ -151,6 +151,10 @@ Implemented with one simulation-owned half-metre coverage grid shared by discove
 - Status: Accepted design; first production increment implemented on `codex/automatic-keyboard-traversal`, browser traversal acceptance pending.
 - Basis: The accepted [navigation checkpoint](navigation-design.md) and its linked decisions.
 - Decision: Navigation owns supported surfaces, local traversal and movement physics; play owns camera-relative input, exploration and lifecycle. Profiles carry individual body dimensions, speed, jump availability, elevation limit and setup/recovery durations. Planning in the next increment must reuse this movement implementation.
-- Tradeoff: Fully supported landing footprints and prevalidated arcs conservatively reject narrow footholds and clearance-constrained paths. Lateral airborne steering is allowed only when the remaining arc and landing remain feasible. Actual feel still needs human playtesting.
+- Tradeoff: Ground support beneath the actor centre is distinct from clearance for the full collision body. This allows overhang on half-metre treads without shrinking collision dimensions; prevalidated arcs still reject blocked paths. Lateral airborne steering is allowed only when the remaining arc and landing remain feasible. Actual feel still needs human playtesting.
 - Lifecycle: Explicit pause freezes movement; the terminal leaves it running with gameplay keys disabled. Focus loss clears held keys without pausing. A shared clock and hidden-page timer reduce dependence on render scheduling, with a two-second cap after browser/OS suspension; actual hidden-tab behavior remains unverified.
 - Evidence: [Automatic keyboard traversal validation](testing/automatic-keyboard-traversal.md). No prototype branch was merged.
+
+### D015 correction — 2026-09-19
+
+The first implementation incorrectly required the whole 0.6 m body footprint to rest at one height. Human feedback showed that this blocked ordinary 0.5 m stairs. A deterministic reproduction at the screenshot's **rounded HUD coordinates** and a minimal staircase both failed before correction. Centre support with unchanged body clearance fixes the shared rule. This is a correction to the accepted normal-terrain traversal requirement, not a new movement mode. Reports preserve full floating-point coordinates; screenshots only provide rounded display values.

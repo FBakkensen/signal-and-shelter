@@ -561,3 +561,24 @@ footer {
   pointer-events: none;
   opacity: 0;
 }
+
+#movement-report-panel label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 12px;
+}
+#movement-report-text {
+  width: 100%;
+  max-width: 100%;
+  resize: vertical;
+  padding: 8px;
+  border: 1px solid #dca88844;
+  border-radius: 6px;
+  background: #271f29;
+  color: #f6dcc2;
+  font: 11px monospace;
+}
+#movement-report-status {
+  font-size: 12px;
+  line-height: 1.5;
+}
