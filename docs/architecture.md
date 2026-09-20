@@ -74,7 +74,7 @@ The earlier beacon `.blend`, `.glb`, and recipe are retained as experiment histo
 
 ## Current boundaries
 
-Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. No device performance target or frame-rate benchmark has been established. The production build currently warns about the approximately 648 kB minified JavaScript bundle, which includes Three.js.
+Keyboard/mouse input, finite terrain, and session-only progress are deliberate experiment choices. Audio, touch movement, terrain editing, streaming, multiplayer, and persistence remain unimplemented. Performance targets and reference hardware are defined in [simulation acceptance](simulation-acceptance.md); benchmark execution and measured capacity remain pending. The production build currently warns about the approximately 648 kB minified JavaScript bundle, which includes Three.js.
 
 ## Current presentation — 2026-09-19
 

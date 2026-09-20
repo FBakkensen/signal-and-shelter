@@ -39,7 +39,7 @@ Establish shared movement and per-individual capabilities, then integrate automa
 Acceptance:
 
 - Walk diagonally and turn/release without snapping or completing an obsolete movement segment.
-- Traverse eligible steps and low obstacles with timing A; reject excessive rises/drops, unsupported landings, gaps and insufficient clearance.
+- Traverse eligible steps and low obstacles with seven preparation ticks and seven recovery ticks at 60 Hz; reject excessive rises/drops, unsupported landings, gaps and insufficient clearance.
 - Exercise different body sizes and a non-jumping capability profile through production logic.
 - Release or redirect during setup; take over in flight; freeze/resume setup, flight and recovery.
 - Verify Space/Ctrl/Shift do not jump, sprint or sneak; preserve camera, selection, proximity and exploration.
@@ -70,7 +70,7 @@ Each increment requires production-code behavior tests, `npm run check`, real in
 
 The accepted prototype is archived at `codex/navigation-prototype`, commit `3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544`; [its evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md) includes limitations, not whole-world production validation. Start implementation from the production baseline with accepted design records available. Never merge the prototype branch or ship its study entry, comparison controls or course renderer. Apply [prototype handoff](agents/prototype-handoff.md).
 
-Arrival tolerance, steering strength and feedback wording may be refined against the accepted behavior during integration. Record chosen values and measured limitations. Timing A and the 1 m elevation limit remain selected values. Do not claim performance, background scheduling or human acceptance without corresponding evidence.
+Arrival tolerance, steering strength and feedback wording may be refined against the accepted behavior during integration. Record chosen values and measured limitations. Seven preparation ticks and seven recovery ticks at 60 Hz, and the 1 m elevation limit, remain selected values. Do not claim performance, background scheduling or human acceptance without corresponding evidence.
 
 ## Foundation migration handoff — 2026-09-20
 

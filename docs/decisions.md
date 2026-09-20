@@ -152,7 +152,7 @@ Implemented with one simulation-owned half-metre coverage grid shared by discove
 ## D015 — Establish shared simulation fundamentals before navigation implementation
 
 - Date: 2026-09-19
-- Status: Accepted direction; detailed design pending
+- Status: Historical baseline; current design status is recorded in the accepted decisions below, with production implementation and validation still pending
 - Basis: Repeated blocked movement exposed insufficient confidence in the general rules. The user explicitly withdrew the current implementation and chose fundamentals first.
 - Decision: Chart the [shared simulation foundation](https://github.com/FBakkensen/signal-and-shelter/issues/26), carrying forward confirmed requirements in its [contract ticket](https://github.com/FBakkensen/signal-and-shelter/issues/27). Keep physics authoritative for direct input, planning and execution, with presentation and host integration separate.
 - Consequence: Gameplay returns to baseline `3929c5b`. Archive the withdrawn implementation and diagnostics at `f09a795` on `codex/automatic-keyboard-traversal`; do not merge it. Its centre-support relaxation is not accepted. The old navigation implementation tickets remain incomplete and depend on the new foundation.
