@@ -175,3 +175,7 @@ The user clarified that upgrades happen while stationary at a designated station
 ### Connected robot decisions — 2026-09-20
 
 The user rejected assuming congestion occurs at known passages or stable queues: it can emerge anywhere from generated terrain, actors and, later, building or modifiers. They requested moving both job and movement decisions out of the physics ticket while designing them together. Job intent and constraints inform movement decisions; movement outcomes feed back into job reconsideration. Both decision tickets belong outside the foundation wayfinder and do not block its migration. The assistant’s earlier expansion of that map was rejected and corrected; earlier fairness preferences do not establish an operational congestion model.
+
+### Exact-contact physics experiment accepted — 2026-09-20
+
+The user approved the [exact-contact and simultaneous-movement prototype](https://github.com/FBakkensen/signal-and-shelter/issues/36). Carry forward the demonstrated exact-fit clearance, safe partial movement and sliding, following with joint motion validation, and time-aware jump protection. The [archive](https://github.com/FBakkensen/signal-and-shelter/blob/9eab9caaf96950e1fd1ee6f3928959a039d2ac97/docs/testing/physics-contact-prototype.md) records the straight-to-clipped-endpoint tick convention and bounded evidence. This approves the experiment’s behavior, not production implementation or robot decision policy.
