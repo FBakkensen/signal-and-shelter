@@ -171,3 +171,7 @@ Reference arithmetic checks support the numeric bounds and residue identities on
 ### D015 movement-conflict prototype accepted — 2026-09-20
 
 The user accepted yielding before takeoff and protected safe completion after commitment, including brief entry blocking or declined unsafe steering. Protection ends on landing; physical occupancy persists. The tradeoff is a bounded exception to immediate player priority once a jump is underway. The [prototype resolution](https://github.com/FBakkensen/signal-and-shelter/issues/32#issuecomment-5748276198) is canonical. Archive `codex/movement-conflicts-prototype` at `c28ba49da8c538f2c781ae4db929e8b3025aaae5` is evidence only and must never be merged. Exact protection representation, support dimensions, shared-physics invariants, performance and migration gates remain open.
+
+### D015 adaptive integer traversal accepted — 2026-09-20
+
+The user accepted [Validate adaptive integer traversal and individual capabilities](https://github.com/FBakkensen/signal-and-shelter/issues/34) after playtesting. The accepted experiment supports early/vertical-first takeoff, adaptive safe hops and landings, supported pre-jump alignment, recovery and separate actor capabilities. Archive `codex/integer-traversal-prototype` at `473279eba7f809bb17c34757be8e12f724dbbaf1` is verified evidence only and must never be merged. The [working physics design](physics-design.md) carries the findings into the still-open general coordination, arithmetic/algorithm completeness and migration gates; production implementation remains unauthorized.

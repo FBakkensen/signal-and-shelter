@@ -163,3 +163,7 @@ The user accepted roughly 1.25 m above takeoff as the humanoid's initial jump-ap
 ### Landing recovery — 2026-09-20
 
 The user agreed that the humanoid remains stationary during its seven-tick landing recovery. New input may update the action afterward but cannot shorten or skip recovery. Recovery duration remains part of each actor's individual movement capabilities. Ordinary body occupancy continues after flight protection ends on landing. This is accepted design, not implemented behavior.
+
+### Adaptive integer traversal accepted — 2026-09-20
+
+The user accepted the adaptive integer traversal prototype: “this is working as expected.” Carry forward early takeoff on approach and vertical-first takeoff when already close, adaptive hops, bounded supported alignment, full supported landings and stationary recovery, with independently recorded actor capabilities. This is accepted behavior for the upcoming foundation, not implemented production gameplay. The [prototype decision](https://github.com/FBakkensen/signal-and-shelter/issues/34) and [archived evidence](https://github.com/FBakkensen/signal-and-shelter/blob/473279eba7f809bb17c34757be8e12f724dbbaf1/docs/testing/integer-traversal-prototype.md) preserve the experiment; general coordination and scale design remain open.

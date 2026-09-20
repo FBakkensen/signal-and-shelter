@@ -85,13 +85,13 @@ These are design obligations and proposed structure, not newly accepted algorith
 4. **Coordination:** choose how to protect a committed continuation against future occupancy, including stationary actors after landing. Define simultaneous requests, preserved queue age, deterministic contention groups, safe retreat selection and impossible traffic. Do not assume an actor will vacate its landing because its flight protection ended.
 5. **Geometry/index invalidation:** separate static geometry/capability feasibility from dynamic occupancy. Include relevant versions in reusable results. Rebuilding a cache cannot change the tick a gameplay result becomes available. Revalidate plans and clearance before committing movement; define safe handling of upgrades and invalidations during established traversal.
 6. **Interface:** use one headless simulation transition for direct control, planning trials and execution. Callers submit intent, not writable positions or render meshes. Expose read-only observations, ordinary blocked/rejected outcomes and separately typed invariant faults. Keep resumable planning and coordination state authoritative when it affects future ticks.
-7. **Lifecycle and validation:** make alignment/preparation/flight/recovery preservation across explicit pause precise, including new input after resume. Define per-tick checks, last-valid-state retention and reproducible failure evidence. Complete focused integer traversal and congestion experiments before claiming that the accepted behavior works together; apply the existing replay/scale gates afterward.
+7. **Lifecycle and validation:** make alignment/preparation/flight/recovery preservation across explicit pause precise, including new input after resume. Define per-tick checks, last-valid-state retention and reproducible failure evidence. Use the accepted focused integer traversal evidence below and complete the remaining general congestion experiments before claiming the whole coordination design works together; apply the existing replay/scale gates afterward.
 
 The engineering proposal should resolve the remaining rules without reopening accepted preferences unless concrete conflicting evidence appears. Exact algorithms, bounded work budgets and failure behavior need review before this ticket can close.
 
 ## Evidence boundary
 
-No foundation physics implementation has been produced in this interview. The archived feet comparison passed 71 tests and focused browser checks; its independent outline arithmetic is not a support solver. The conflict archive used floating-point baseline movement and controlled scenarios, not the accepted integer migration. No one-block traversal, adaptive integer jump, alignment, general fair coordination or 1,000-actor capacity claim is established by these archives.
+Before the adaptive integer experiment, the feet comparison and floating-point conflict archive did not establish one-block integer traversal, adaptive integer jumps or alignment. Their limits remain unchanged. The subsequent accepted integer experiment supplies bounded traversal evidence, summarized under Experiment frontier below; it still does not establish general fair coordination or 1,000-actor capacity.
 
 ## Integer trajectory arithmetic investigation — 2026-09-20
 
@@ -115,9 +115,11 @@ A prototype needs an explicit velocity/apex cap, safe integer landing/contact se
 
 The investigation ran ephemeral reference arithmetic only. It did not execute production movement or modify application code.
 
-## Proposed next prototype contract — not yet accepted
+## Integer traversal experiment plan — historical checkpoint
 
-The next representative experiment should exercise a headless integer movement module through the same interface for direct input, candidate validation and actual movement. Existing float-based trajectories cannot validate these new numeric rules. Use controlled courses with the real body/support settings, production input mapping, selected avatar appearance and camera; introduce only the integer kernel and traversal rules under investigation. Keep experiment code on an isolated archive branch.
+The following plan preceded the accepted experiment documented below. Its unaccepted-hypothesis wording records the starting status; see the acceptance and evidence boundary below for the current status.
+
+The representative experiment should exercise a headless integer movement module through the same interface for direct input, candidate validation and actual movement. Existing float-based trajectories cannot validate these new numeric rules. Use controlled courses with the real body/support settings, production input mapping, selected avatar appearance and camera; introduce only the integer kernel and traversal rules under investigation. Keep experiment code on an isolated archive branch.
 
 ### State and interface
 
@@ -147,4 +149,10 @@ Automated tests must execute the new module and compare exact state; interactive
 
 ### Experiment frontier
 
-[Validate adaptive integer traversal and individual capabilities](https://github.com/FBakkensen/signal-and-shelter/issues/34) now owns the focused experiment above. It is open and unclaimed; no experiment branch or implementation has started. Its evidence feeds back into the shared-physics decision, which remains unresolved. General fairness, indexing/work budgets and the final migration gate remain separate outstanding obligations.
+[Validate adaptive integer traversal and individual capabilities](https://github.com/FBakkensen/signal-and-shelter/issues/34) was accepted by the user on 2026-09-20: “this is working as expected.” [The archived experiment and detailed evidence](https://github.com/FBakkensen/signal-and-shelter/blob/473279eba7f809bb17c34757be8e12f724dbbaf1/docs/testing/integer-traversal-prototype.md) are preserved on `codex/integer-traversal-prototype` at `473279eba7f809bb17c34757be8e12f724dbbaf1`; remote commit verified, clean return completed, never merge.
+
+The accepted behavior includes anticipatory early takeoff and vertical-first takeoff when already near a step, adaptive hops, bounded supported alignment before preparation, full supported landings/recovery, and individual movement capabilities. Preserve the previously selected 440 mm support square, separate 600 mm body clearance, humanoid speed/elevation/apex limits, and seven-tick preparation/recovery. The prototype retained 1800 mm body height and tested integer acceleration 7 mm/tick², actor-specific limited steering, and a piecewise-linear final landing segment ending at an integer supported position. These mechanisms now have accepted behavioral evidence, not proof of production completeness.
+
+All 105 tests passed in the archive commit hook, including 36 focused traversal tests and one input-mapping test; prior full project checks and desktop/narrow integrated-browser checks passed. The user supplied the human verdict after the earlier automated held-key/timing limitations. Exact sweeps, rectangle-union support, planned/actual agreement and a coordinate-bound regression provide bounded evidence. The source is an experiment, not production migration.
+
+The shared-physics decision remains open. It must still settle general fair coordination, contention groups, indexing/invalidation and deterministic work budgets, capability changes during committed flight, and the final production interface/validation design. Assess the prototype's bounded target/trajectory family, conservative occupancy envelopes and landing-segment convention explicitly; do not infer complete routing, full cross-runtime replay or 1,000-actor capacity. Those questions already belong to the existing physics and migration tickets; this acceptance creates no new ticket or implementation authorization.
