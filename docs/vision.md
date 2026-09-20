@@ -2,6 +2,10 @@
 
 Last updated: 2026-09-19.
 
+### Movement scale acceptance — 2026-09-20
+
+The user clarified that the initial 1,000-actor scale target covers movement only; robot jobs and other future systems will add simulation work and require expanded benchmarks. Chromium is the initial supported browser, with performance measured on the user's Core Ultra 5 125H Linux machine. Required views target 60 FPS with 100 visible actors in close play and all 1,000 represented in strategic view. See [simulation acceptance](simulation-acceptance.md) for agreed thresholds, routing load and replay evidence requirements. This is accepted validation design, not measured capacity or implementation authorization.
+
 ## Confirmed direction
 
 The game is named **Signal & Shelter**.

@@ -2,6 +2,10 @@
 
 Record significant choices with date, status, rationale, and consequences. Use proposed, accepted, or superseded; link a replacement when superseding a choice.
 
+### D015 movement acceptance gates agreed — 2026-09-20
+
+The user accepted the requirements in [simulation acceptance](simulation-acceptance.md): movement-only load for 1,000 actors, Chromium on the current reference machine, exact per-tick Node/Chromium replay including a second machine, repeatable routing load and explicit simulation/rendering/memory thresholds. [Define reproducibility and normal-speed scale acceptance](https://github.com/FBakkensen/signal-and-shelter/issues/30) owns the canonical resolution. The scope deliberately excludes unimplemented robot jobs; future systems must expand the workload and share the budget. Protocol defaults make the measurements repeatable without claiming universal hardware or display support. No production benchmark has run, and the foundation migration checkpoint remains required.
+
 ## D008 — Make seeded arrival the next small experiment
 
 - Date: 2026-09-19
