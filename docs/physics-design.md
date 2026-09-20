@@ -32,6 +32,7 @@ The accepted visual variant B has a 440 mm total foot span, 160 mm individual wi
 - A planned jump may use lower horizontal speed to avoid overshooting a supported landing, equally for player and robots. If no safe trajectory exists, remain before takeoff.
 - A small automatic sideways adjustment may align a safe landing while continuing toward the intended direction. This is supported, collision-checked movement, never a snap or teleport. Its accepted starting lateral limit is 250 mm from the start of the alignment attempt; if a larger correction is needed, stop and let the player reposition. It does not authorize arbitrary detours.
 - Finish alignment before beginning the seven-tick preparation. Then execute flight and the seven-tick recovery. Route cost includes all four phases. Alignment rate and flight arithmetic remain open; the 250 mm starting limit still needs movement validation.
+- During landing recovery the actor remains stationary for its configured duration (currently seven ticks for the humanoid). New input updates subsequent intent but cannot shorten or skip recovery. Flight protection has ended; body occupancy persists.
 - Changing direction or releasing direct movement cancels alignment/preparation. The accepted separate explicit-pause preservation rule still applies: clearing host-held keys for pause must not be mistaken for an ordinary release that cancels established traversal.
 
 ### Actor coordination
@@ -113,3 +114,37 @@ These are necessary geometric checks, not executed traversals or sufficient cond
 A prototype needs an explicit velocity/apex cap, safe integer landing/contact selection, exact within-tick sweep convention and a declared candidate family. No candidate found means none within that supported family, not mathematical impossibility for every imaginable trajectory. A naive search over 120 velocities × 71 speeds × roughly 42 ticks approaches 358,000 segment evaluations per heading before geometry work; this is an illustrative count, not a measured cost or proposed production strategy. Candidate generation and reused results need independent scale evidence.
 
 The investigation ran ephemeral reference arithmetic only. It did not execute production movement or modify application code.
+
+## Proposed next prototype contract — not yet accepted
+
+The next representative experiment should exercise a headless integer movement module through the same interface for direct input, candidate validation and actual movement. Existing float-based trajectories cannot validate these new numeric rules. Use controlled courses with the real body/support settings, production input mapping, selected avatar appearance and camera; introduce only the integer kernel and traversal rules under investigation. Keep experiment code on an isolated archive branch.
+
+### State and interface
+
+- Initialize a run from explicit static integer geometry and actors with recorded effective movement capabilities. Each actor carries position, movement residues, phase/timers, original intent, alignment origin, chosen traversal and any committed continuation. No render mesh enters the interface.
+- Advance one complete tick with ordered resolved input commands. Return a valid next state plus ordered observations, or a fault preserving the last valid state. A rejected candidate or blocked request is an ordinary outcome, not a fault.
+- Candidate evaluation executes the same motion/contact transition on isolated trial state. It cannot change live actors, consume unrelated random streams or publish partial movement. Tests and the browser use the same headless interface.
+- Geometry indexes and cached transitions are internal. Reuse is keyed by geometry and effective capabilities, and dynamic occupancy is revalidated. Cached results do not bypass logical planning work or change result timing.
+
+### Initial numeric hypothesis
+
+For the current humanoid only, investigate vertical acceleration of 7 mm/tick², initial vertical velocity selected from nonnegative integer values, and the accepted 1,250 mm apex ceiling. Under the advance-then-accelerate recurrence above, initial velocity 128 mm/tick reaches 1,235 mm and 129 reaches 1,254 mm; these two apex values were verified by an ephemeral integer reference loop, not production motion. The exact highest admissible velocity is derived from this actor's configuration, never a constant shared by all actors. Horizontal speed remains bounded by the actor's walking capability, with lower candidates allowed. These acceleration/trajectory values are **hypotheses**, not accepted tuning or executed traversal evidence.
+
+Inspect the complete swept body path for every tick and every actual contact adjustment, not just endpoints. Decide the exact landing/contact convention before building: a fractional-time contact cannot silently become an unsupported rounded integer position. Landing must have full support and body clearance, and must preserve the declared numeric/residue semantics. Neither snapping to a nearby platform nor freezing in midair is a valid fallback.
+
+### Required courses and observations
+
+1. Cardinal and diagonal rises/drops of 500 and 1,000 mm, including repeated one-block landings. Inspect body clearance, full support and centred landing preference.
+2. Small steps beneath low ceilings: show a lower valid hop and a truly blocked case.
+3. Near-edge starts, seams between coplanar blocks and a hole inside the support footprint; verify full area coverage rather than centre/corner samples.
+4. Alignment inside/outside the 250 mm bound, direction changes and release during alignment/preparation; verify that preparation starts only after alignment completes.
+5. Reduced-speed landing candidates, phase duration and exact route cost accounting; compare trial and actual tick states.
+6. Two differently configured actors, including a non-jumper, executing the same shared rules. No upgrade UI or robot job behavior.
+7. Explicit pause in each movement phase; preserve established traversal while applying the accepted input/lifecycle rules.
+8. Focused occupancy conflicts and a stopped actor on a landing; preserve the accepted safe-continuation behavior. General fair traffic and scale measurements remain separate obligations.
+
+Automated tests must execute the new module and compare exact state; interactive browser evidence must cover actual course traversal, controls and visual inspection. A human verdict is required for alignment, hop and landing feel. Do not claim complete physics or capacity from this bounded experiment.
+
+### Experiment frontier
+
+[Validate adaptive integer traversal and individual capabilities](https://github.com/FBakkensen/signal-and-shelter/issues/34) now owns the focused experiment above. It is open and unclaimed; no experiment branch or implementation has started. Its evidence feeds back into the shared-physics decision, which remains unresolved. General fairness, indexing/work budgets and the final migration gate remain separate outstanding obligations.

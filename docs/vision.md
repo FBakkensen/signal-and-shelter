@@ -159,3 +159,7 @@ The user accepted a small automatic sideways adjustment before takeoff to align 
 ### Individual physics settings — 2026-09-20
 
 The user accepted roughly 1.25 m above takeoff as the humanoid's initial jump-apex cap, distinct from its 1 m elevation-change limit. They emphasized that these are individual movement capabilities, not shared constants for every actor. Body/support dimensions, movement speeds, jump limits, phase durations and alignment settings can differ by type and individual and may change through future upgrades. Shared physics uses each actor's recorded effective settings; prepare that representation without implementing upgrades now. This clarifies the scope of the humanoid values agreed above.
+
+### Landing recovery — 2026-09-20
+
+The user agreed that the humanoid remains stationary during its seven-tick landing recovery. New input may update the action afterward but cannot shorten or skip recovery. Recovery duration remains part of each actor's individual movement capabilities. Ordinary body occupancy continues after flight protection ends on landing. This is accepted design, not implemented behavior.
