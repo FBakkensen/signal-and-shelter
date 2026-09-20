@@ -73,3 +73,9 @@ This is the production implementation branch. `npm run dev` opens normal third-p
 The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
 The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play controls, shared exploration and the active strategic atlas are implemented. Sustained human playtesting and rendering-cost measurement remain for the final increment.
+
+## Movement-conflict experiment (throwaway branch only)
+
+On `codex/movement-conflicts-prototype`, run `npm run prototype:conflicts -- --port 5173` and open [the study](http://127.0.0.1:5173/movement-prototype.html). Select a scenario and policy, then **Run the encounter**. WASD allows free movement; wheel zooms. The ledge scenario compares the existing body and visible feet against shelf widths.
+
+`npm run check` passed with 78 tests. [Experiment evidence and limitations](docs/testing/movement-conflicts-prototype.md) distinguish tested behavior, user acceptance and remaining design limits. This branch is an accepted prototype archive, never a production merge candidate; normal game entry remains separate.

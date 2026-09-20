@@ -1,0 +1,186 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #f4ebdb;
+  background: #171d25;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+#study {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  height: 100dvh;
+}
+aside {
+  padding: 24px;
+  overflow: auto;
+  background: #202833;
+  border-right: 1px solid #41474c;
+}
+h1 {
+  font-size: 25px;
+  line-height: 1.14;
+  margin: 10px 0;
+}
+h2 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 24px 0 10px;
+}
+p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c1c9cd;
+}
+.eyebrow {
+  color: #e9b779;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  font-weight: bold;
+}
+button,
+select {
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid #5b646b;
+  border-radius: 5px;
+  padding: 10px;
+  color: #f4ebdb;
+  background: #303b46;
+  cursor: pointer;
+  width: 100%;
+  margin: 4px 0;
+}
+button:hover {
+  background: #455361;
+}
+button:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ffce80;
+}
+button.primary {
+  background: #d8ab72;
+  color: #19212a;
+  font-weight: bold;
+}
+.pair {
+  display: flex;
+  gap: 7px;
+}
+.pair > * {
+  flex: 1;
+}
+#viewport {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#status {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  padding: 15px;
+  background: #17202bee;
+  border: 1px solid #58616b;
+  border-radius: 8px;
+  pointer-events: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+#status.fault {
+  border-color: #ef8e83;
+}
+#status strong {
+  color: #ffd49c;
+}
+#positions {
+  font:
+    12px ui-monospace,
+    monospace;
+  color: #c4cdd2;
+  margin-top: 7px;
+}
+#legend {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  background: #17202bdd;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #d4dedc;
+}
+details {
+  font-size: 12px;
+  margin-top: 20px;
+  color: #aebdc4;
+}
+summary {
+  cursor: pointer;
+}
+#history {
+  padding-left: 16px;
+  line-height: 1.5;
+}
+label {
+  font-size: 12px;
+  color: #bccad0;
+}
+#ledge-controls {
+  display: none;
+}
+.hint {
+  font-size: 12px;
+  color: #94b3b0;
+}
+@media (max-width: 700px) {
+  #study {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  aside {
+    padding: 16px;
+    border: 0;
+    overflow: visible;
+  }
+  h1 {
+    font-size: 22px;
+  }
+  h2 {
+    margin-top: 14px;
+  }
+  #viewport {
+    height: 65dvh;
+    min-height: 420px;
+    order: -1;
+  }
+  #status {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    font-size: 12px;
+  }
+  #legend {
+    left: 10px;
+    top: 10px;
+    font-size: 10px;
+  }
+  #positions {
+    font-size: 10px;
+  }
+  .intro {
+    display: none;
+  }
+}
