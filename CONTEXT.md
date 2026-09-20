@@ -20,7 +20,7 @@ _Avoid_: Landmark (when referring to a resource deposit)
 
 **Unexplored area**: Ground not yet uncovered through exploration. Fog conceals its terrain and objects in both close play and strategic view.
 
-**Movement capabilities**: What an individual humanoid or robot can currently traverse, including its body dimensions, speed and available movement abilities. Capabilities can differ by type and individual, including changes from upgrades; an actor need not be able to jump.
+**Movement capabilities**: What an individual humanoid or robot can currently traverse, including its support footprint, body dimensions, speed, jump limits and movement timings. Capabilities can differ by type and individual, including changes from upgrades; an actor need not be able to jump.
 
 **Actor**: The player-controlled humanoid or an individual robot that occupies space and moves on the island.
 

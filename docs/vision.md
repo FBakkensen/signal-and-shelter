@@ -155,3 +155,7 @@ The user agreed that automatic traversal should jump only as high as needed to s
 ### Pre-takeoff alignment — 2026-09-20
 
 The user accepted a small automatic sideways adjustment before takeoff to align a safe landing while continuing toward the intended direction. Changing direction or releasing direct movement during preparation cancels it. Alignment is ordinary supported, collision-checked movement, never a snap or teleport. The user subsequently agreed to finish alignment before starting the seven-tick preparation; route costs include that additional alignment time. The accepted starting lateral limit is 250 mm from the alignment start; if more correction is required, stop and let the player reposition. Alignment speed and feel still require validation in [the physics decision](https://github.com/FBakkensen/signal-and-shelter/issues/29); this is not production behavior.
+
+### Individual physics settings — 2026-09-20
+
+The user accepted roughly 1.25 m above takeoff as the humanoid's initial jump-apex cap, distinct from its 1 m elevation-change limit. They emphasized that these are individual movement capabilities, not shared constants for every actor. Body/support dimensions, movement speeds, jump limits, phase durations and alignment settings can differ by type and individual and may change through future upgrades. Shared physics uses each actor's recorded effective settings; prepare that representation without implementing upgrades now. This clarifies the scope of the humanoid values agreed above.

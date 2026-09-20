@@ -6,6 +6,14 @@ Read with [simulation contract](simulation-contract.md), [numeric design](numeri
 
 ## Accepted behavior
 
+### Individual movement capabilities — clarified 2026-09-20
+
+The roughly 1.25 m apex cap is accepted as the current humanoid prototype starting value. It limits height above takeoff, separately from that humanoid's 1 m up/down landing-elevation limit. Exact representable trajectory tuning still requires validation.
+
+All actor-specific physical dimensions, speeds, jump availability/limits, preparation/recovery and alignment settings belong to that individual actor's movement capabilities. Type defaults may initialize them; different individuals of the same type may have different effective values, including future upgrades. The 440 mm support width, 600 mm clearance width, 70 mm/tick walking speed, 1 m elevation limit, roughly 1.25 m apex cap, seven-tick phase durations and 250 mm alignment cap discussed here describe the current humanoid configuration, not constants for every robot or humanoid.
+
+Shared physics enforces the same support, clearance, non-overlap, determinism and safe-completion rules using each actor's effective values. Planning and execution read the same individual capabilities. Include effective values and any version needed for cache/plan validation in authoritative state and replay; never resolve them from rendered meshes. Capability changes require invalidation/revalidation and the already accepted safe movement-interruption rule; exact update timing during committed flight remains to be specified. Prepare to record individual values now; do not build upgrades or robot gameplay in this map.
+
 ### Geometry and support
 
 Physics defines what is possible independently of rendering. Visible meshes and animation never determine authoritative dimensions. The user wants deliberate alignment of appearance and physics in the humanoid feet case.

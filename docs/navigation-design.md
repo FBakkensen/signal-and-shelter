@@ -26,7 +26,7 @@ Explicit pause freezes and preserves state and jump timers; resume continues it.
 
 Navigation owns movement requests, planning, route execution and automatic traversal through shared movement physics. Player input, camera, terminal presentation and future robot job management stay outside it. Use island geometry and existing exploration knowledge, and distinguish supported surfaces at different heights at the same horizontal location. Clearance alone does not prove support.
 
-Planning and execution consume the same individual's movement capabilities: body dimensions, walking speed, jump availability, shared up/down limit and setup/recovery timings. Type and upgrades can determine these values elsewhere. Upgrades interrupt movement first. Validate reuse with differing capability profiles, including no jumping, without adding robot gameplay.
+Planning and execution consume the same individual's movement capabilities: support footprint, body dimensions, walking speed, jump availability, up/down and apex limits, setup/recovery timings and alignment settings. Type defaults initialize per-individual effective values; individuals of the same type may differ, including through future upgrades. The humanoid tuning values above are not universal robot or humanoid constants. Prepare to record individual values without implementing upgrades now. Upgrades interrupt movement first. Validate reuse with differing capability profiles, including no jumping, without adding robot gameplay.
 
 Navigation reports arrival or inability to progress. [Robot job selection and blocked-job recovery](https://github.com/FBakkensen/signal-and-shelter/issues/21), retry schedules, tick systems, flying and terrain-specific movement remain outside this effort.
 
