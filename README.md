@@ -73,3 +73,7 @@ This is the production implementation branch. `npm run dev` opens normal third-p
 The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
 The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play controls, shared exploration and the active strategic atlas are implemented. Sustained human playtesting and rendering-cost measurement remain for the final increment.
+
+## Deterministic numeric foundation
+
+The new [numeric package](src/packages/numeric/README.md) prepares the accepted simulation migration; current gameplay still uses its existing physics and generator. `npm run numeric:generate` regenerates the checked-in versioned Q24 direction table, and `npm run numeric:verify` verifies exact reproducibility. Verification is also part of `npm run check`. See [numeric validation](docs/testing/numeric-primitives.md) for evidence and remaining integration gates.

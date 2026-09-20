@@ -118,3 +118,9 @@ The user accepted the [navigation design checkpoint](navigation-design.md) and i
 ### Consolidated physics design — 2026-09-20; not implemented
 
 The [physics contract](physics-design.md) specifies a headless module with initialize, atomic tick advance and isolated trial operations. Direct control, navigation trials and execution share the same transition. Geometry indexes and protected-continuation storage are internal; snapshots retain every movement/work field affecting future ticks. Revision-keyed static feasibility is reusable, while dynamic occupancy is revalidated before commitment. The existing migration checkpoint owns production integration and evidence. Current production modules described above remain unchanged.
+
+## Integer numeric foundation — 2026-09-20
+
+The production `numeric` package now provides checked region/local arithmetic, Q24 directions and world-axis residues, deterministic target conversion, canonical seed/random streams, and individual capability units. Its [interface and byte conventions](../src/packages/numeric/README.md) include bounds, version identifiers and reproducible direction-table generation. It is independent of Three.js and browser state. Normal play still uses the existing island/play authority; this package prepares the migration without changing current gameplay or generator output.
+
+The offline Node-only table recipe is a separate entry point. `npm run numeric:verify`, included in `npm run check`, checks the committed table against that recipe. Future simulation snapshots must retain residues, counters and effective capabilities. Geometry predicates, ticks/replay, host input conversion and physics remain downstream work.
