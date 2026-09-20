@@ -18,6 +18,8 @@ Shared physics enforces the same support, clearance, non-overlap, determinism an
 
 Physics defines what is possible independently of rendering. Visible meshes and animation never determine authoritative dimensions. The user wants deliberate alignment of appearance and physics in the humanoid feet case.
 
+Exact-fit clearance accepted on 2026-09-20: a perfectly aligned 600 mm-wide body may traverse a passage exactly 600 mm wide. Boundary contact is valid; positive-volume overlap is not. Movement into a wall is blocked, while safe tangential movement remains possible. Do not add an undeclared clearance margin beyond the actor's recorded physical dimensions. Exact swept-contact arithmetic and production tests still need to establish this behavior, including contact at corners and moving away from a touching face.
+
 The humanoid's support footprint is a 440 × 440 mm square fixed to the world axes. Facing and walking animation do not rotate or resize it. Its whole area must be supported at a valid standing position; a centre or corner-only test is insufficient. The separate horizontal full-body clearance remains 600 × 600 mm. A 500 mm ridge with open sides can support the humanoid; a 500 mm passage between solid walls cannot clear it. This interview has not newly selected body height.
 
 The accepted visual variant B has a 440 mm total foot span, 160 mm individual width, centres at ±140 mm and the retained 220 mm depth. Its appearance does not imply that physical support is two animated foot meshes. [Prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/a03f661feb780137fd5c4a05ac700fb1f5c9d417/docs/testing/feet-stance-prototype.md) is a visual comparison, not traversal validation.
@@ -25,6 +27,7 @@ The accepted visual variant B has a 440 mm total foot span, 160 mm individual wi
 ### Ground movement and traversal
 
 - A wall blocks its normal movement component while permitting safe tangential movement. Do not boost tangential speed. The accepted blocked-axis residue rules apply.
+- Partial movement to contact accepted on 2026-09-20: when a 70 mm requested movement reaches a wall after 45 mm, advance those safe 45 mm rather than rejecting the entire movement. Select the furthest safe integer position along the attempted movement, then permit the remaining safe tangential component without increasing its speed or duplicating the tick's travel budget. Preserve full support and body clearance throughout. Discard rejected displacement and clear residues on genuinely blocked axes under the numeric contract; retain tangential residues. Exact contact rounding and multiple-contact handling still require specification and validation.
 - Stop at an unsafe edge instead of permitting an uncontrolled fall. Use automatic traversal when a safe descent exists within the accepted 1 m elevation limit. Tangential edge movement still requires full support and body clearance.
 - Jump only as high as needed to safely clear the obstacle. Smaller hops may fit under lower ceilings only if the whole body clears the complete trajectory.
 - On small platforms, prefer a target near the centre of the safe landing area over the earliest fully supported edge position. Stay within the accepted jump/alignment limits and preserve full-body clearance and occupancy. This does not request travel to the centre of a large surface.
@@ -79,6 +82,14 @@ Reservations are one representation of future constraints, not an additional set
 
 ## Accepted committed-jump protection direction — 2026-09-20
 
+### Simultaneous movement — accepted 2026-09-20
+
+Two actors may advance together during the same tick when their bodies remain non-overlapping throughout the complete movements. A follower may enter space the leader actually vacates during that tick; it may not assume continued movement on later ticks. Endpoint-only collision checks are insufficient. Selecting desired movement remains outside this physics decision.
+
+Engineering consequence to specify and validate: movement that relies on another actor vacating space must be checked against that actor's final accepted movement and committed with it. If the leader's movement is shortened or rejected, revalidate dependent movement before committing the tick. Do not publish a follower's advance based on a rejected proposal. This is a safety obligation, not a selected traffic-priority or replanning algorithm.
+
+### Protected continuation
+
 The user accepted protecting the swept body space needed at each tick of a committed jump, plus its supported endpoint. Include the complete movement between tick positions, not only occupancy at tick boundaries. Other actors may use nearby space when their movement cannot interfere. This selects a time-aware protection direction instead of excluding the entire jump area for the whole flight; exact conflict arithmetic, data structures, congestion behavior and performance remain to be validated.
 
 Do not reserve complete routes or global island cells for every actor. Ordinary ground movement remains interruptible and is checked against current occupancy and committed continuations. Route intent alone creates no right to future space.
@@ -106,6 +117,20 @@ These are design obligations and proposed structure, not newly accepted algorith
 The engineering proposal should resolve the remaining rules without reopening accepted preferences unless concrete conflicting evidence appears. Exact algorithms, bounded work budgets and failure behavior need review before this ticket can close.
 
 ## Evidence boundary
+
+### Approved next physics experiment — 2026-09-20
+
+**Question:** do exact-fit contact, partial movement/sliding, simultaneous actor movement and time-aware committed-jump protection work together through one authoritative integer transition? The recent interview accepted these behaviors; the earlier archive does not establish their combined correctness.
+
+**Real foundations:** retain the accepted integer numeric contract, full-area support, individual body dimensions, adaptive traversal and seven-tick humanoid preparation/recovery. Inspect and reuse the relevant archived integer-kernel source on a new isolated experiment branch, extending it only where these rules require changes; never merge the archive into production. Keep actual movement and trial validation on the same transition. Retain the established input/camera where direct play is part of a case. Record the exact reused source and departures before implementation.
+
+**Controlled differences:** use small purpose-built geometry and explicit movement inputs for a few actors. Commands are fixtures for physics validation, not autonomous choices. No robot-job, fairness, congestion-recognition or replanning algorithm belongs in this experiment. The previous conservative protection envelope must not stand in for the newly selected time-aware rule.
+
+Required cases: a 600 mm exact-fit passage and a 599 mm blocked passage; moving away from wall contact; diagonal wall sliding and corners with no extra travel; 45 mm of safe progress from a 70 mm request; full support across seams and near edges; two following actors moving together; a leader stopping partway through a tick with its follower revalidated; paths whose endpoints are clear but whose bodies cross during the tick; a walker interacting with a committed jump at different times; safe and rejected airborne replacement; a stopped actor retaining its landing occupancy.
+
+Automated tests execute the experiment kernel and assert complete-tick validity, exact displacement/residues, no penetration between endpoints, supported grounded states, retained safe continuations and trial/execution agreement. Integrated-browser controls must expose the same scenarios for real interaction and visual inspection. Tests, observed browser results and the human verdict are separate evidence. This bounded experiment cannot establish global routing, autonomous coordination or 1,000-actor capacity.
+
+Status: approved by the user as the next evidence step. [Validate exact contacts and simultaneous protected movement](https://github.com/FBakkensen/signal-and-shelter/issues/36) owns the experiment. Exact solver/contact rules must be specified before implementation. The physics decision remains open; this authorizes a throwaway prototype, not production migration.
 
 Before the adaptive integer experiment, the feet comparison and floating-point conflict archive did not establish one-block integer traversal, adaptive integer jumps or alignment. Their limits remain unchanged. The subsequent accepted integer experiment supplies bounded traversal evidence, summarized under Experiment frontier below; it still does not establish general fair coordination or 1,000-actor capacity.
 
