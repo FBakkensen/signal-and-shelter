@@ -179,3 +179,7 @@ The user rejected assuming congestion occurs at known passages or stable queues:
 ### Exact-contact physics experiment accepted — 2026-09-20
 
 The user approved the [exact-contact and simultaneous-movement prototype](https://github.com/FBakkensen/signal-and-shelter/issues/36). Carry forward the demonstrated exact-fit clearance, safe partial movement and sliding, following with joint motion validation, and time-aware jump protection. The [archive](https://github.com/FBakkensen/signal-and-shelter/blob/9eab9caaf96950e1fd1ee6f3928959a039d2ac97/docs/testing/physics-contact-prototype.md) records the straight-to-clipped-endpoint tick convention and bounded evidence. This approves the experiment’s behavior, not production implementation or robot decision policy.
+
+### Foundation migration plan accepted — 2026-09-20
+
+The user accepted the [foundation migration sequence](simulation-migration.md): headless verification, coherent normal-play cutover, click-to-move integration, and combined replay/scale validation. This completes the foundation planning map. Production implementation awaits separate authorization; robot job and autonomous movement policy remain future work outside the migration.

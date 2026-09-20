@@ -71,3 +71,7 @@ Each increment requires production-code behavior tests, `npm run check`, real in
 The accepted prototype is archived at `codex/navigation-prototype`, commit `3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544`; [its evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md) includes limitations, not whole-world production validation. Start implementation from the production baseline with accepted design records available. Never merge the prototype branch or ship its study entry, comparison controls or course renderer. Apply [prototype handoff](agents/prototype-handoff.md).
 
 Arrival tolerance, steering strength and feedback wording may be refined against the accepted behavior during integration. Record chosen values and measured limitations. Timing A and the 1 m elevation limit remain selected values. Do not claim performance, background scheduling or human acceptance without corresponding evidence.
+
+## Foundation migration handoff — 2026-09-20
+
+The accepted [migration plan](simulation-migration.md) supersedes the earlier implementation sequence where it conflicts. After separate production authorization, build and verify the headless foundation before the first playable automatic-traversal cutover. Resume click-to-move after that cutover passes its gates, then complete combined replay and scale acceptance using the production planner. The foundation planning map is complete; no production gate is thereby passed. The existing two implementation tickets remain open.

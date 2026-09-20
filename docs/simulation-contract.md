@@ -1,6 +1,6 @@
 # Shared simulation contract
 
-Status: accepted by the user, 2026-09-19, through [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27). The requirements, authority/command semantics and migration scope are accepted. Detailed design and migration gates remain open; this does not authorize production implementation or claim current compliance. The issue resolution is the canonical decision.
+Status: accepted by the user, 2026-09-19, through [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27). The requirements, authority/command semantics and migration scope are accepted. Detailed design and the migration plan are now accepted; see the migration handoff below. Production implementation remains separately authorized work, with compliance unverified. The issue resolution is the canonical decision.
 
 ## Confirmed requirements
 
@@ -51,7 +51,7 @@ No robot jobs, gathering, resource transfers, saves, runtime gameplay PRNG, or r
 This ticket approves the project-wide contract and migration scope only. It does not select units, tick rate, physics algorithms, spatial indexes, scheduling implementation, support dimensions, runtime matrix or hardware budgets.
 
 - [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28) owns arithmetic, generation, command ordering, random-state semantics and lifecycle timing.
-- [Define shared physics and movement coordination invariants](https://github.com/FBakkensen/signal-and-shelter/issues/29) owns support, swept movement, planning/execution agreement, dynamic occupancy and safe/fair coordination.
+- [Define shared physics and movement coordination invariants](https://github.com/FBakkensen/signal-and-shelter/issues/29) owns support, swept movement, planning/execution agreement, dynamic occupancy and physical admission safety. Autonomous fairness belongs to the separate robot-policy work.
 - [Define reproducibility and normal-speed scale acceptance](https://github.com/FBakkensen/signal-and-shelter/issues/30) owns the runtime/hardware matrix, workloads, evidence and performance thresholds.
 
-After those decisions and any needed experiments, agree a concrete migration sequence and acceptance checkpoint before authorizing production work. Existing navigation and robot-job work remains dependent on the foundation map. The withdrawn implementation is an evidence archive, not a starting implementation to merge. Detailed job selection, retry and abandonment policy remains in the separate robot-job effort.
+The user accepted the [migration sequence and gates](simulation-migration.md) on 2026-09-20. The foundation planning map is complete; production work still requires separate subsequent authorization. Verify the headless foundation, cut normal play over coherently, resume click-to-move, then complete combined replay and scale acceptance. Robot job and autonomous movement policy remain separate future work, not foundation migration prerequisites. The withdrawn implementation remains an archive that must never be merged.
