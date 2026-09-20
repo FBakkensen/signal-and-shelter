@@ -22,3 +22,9 @@ src/packages/<name>/
 - `play/simulation.ts`: deterministic headless simulation bound to one island, also used by the play implementation and traversal scenarios.
 
 `lib/` files are private. Keep Three.js and DOM effects in the application adapters. The simulation entry point deliberately supports controlled terrain and solid geometry without exposing the collision helpers, session, or input mapping. Tests cross those same entry points. Entry-point checks include top-level `tests/` as well as package tests.
+
+- `numeric/index.ts`: checked region/local coordinates, Q24 direction lookup, target conversion and displacement/residue arithmetic.
+- `numeric/random.ts`: versioned canonical encoding and addressed/stateful integer randomness.
+- `numeric/capabilities.ts`: effective movement units and accepted humanoid defaults.
+
+The numeric package is implemented for the foundation migration but is not yet connected to normal play. Its Node-only `generate.ts` entry point is offline tooling; see [numeric interface documentation](numeric/README.md).

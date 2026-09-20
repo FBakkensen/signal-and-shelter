@@ -2,6 +2,8 @@
 
 Status: accepted by the user, 2026-09-19. [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28) owns the decision. The consolidated rules below are accepted design. Production implementation and its validation remain pending.
 
+Production progress, 2026-09-20: the standalone [numeric package](../src/packages/numeric/README.md) implements the arithmetic, table, target-heading conversion, random streams and capability units with [test evidence](testing/numeric-primitives.md). Normal play is not migrated; authoritative tick/replay and combined runtime/scale gates remain pending. The accepted design below remains the contract.
+
 ## Confirmed choices
 
 - 1 millimetre integer position units; integer region coordinates plus bounded local positions. Region dimensions, storage types and cross-region arithmetic are specified below.

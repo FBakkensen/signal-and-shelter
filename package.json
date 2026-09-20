@@ -11,10 +11,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "lint:boundaries": "depcruise src tests",
-    "check": "npm run typecheck && npm run lint:boundaries && npm run lint && npm test && npm run format:check && npm run build",
+    "check": "npm run numeric:verify && npm run typecheck && npm run lint:boundaries && npm run lint && npm test && npm run format:check && npm run build",
     "format:check": "prettier --check src tests index.html package.json tsconfig.json eslint.config.js .dependency-cruiser.cjs .prettierrc .lintstagedrc",
     "format": "prettier --write src tests index.html package.json tsconfig.json eslint.config.js .dependency-cruiser.cjs .prettierrc .lintstagedrc",
-    "prepare": "husky"
+    "prepare": "husky",
+    "numeric:generate": "node --import tsx src/packages/numeric/generate.ts",
+    "numeric:verify": "node --import tsx src/packages/numeric/generate.ts --check"
   },
   "dependencies": {
     "three": "0.186.0"

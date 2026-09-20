@@ -1,12 +1,12 @@
 # Simulation implementation plan
 
-Status: implementation backlog published on 2026-09-20 following the user's request to complete the migration handoff. This document indexes executable work; the linked issues own detailed scope and acceptance. No production implementation or new validation result is claimed.
+Status: implementation backlog published on 2026-09-20 following the user's request to complete the migration handoff. This document indexes executable work; the linked issues own detailed scope and acceptance. The initial backlog was documentation only; the numeric foundation implementation and validation are now recorded below.
 
 ## Destination and next task
 
 Continue [Add click-to-move with navigation shared by humanoid and future robots](https://github.com/FBakkensen/signal-and-shelter/issues/11), the existing execution map. It now explicitly includes the accepted deterministic foundation migration and combined replay/scale gates. The [foundation design map](https://github.com/FBakkensen/signal-and-shelter/issues/26) remains a completed record of decisions; it is not evidence that its production prerequisites have been built.
 
-Start with [Implement deterministic numeric primitives and random streams](https://github.com/FBakkensen/signal-and-shelter/issues/37). It is the initial unblocked implementation task and is labelled `ready-for-agent`. Claim it when beginning implementation. Subsequent sessions query native child dependencies and assignees rather than treating this initial next-task pointer as a permanent frontier.
+[Implement deterministic numeric primitives and random streams](https://github.com/FBakkensen/signal-and-shelter/issues/37) is implemented on `codex/deterministic-numeric-primitives`; see [validation](testing/numeric-primitives.md). Normal play is unchanged. Subsequent sessions query native child dependencies and assignees to choose the frontier, and ensure the completed prerequisite implementation is present in their starting checkout. Generation and tick/replay infrastructure are the next dependent tasks.
 
 ## Implementation dependencies
 

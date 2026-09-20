@@ -259,3 +259,9 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 The foundation handoff closed its design map after accepting broad phase order but left the expanded production work inside two older navigation issues. Native dependencies then made keyboard integration appear unblocked despite the missing core implementation. The user rejected the unclear handoff and the suggestion that adding one broad headless issue would fix it.
 
 The [implementation plan](simulation-implementation-plan.md) now maps accepted numeric, geometry, tick/replay, physics, gameplay, host, navigation and scale requirements to concrete issues under the existing execution map. It retains the two playable issue identities, adds production dependencies and keeps final acceptance open. This is tracker/documentation evidence only; design closure and existing baseline tests do not establish implemented behavior.
+
+## 2026-09-20 — Production numeric primitives
+
+The standalone numeric package implements the accepted foundation without switching live play. Its full direction table is reproducible with fixed-decimal BigInt arithmetic; 60- and 90-place generation agree. Public-interface tests check all 65,536 headings, signed arithmetic against exact references, 100,000 turning/stopping steps, region limits, capability units and versioned random vectors including rejected draws/exhaustion. [Validation record](testing/numeric-primitives.md) owns the command results.
+
+Keep rounding separate from contact projection: retained world-axis residues establish the free-motion cumulative identity, while physics must identify genuinely blocked axes before clearing them. Exhaustive greatest-dot heading conversion preserves the accepted tie rule but has not been benchmarked as a production-planner workload. Numeric tests do not establish support/contact correctness, cross-runtime replay or 1,000-actor capacity.
