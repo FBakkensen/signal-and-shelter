@@ -1,20 +1,44 @@
 # Shared physics and movement coordination — working design
 
-Status: in progress, 2026-09-20. [Define shared physics and movement coordination invariants](https://github.com/FBakkensen/signal-and-shelter/issues/29) owns this decision. This is design analysis, not accepted implementation. The user has not accepted reservations; their cost and restrictions need justification. On 2026-09-20 the user requested prototype evidence before deciding, then explicitly clarified that this session must chart that work rather than build it. [Prototype movement conflicts and safe landing behavior](https://github.com/FBakkensen/signal-and-shelter/issues/32) owns that future experiment. Support dimensions also remain unresolved; the user has not selected a smaller footprint.
+Status: partial decisions accepted during the 2026-09-20 interview; engineering proposal incomplete. This document is a working checkpoint, not a resolved contract or authorization for production implementation. [Define shared physics and movement coordination invariants](https://github.com/FBakkensen/signal-and-shelter/issues/29) owns the decisions and remaining questions.
 
-## Established constraints
+Read with [simulation contract](simulation-contract.md), [numeric design](numeric-design.md), [acceptance gates](simulation-acceptance.md), and [navigation design](navigation-design.md). Those accepted contracts remain binding.
 
-Carry forward the [simulation contract](simulation-contract.md), [numeric design](numeric-design.md) and [navigation experience](navigation-design.md). Standing requires full coverage of an actor-specific support footprint, separately from full-body clearance. Actors block one another and do not provide standing support. Movement cannot resolve conflict by overlap, teleportation or involuntary player displacement. Direct input, route planning and execution use the same physics. Airborne steering is limited; a normal blockage must remain a valid simulation state.
+## Accepted behavior
 
-## Geometry evidence
+### Geometry and support
+
+Physics defines what is possible independently of rendering. Visible meshes and animation never determine authoritative dimensions. The user wants deliberate alignment of appearance and physics in the humanoid feet case.
+
+The humanoid's support footprint is a 440 × 440 mm square fixed to the world axes. Facing and walking animation do not rotate or resize it. Its whole area must be supported at a valid standing position; a centre or corner-only test is insufficient. The separate horizontal full-body clearance remains 600 × 600 mm. A 500 mm ridge with open sides can support the humanoid; a 500 mm passage between solid walls cannot clear it. This interview has not newly selected body height.
+
+The accepted visual variant B has a 440 mm total foot span, 160 mm individual width, centres at ±140 mm and the retained 220 mm depth. Its appearance does not imply that physical support is two animated foot meshes. [Prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/a03f661feb780137fd5c4a05ac700fb1f5c9d417/docs/testing/feet-stance-prototype.md) is a visual comparison, not traversal validation.
+
+### Ground movement and traversal
+
+- A wall blocks its normal movement component while permitting safe tangential movement. Do not boost tangential speed. The accepted blocked-axis residue rules apply.
+- Stop at an unsafe edge instead of permitting an uncontrolled fall. Use automatic traversal when a safe descent exists within the accepted 1 m elevation limit. Tangential edge movement still requires full support and body clearance.
+- Jump only as high as needed to safely clear the obstacle. Smaller hops may fit under lower ceilings only if the whole body clears the complete trajectory.
+- A planned jump may use lower horizontal speed to avoid overshooting a supported landing, equally for player and robots. If no safe trajectory exists, remain before takeoff.
+- A small automatic sideways adjustment may align a safe landing while continuing toward the intended direction. This is supported, collision-checked movement, never a snap or teleport. It does not authorize arbitrary detours.
+- Finish alignment before beginning the seven-tick preparation. Then execute flight and the seven-tick recovery. Route cost includes all four phases. Exact alignment bounds, rates and flight arithmetic remain open.
+- Changing direction or releasing direct movement cancels alignment/preparation. The accepted separate explicit-pause preservation rule still applies: clearing host-held keys for pause must not be mistaken for an ordinary release that cancels established traversal.
+
+### Actor coordination
+
+Actors occupy space, never overlap, never support one another, and do not push or teleport to solve traffic. Robots can wait, retreat or detour while retaining their destinations; job selection/abandonment is a separate system.
+
+Robots yield before takeoff; everyone respects a jump already underway. Revalidate before commitment. A committed jump may briefly block entry and decline unsafe steering so it can complete safely. Flight protection ends on landing, while ordinary body occupancy remains. The [accepted conflict experiment](https://github.com/FBakkensen/signal-and-shelter/issues/32#issuecomment-5748276198) establishes behavior, not an exact reservation representation or scale claim.
+
+Among robots that can safely proceed through a contested passage, the longest-waiting gets the next opportunity. Stable ties are deterministic. Necessary retreat preserves waiting priority. A robot with a blocked exit must not prevent unrelated safe traffic. Player priority and committed-flight protection override ordinary robot turn-taking, so there is no bounded-wait promise under continuous player interference or impossible traffic. Precise contention-group definitions and fairness state remain open.
+
+## Existing production evidence
 
 Read-only inspection of the current production baseline found a world-axis-aligned 600 × 600 mm player collision footprint and 1,800 mm standing height. The visible body is smaller and is not the collision shape. Current terrain uses 500 mm cells; authored solid boxes also contain finer dimensions. Physical scenery has axis-aligned faces, including layered ship boxes and overlapping parts.
 
 The current `canStandAt` tests clearance without support. Current landing support accepts any horizontal overlap with a surface; four-corner sneak checks do not establish coverage of the footprint interior. Neither behavior meets the accepted support contract. These are source findings, not a new reproduction of the original blocked spot.
 
-A fully supported 600 mm square cannot stand entirely on an isolated 500 mm-wide shelf. A separately specified smaller support footprint could fit while the full body overhangs, provided body clearance holds. The accepted contract allows those shapes to differ but has not selected their dimensions. Do not change support rules to compensate for a bad trajectory or silently shrink the footprint.
-
-## Safety questions must precede mechanisms
+## Safety analysis and candidate mechanisms
 
 A trajectory that was valid at takeoff is not necessarily valid after another actor moves. Checking for overlap at the next tick detects an immediate conflict but does not establish that the airborne actor can still finish safely. A correct dynamic design must preserve at least one legal continuation, or explicitly relax a gameplay requirement. The following are logical counterexamples, not executed tests or performance results.
 
@@ -34,19 +58,26 @@ Do not reserve complete routes or global island cells for every actor. Consider 
 
 A committed continuation must end at a supported, non-overlapping position that can remain occupied. Releasing protection at the arrival tick is insufficient: the actor may stop there during recovery or indefinitely. A later departure may release space only when that departure is itself safely committed. Likewise, do not assume a walking actor will vacate a future landing merely because its current input says to move.
 
-Limited airborne steering can propose a replacement continuation. Validate the replacement with the same physics and acquire its required space before releasing the old continuation. If that fails, retain the old safe continuation. This implies a concrete gameplay restriction: some airborne steering requests cannot be followed. It remains a proposal, not an accepted change to steering behavior.
+Limited airborne steering can propose a replacement continuation. Validate the replacement with the same physics and acquire its required space before releasing the old continuation. If that fails, retain the old safe continuation. Declining unsafe steering is accepted behavior; this atomic-replacement mechanism remains a proposal.
 
-Player priority may select between uncommitted requests and induce safe robot yielding. It cannot revoke a continuation if doing so strands an airborne actor. This creates possible brief player blocking, which the user has not accepted yet. Fair robot contention and impossible-traffic reporting remain separate open branches.
+Player priority may select between uncommitted requests and induce safe robot yielding. It cannot revoke a continuation if doing so strands an airborne actor. Brief player blocking to protect committed flight is now accepted. The detailed fairness and impossible-traffic algorithms remain open under the accepted behavioral rules above.
 
 Spatial indexing should restrict consideration to nearby overlapping bounds, then evaluate exact time-aware conflicts. No linear scan of all actors or all solids is justified as the final design. Indexing is an optimization, not evidence of normal-speed capacity: representative measurements remain mandatory.
 
-## Decision tree still open
+## Engineering proposal to complete next
 
-1. Actor support dimensions and exposed-surface coverage, independent of visual shape.
-2. Dynamic movement safety: acceptable player blocking and steering restrictions; representation and cost of future constraints.
-3. Integer trajectory, swept contact, landing and edge-transition rules; planner/execution equivalence and direction conversion.
-4. Deterministic contention, yielding/retreat, stable fairness and bounded search without job-policy decisions.
-5. Pause/resume and interrupted preparation semantics consistent with already accepted lifecycle rules.
-6. Small shared interface, geometry/capability invalidation, diagnostics and representative experiment requirements.
+These are design obligations and proposed structure, not newly accepted algorithms.
 
-The decision cannot be marked accepted while these branches remain open. No gameplay code or runtime tests were changed for this analysis.
+1. **Coverage and contact:** specify exact area coverage by the union of supporting static top surfaces, including seams, holes and multiple surface heights. Specify touching versus overlap and how safe integer positions are selected from swept contacts. Preserve full support during alignment/walking; airborne states require a verified safe continuation rather than standing support.
+2. **Trajectory kernel:** specify integer tick-based velocity/acceleration, adaptive arc selection, reduced horizontal speed, landing detection and bounded steering. Define the candidate search space, completeness limits and deterministic tie order. Do not substitute a planner estimate for executable physics. A trajectory must account for takeoff clearance, intermediate body sweeps and supported landing, not only endpoints.
+3. **Alignment bounds:** choose a bounded lateral correction and speed, prohibit movement away from the intended direction, and include its actual duration in costs. Validate cancellation, blocked alignment and repeated intent changes. These numeric tuning choices require representative movement evidence.
+4. **Coordination:** choose how to protect a committed continuation against future occupancy, including stationary actors after landing. Define simultaneous requests, preserved queue age, deterministic contention groups, safe retreat selection and impossible traffic. Do not assume an actor will vacate its landing because its flight protection ended.
+5. **Geometry/index invalidation:** separate static geometry/capability feasibility from dynamic occupancy. Include relevant versions in reusable results. Rebuilding a cache cannot change the tick a gameplay result becomes available. Revalidate plans and clearance before committing movement; define safe handling of upgrades and invalidations during established traversal.
+6. **Interface:** use one headless simulation transition for direct control, planning trials and execution. Callers submit intent, not writable positions or render meshes. Expose read-only observations, ordinary blocked/rejected outcomes and separately typed invariant faults. Keep resumable planning and coordination state authoritative when it affects future ticks.
+7. **Lifecycle and validation:** make alignment/preparation/flight/recovery preservation across explicit pause precise, including new input after resume. Define per-tick checks, last-valid-state retention and reproducible failure evidence. Complete focused integer traversal and congestion experiments before claiming that the accepted behavior works together; apply the existing replay/scale gates afterward.
+
+The engineering proposal should resolve the remaining rules without reopening accepted preferences unless concrete conflicting evidence appears. Exact algorithms, bounded work budgets and failure behavior need review before this ticket can close.
+
+## Evidence boundary
+
+No foundation physics implementation has been produced in this interview. The archived feet comparison passed 71 tests and focused browser checks; its independent outline arithmetic is not a support solver. The conflict archive used floating-point baseline movement and controlled scenarios, not the accepted integer migration. No one-block traversal, adaptive integer jump, alignment, general fair coordination or 1,000-actor capacity claim is established by these archives.
