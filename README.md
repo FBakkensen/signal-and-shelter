@@ -15,6 +15,14 @@ npm run dev -- --port 5173
 
 Open the URL printed by Vite, normally http://127.0.0.1:5173. The page requires WebGL. No external fonts, accounts, or runtime asset services are needed.
 
+## Integer traversal experiment (this throwaway branch)
+
+Run `npm run prototype:integer-traversal`, then open `/integer-traversal.html` on the URL Vite prints. Verified on 2026-09-20 at `http://127.0.0.1:5175/integer-traversal.html` because ports 5173 and 5174 were occupied.
+
+Start with One-metre step, Already at the wall, and Sideways alignment. **Try course** supplies a direction through the same simulation used by WASD; it stops after a landing or blockage. The two-step terrace needs a second press to continue. Use automatic phase pauses and **One tick** to inspect preparation, takeoff, alignment, or recovery. Q/E and arrows orbit, wheel zooms, and Escape pauses. Space, sprint and sneak do not affect this experiment. The non-jumper and smaller jumper have separate recorded capabilities.
+
+`npm run check` validates both existing code and the experiment. `node --import tsx src/packages/traversal-prototype/tests/traversal.test.ts` prints individual experiment tests. [Evidence and limitations](docs/testing/integer-traversal-prototype.md) distinguish automated checks from human playtesting, which remains pending. The branch is `codex/integer-traversal-prototype`; do not merge it.
+
 ## Controls
 
 | Input                               | Action                                                                 |
