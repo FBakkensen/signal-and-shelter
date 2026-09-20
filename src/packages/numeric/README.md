@@ -31,7 +31,7 @@ The recipe uses the embedded decimal digits of pi and a BigInt fixed-decimal Tay
 
 ## Random encoding v1
 
-A resolved seed uses the existing case-sensitive convention: trim, truncate to 80 UTF-16 units, replace lone surrogates with U+FFFD. Blank seed selection belongs to the host; streams require a nonempty canonical seed. Purpose and stable entity identity are well-formed Unicode strings, without implicit normalization. Coordinate-addressed generation can use stable integer-coordinate entity keys; the generator must version that key convention.
+A resolved seed uses the existing case-sensitive convention: trim, truncate to 80 UTF-16 units, replace lone surrogates with U+FFFD, then trim again so truncation cannot expose trailing whitespace. Blank seed selection belongs to the host; streams require a nonempty canonical seed. Purpose and stable entity identity are well-formed Unicode strings, without implicit normalization. Coordinate-addressed generation can use stable integer-coordinate entity keys; the generator must version that key convention.
 
 Encode seed, purpose and entity in that order. Each is UTF-8 prefixed with an unsigned-32 little-endian byte length. Append a six-byte unsigned little-endian draw counter (low 32-bit word then high 16-bit word). Version is recorded separately, not prepended to v1 bytes. Hash all bytes with FNV-1a, then xor-shift 13, multiply modulo `2^32` by 1,274,126,177, xor-shift 16. Only hash operations use modular arithmetic.
 

@@ -114,3 +114,32 @@ void test("named entity streams and coordinate queries do not depend on unrelate
     .reverse();
   assert.deepEqual(forward, backward);
 });
+
+void test("truncated seeds remain canonical and usable by random streams", () => {
+  for (const whitespace of [" ", "\t", "\n", "\u00a0"]) {
+    const seed = normalizeSeed("x".repeat(79) + whitespace + "y");
+    assert.doesNotThrow(() => createRandomStream({ ...key, seed }));
+    assert.equal(seed, "x".repeat(79));
+    assert.equal(normalizeSeed(seed), seed);
+  }
+});
+
+void test("independent same-key streams reproduce sequences and final states", () => {
+  let first = createRandomStream(key);
+  let second = createRandomStream({ ...key });
+  const firstValues: number[] = [];
+  const secondValues: number[] = [];
+  for (let i = 0; i < 100; i++) {
+    const a = drawInteger(first, 0, 2147483648);
+    firstValues.push(a.value);
+    first = a.state;
+  }
+  for (let i = 0; i < 100; i++) {
+    const b = drawInteger(second, 0, 2147483648);
+    secondValues.push(b.value);
+    second = b.state;
+  }
+  assert.deepEqual(firstValues, secondValues);
+  assert.deepEqual(first, second);
+  assert.ok(first.counter > firstValues.length);
+});

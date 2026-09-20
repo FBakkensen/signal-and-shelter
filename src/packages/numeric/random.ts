@@ -12,12 +12,13 @@ export interface RandomState extends RandomKey {
   readonly version: number;
   readonly counter: number;
 }
-/** Matches the existing case-sensitive, trimmed 80-UTF-16-unit seed convention. */
+/** Canonical case-sensitive seed: bounded UTF-16, repaired surrogates, no edge whitespace. */
 export function normalizeSeed(value: string): string {
   return value
     .trim()
     .slice(0, 80)
-    .replace(/[\uD800-\uDFFF]/gu, "\uFFFD");
+    .replace(/[\uD800-\uDFFF]/gu, "\uFFFD")
+    .trim();
 }
 function stringBytes(value: string): Uint8Array {
   if (/[\uD800-\uDFFF]/u.test(value)) {

@@ -23,3 +23,11 @@
 ## Limits
 
 The numeric package is not wired into normal play. This evidence does not establish generation migration, collision/support predicates, authoritative ticks/replay, cross-runtime determinism, target-heading throughput or normal-speed actor capacity. Those remain owned by downstream implementation tickets. The table check uses reproducible high-precision generation and full-table properties; it is not a formal proof of the Taylor recipe's error bound.
+
+## PR review regression — 2026-09-20
+
+CodeRabbit identified that truncation could expose trailing whitespace, making a normalized seed fail the stream constructor's canonicality check. Validation plan: exercise normalization followed by stream creation for space, tab, newline and nonbreaking space at the truncation boundary, assert idempotence, then run the full checks. Also compare 100 draws and final states from independent same-key streams through rejection sampling.
+
+The new production-interface regression failed before the fix with `Seed must be resolved and canonical`. A final trim after truncation/surrogate repair makes the result canonical. Existing canonical seed/hash vectors remain unchanged; this corrects the unmerged seed-v1 implementation. The old live-game normalizer is untouched. No gameplay/UI change or browser validation is involved.
+
+After the fix, `npm run check` passed all stages, including both new regressions. The existing Vite bundle-size warning remains.
