@@ -2,6 +2,10 @@
 
 Record significant choices with date, status, rationale, and consequences. Use proposed, accepted, or superseded; link a replacement when superseding a choice.
 
+### D015 movement acceptance gates agreed — 2026-09-20
+
+The user accepted the requirements in [simulation acceptance](simulation-acceptance.md): movement-only load for 1,000 actors, Chromium on the current reference machine, exact per-tick Node/Chromium replay including a second machine, repeatable routing load and explicit simulation/rendering/memory thresholds. [Define reproducibility and normal-speed scale acceptance](https://github.com/FBakkensen/signal-and-shelter/issues/30) owns the canonical resolution. The scope deliberately excludes unimplemented robot jobs; future systems must expand the workload and share the budget. Protocol defaults make the measurements repeatable without claiming universal hardware or display support. No production benchmark has run, and the foundation migration checkpoint remains required.
+
 ## D008 — Make seeded arrival the next small experiment
 
 - Date: 2026-09-19
@@ -144,3 +148,52 @@ Record significant choices with date, status, rationale, and consequences. Use p
 The user rejected inconsistent knowledge across close and strategic views and explicitly removed the separate 4 m surveying rule. The confirmed interview specifies one 8 m horizontal reveal radius, permanent visible/active explored areas, obstacle-independent reveal, and concealment of unexplored terrain and objects at every zoom and in the menu. Partly explored objects stay partly revealed; any exposed deposit part identifies its material. Starts/resets grant only the starting area, with no ship or island-outline exception. Physical use distances remain unchanged.
 
 Implemented with one simulation-owned half-metre coverage grid shared by discovery, CPU atlas clipping, GPU surface/shadow clipping and picking. This trades a mathematically smooth circle for a stepped boundary matching the voxel scale; the 2 m chart grid does not determine exploration. The previous atlas-only concealment and 4 m identity gate are superseded. See [accepted design](third-person-design.md) and [evidence](testing/active-strategic-atlas.md).
+
+## D015 — Establish shared simulation fundamentals before navigation implementation
+
+- Date: 2026-09-19
+- Status: Historical baseline; current design status is recorded in the accepted decisions below, with production implementation and validation still pending
+- Basis: Repeated blocked movement exposed insufficient confidence in the general rules. The user explicitly withdrew the current implementation and chose fundamentals first.
+- Decision: Chart the [shared simulation foundation](https://github.com/FBakkensen/signal-and-shelter/issues/26), carrying forward confirmed requirements in its [contract ticket](https://github.com/FBakkensen/signal-and-shelter/issues/27). Keep physics authoritative for direct input, planning and execution, with presentation and host integration separate.
+- Consequence: Gameplay returns to baseline `3929c5b`. Archive the withdrawn implementation and diagnostics at `f09a795` on `codex/automatic-keyboard-traversal`; do not merge it. Its centre-support relaxation is not accepted. The old navigation implementation tickets remain incomplete and depend on the new foundation.
+- Scope: This map produces an accepted contract and migration plan, not a production implementation. Job policy remains separate from movement coordination. No performance or cross-runtime determinism claim is established.
+
+### D015 contract accepted — 2026-09-19
+
+The user accepted the consolidated [shared simulation contract](simulation-contract.md), including authoritative gameplay state, ordered tick-addressed commands, seeded randomness, invalid-state halt/diagnostics, deterministic island generation and per-run replay boundaries. The migration scope includes generation, movement, exploration/discovery, interactions and host lifecycle handling. [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27) owns the resolution. Numeric/tick semantics, physics/coordination, validation acceptance and the final migration checkpoint remain open; no production implementation is authorized by this contract approval.
+
+### D015 numeric and tick semantics accepted — 2026-09-19
+
+The user accepted [numeric and tick semantics](numeric-design.md), resolving [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28). The design fixes 60 Hz, integer millimetres in bounded regions, 4.2 m/s walking, seven-tick preparation/recovery, Q24 direction tables and centered residues, stable command ordering, versioned random streams/generation and canonical replay comparison. Direction normalization has a bounded approximation error; it does not provide mathematically exact equal Euclidean displacement each tick. The conservative host fallback can treat a long ordinary stall like suspension, slowing game time without skipping authoritative ticks.
+
+Reference arithmetic checks support the numeric bounds and residue identities only. Production arithmetic/contact tests, direction-table generation and validation, cross-runtime replay, normal-speed scale evidence, shared physics and the migration checkpoint remain pending. This acceptance does not authorize production implementation.
+
+### D015 movement-conflict prototype accepted — 2026-09-20
+
+The user accepted yielding before takeoff and protected safe completion after commitment, including brief entry blocking or declined unsafe steering. Protection ends on landing; physical occupancy persists. The tradeoff is a bounded exception to immediate player priority once a jump is underway. The [prototype resolution](https://github.com/FBakkensen/signal-and-shelter/issues/32#issuecomment-5748276198) is canonical. Archive `codex/movement-conflicts-prototype` at `c28ba49da8c538f2c781ae4db929e8b3025aaae5` is evidence only and must never be merged. Exact protection representation, support dimensions, shared-physics invariants, performance and migration gates remain open.
+
+### D015 adaptive integer traversal accepted — 2026-09-20
+
+The user accepted [Validate adaptive integer traversal and individual capabilities](https://github.com/FBakkensen/signal-and-shelter/issues/34) after playtesting. The accepted experiment supports early/vertical-first takeoff, adaptive safe hops and landings, supported pre-jump alignment, recovery and separate actor capabilities. Archive `codex/integer-traversal-prototype` at `473279eba7f809bb17c34757be8e12f724dbbaf1` is verified evidence only and must never be merged. The [working physics design](physics-design.md) carries the findings into the still-open general coordination, arithmetic/algorithm completeness and migration gates; production implementation remains unauthorized.
+
+### D015 connected decision scope — 2026-09-20
+
+The user accepted separating physical validity and committed-motion safety from the connected [job-decision](https://github.com/FBakkensen/signal-and-shelter/issues/21) and [movement-decision](https://github.com/FBakkensen/signal-and-shelter/issues/35) designs. Movement policy cannot be settled without job intent, while movement outcomes inform job reconsideration. Both tickets are future work outside the foundation wayfinder and do not gate its migration; the job contract precedes acceptance of movement policy. The assistant incorrectly added them to the map and migration gates; the user rejected that expansion, and those relationships were removed. No predefined congestion zones or stable queues are assumed. The existing movement-only scale acceptance remains binding and does not establish job-workload capacity. No production implementation is authorized.
+
+### D015 exact-contact experiment accepted — 2026-09-20
+
+The user approved [Validate exact contacts and simultaneous protected movement](https://github.com/FBakkensen/signal-and-shelter/issues/36). Archive `codex/physics-contact-prototype` at `9eab9caaf96950e1fd1ee6f3928959a039d2ac97` is pushed and verified; clean return completed. The [evidence](https://github.com/FBakkensen/signal-and-shelter/blob/9eab9caaf96950e1fd1ee6f3928959a039d2ac97/docs/testing/physics-contact-prototype.md) supports exact contacts, clipped movement, simultaneous safe movement and time-aware flight protection under the declared tick convention. Never merge the archive. The parent physics contract and migration gate remain unresolved; external robot job/movement policy has not been brought back into this map.
+
+### D015 physics contract consolidated — 2026-09-20
+
+Following the accepted interview, four approved experiments and the user's instruction to finish the decision, [the physics contract](physics-design.md) consolidates the physical invariants and specifies the shared interface, straight-segment integer contact convention, bounded executable trajectory family, joint safe admission, protected fallback, revision-aware reuse and lifecycle/failure handling. It replaces the running interview checkpoint. Historical open-question statements above describe their dates; this consolidation is the current status.
+
+The design intentionally permits a bounded search to report no candidate without claiming mathematical unreachability. Exact predicates and deterministic admission are required; prototype limits and fixture priority are not claims of production capacity or robot fairness. The existing migration checkpoint owns implementation sequence, quota tuning, production correctness/replay/browser evidence and scale validation. The benchmark's scripted yielding versus autonomous policy distinction is explicit. No new prototype or robot-policy prerequisite is introduced, and no production code is authorized or merged.
+
+### D015 migration sequence accepted — 2026-09-20
+
+The user agreed to the [four-stage migration plan](simulation-migration.md): verify the headless foundation, switch normal play coherently, resume click-to-move, then verify the combined system against all accepted replay and scale gates. Navigation must precede final scale acceptance because the workload requires the production planner. Early measurements reduce risk without replacing final evidence. Scripted congestion exercises physical safety, not autonomous robot policy. The planning map is complete; production implementation requires separate subsequent authorization. Existing navigation tickets retain their scopes and use seven-tick preparation/recovery. No production evidence is claimed by this decision.
+
+### D015 executable handoff completed — 2026-09-20
+
+After the user identified the missing implementation plan, the [delivery backlog](simulation-implementation-plan.md) now carries the accepted four-stage sequence into the existing navigation execution map. Eleven new production issues and two retained playable issues have native dependencies, distinct scope and evidence requirements. Numeric primitives are the first task; keyboard play depends on the implemented core, and combined replay/scale validation has its own completion gate. This corrects handoff organization without reopening accepted behavior or claiming production implementation. The earlier blanket authorization statement did not describe the receiving map's existing execution override.

@@ -2,6 +2,10 @@
 
 Last updated: 2026-09-19.
 
+### Movement scale acceptance — 2026-09-20
+
+The user clarified that the initial 1,000-actor scale target covers movement only; robot jobs and other future systems will add simulation work and require expanded benchmarks. Chromium is the initial supported browser, with performance measured on the user's Core Ultra 5 125H Linux machine. Required views target 60 FPS with 100 visible actors in close play and all 1,000 represented in strategic view. See [simulation acceptance](simulation-acceptance.md) for agreed thresholds, routing load and replay evidence requirements. This is accepted validation design, not measured capacity or implementation authorization.
+
 ## Confirmed direction
 
 The game is named **Signal & Shelter**.
@@ -38,7 +42,7 @@ WASD immediately cancels the destination and takes direct control. Cancel jump p
 
 Remove sprint and sneak entirely. Reaching the requested destination within a small tolerance removes its marker; reaching an intermediate closest-reachable point retains the destination and marker. Tune the arrival tolerance in the prototype. Switching windows or tabs leaves the game running. Explicit pause freezes and preserves the state, including the destination and jump setup, flight and recovery, and explicit resume continues from that state. The ship terminal also leaves the game running, with gameplay keyboard controls inactive while using its UI; Escape opens the explicit pause menu. Restarting or changing the seed clears the destination.
 
-The user accepted the navigation prototype on 2026-09-19: one shared maximum elevation change of 1 m for jumping up and down, with timing A (0.12 s setup and 0.12 s recovery). Custom scenarios must reuse the game’s movement, collision, input and camera logic. Steering strength, arrival tolerance and feedback can be refined during production integration. Robot gameplay remains outside this effort. See [accepted prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md). These values are accepted design, implemented only in the archived prototype so far.
+The user accepted the navigation prototype on 2026-09-19: one shared maximum elevation change of 1 m for jumping up and down, with timing A (0.12 s setup and 0.12 s recovery). Custom scenarios must reuse the game’s movement, collision, input and camera logic. Steering strength, arrival tolerance and feedback can be refined during production integration. Robot gameplay remains outside this effort. See [accepted prototype evidence](https://github.com/FBakkensen/signal-and-shelter/blob/3c8a0b531eaa3ab993c593a08c1bb1a6e6ef4544/docs/testing/navigation-prototype.md). The 1 m elevation limit remains accepted. The prototype's 0.12 s timings were subsequently superseded by 7 ticks each at 60 Hz (approximately 116.67 ms), explicitly accepted in the [numeric decision](https://github.com/FBakkensen/signal-and-shelter/issues/28#issuecomment-5745146189). Production migration remains pending.
 
 These are accepted upcoming requirements, not implemented behavior. They supersede the earlier manual-jump, sprint/sneak, automatic focus-loss pause and terminal-pause design for this effort. Production still implements those earlier behaviors; background execution has not yet been validated.
 
@@ -121,3 +125,61 @@ Upgrades require movement to be interrupted first; subsequent routing uses the u
 ### Navigation design checkpoint accepted — 2026-09-19
 
 The user accepted the [consolidated navigation design](navigation-design.md), its acceptance criteria and two sequential playable production increments: automatic keyboard traversal with shared individual capabilities and lifecycle behavior, followed by time-aware click-to-move using the same movement logic. Both require production-code tests and integrated-browser validation. The prototype remains archived; production implementation is pending.
+
+### Fundamentals first — 2026-09-19
+
+The user withdrew the automatic-traversal implementation and requested a new shared [deterministic simulation foundation map](https://github.com/FBakkensen/signal-and-shelter/issues/26) before further navigation or robot-job implementation. Confirmed project-wide requirements are consolidated in [Agree the simulation contract and migration boundaries](https://github.com/FBakkensen/signal-and-shelter/issues/27): cross-runtime replay determinism, integer sub-voxel coordinates, shared physics, explicit support footprints, actor blocking and safe yielding, and 1,000 active simulated robots at normal game speed. Visible robot count is independent of simulated population.
+
+The game remains on its pre-implementation behavior while this design is settled. Navigation experience decisions remain inputs, but the prior implementation checkpoint is reopened. The withdrawn code is archived, not accepted or eligible for merging. Robot job selection remains a separate consumer of the foundation. Browser-first packaging continues with a separate simulation/presentation/host boundary; Electron remains an option if browser constraints warrant it.
+
+### Numeric design accepted — 2026-09-19
+
+Confirmed in [Choose deterministic numeric and tick semantics](https://github.com/FBakkensen/signal-and-shelter/issues/28): 1 mm integer position units, integer region coordinates plus bounded local coordinates, and 60 simulation ticks per second independent of rendering. Preparation and recovery each last exactly 7 ticks, replacing the earlier 120 ms values. The user accepted the complete [numeric design](numeric-design.md), including region bounds, Q24 directions with explicit approximation limits, centered residues, ordered commands, versioned randomness and conservative host pacing. No production implementation or performance validation is claimed.
+
+User-corrected numeric tuning policy: divisibility is a design constraint for authored time-based tuning, not merely a convenience. Walking speed is 4.2 m/s, exactly 70 mm per tick at 60 Hz, superseding the earlier decision to retain 4.3 m/s. Durations and periodic schedules use whole ticks. Derived quantities such as diagonal components use the accepted integer arithmetic/remainder rules; divisibility of cardinal speed does not establish exact diagonal representation. Any remainder affecting future gameplay is reproducible state. Properties unrelated to time retain their natural units. This is accepted design only; production migration and performance validation remain pending.
+
+### Movement-conflict behavior accepted — 2026-09-20
+
+The user accepted the refined conflict prototype: robots yield before jumping; everyone respects a jump already underway. Robots wait or cancel conflicting preparation before takeoff. After commitment, safe completion may briefly block entry or decline unsafe steering; restrictions should be small and understandable. Flight protection ends on landing, while ordinary body occupancy remains. [Prototype movement conflicts and safe landing behavior](https://github.com/FBakkensen/signal-and-shelter/issues/32#issuecomment-5748276198) owns the resolution and evidence. Support-footprint dimensions remain open. This accepts behavior, not a reservation implementation or production migration.
+
+### Humanoid feet and stance — 2026-09-20
+
+The user identified the visible feet being wider than one terrain block as the problem and agreed to narrow the humanoid's feet and stance, deliberately align the revised appearance with the physical support dimensions in this case. Physics defines what is possible independently of the visible model; appearance does not define or dynamically determine movement rules. Full support remains required. The user selected visual variant B: 440 mm total span, 160 mm individual foot width and centres at ±140 mm; retain the existing upper-body proportions and foot depth. The user subsequently accepted an independently defined 440 × 440 mm support square, fixed to world axes regardless of facing or animation. Its entire area must be supported. The user also accepted retaining the separate 600 × 600 mm horizontal body clearance: a one-block ridge with open sides can support the humanoid, but a one-block gap between walls cannot clear its body. This is accepted design; no production change or traversal validation is implemented. This continues [the shared-physics decision](https://github.com/FBakkensen/signal-and-shelter/issues/29).
+
+Accepted visual comparison: [archive and evidence](https://github.com/FBakkensen/signal-and-shelter/blob/a03f661feb780137fd5c4a05ac700fb1f5c9d417/docs/testing/feet-stance-prototype.md) on `codex/feet-stance-prototype`.
+
+### Adaptive jump height — 2026-09-20
+
+The user agreed that automatic traversal should jump only as high as needed to safely clear the obstacle, including small hops under low ceilings when full-body clearance permits. Retain the 1 m elevation limit and seven-tick preparation/recovery. The user also agreed to plan reduced horizontal jump speed when needed to avoid overshooting a safe landing, equally for player and robots; stop before takeoff when no safe trajectory exists. On small platforms, aim near the centre of the safe landing area rather than the earliest fully supported edge position, within the accepted jump/alignment limits. For the same landing, prefer the lowest safe jump, then the fastest safe horizontal speed at that height; route costs use its actual duration. This selects behavior; the shared trajectory equation, acceleration and exact safety margin remain open in [the physics decision](https://github.com/FBakkensen/signal-and-shelter/issues/29). Production implementation and traversal evidence remain pending.
+
+### Pre-takeoff alignment — 2026-09-20
+
+The user accepted a small automatic sideways adjustment before takeoff to align a safe landing while continuing toward the intended direction. Changing direction or releasing direct movement during preparation cancels it. Alignment is ordinary supported, collision-checked movement, never a snap or teleport. The user subsequently agreed to finish alignment before starting the seven-tick preparation; route costs include that additional alignment time. The accepted starting lateral limit is 250 mm from the alignment start; if more correction is required, stop and let the player reposition. Alignment speed and feel still require validation in [the physics decision](https://github.com/FBakkensen/signal-and-shelter/issues/29); this is not production behavior.
+
+### Individual physics settings — 2026-09-20
+
+The user accepted roughly 1.25 m above takeoff as the humanoid's initial jump-apex cap, distinct from its 1 m elevation-change limit. They emphasized that these are individual movement capabilities, not shared constants for every actor. Body/support dimensions, movement speeds, jump limits, phase durations and alignment settings can differ by type and individual and may change through future upgrades. Shared physics uses each actor's recorded effective settings; prepare that representation without implementing upgrades now. This clarifies the scope of the humanoid values agreed above.
+
+### Landing recovery — 2026-09-20
+
+The user agreed that the humanoid remains stationary during its seven-tick landing recovery. New input may update the action afterward but cannot shorten or skip recovery. Recovery duration remains part of each actor's individual movement capabilities. Ordinary body occupancy continues after flight protection ends on landing. This is accepted design, not implemented behavior.
+
+### Adaptive integer traversal accepted — 2026-09-20
+
+The user accepted the adaptive integer traversal prototype: “this is working as expected.” Carry forward early takeoff on approach and vertical-first takeoff when already close, adaptive hops, bounded supported alignment, full supported landings and stationary recovery, with independently recorded actor capabilities. This is accepted behavior for the upcoming foundation, not implemented production gameplay. The [prototype decision](https://github.com/FBakkensen/signal-and-shelter/issues/34) and [archived evidence](https://github.com/FBakkensen/signal-and-shelter/blob/473279eba7f809bb17c34757be8e12f724dbbaf1/docs/testing/integer-traversal-prototype.md) preserve the experiment; general coordination and scale design remain open.
+
+### Upgrades at stations — 2026-09-20
+
+The user clarified that upgrades happen while stationary at a designated station, potentially the ship or another facility, not while moving. The specific station and interaction are undecided. This constrains future capability changes; it does not request an upgrade system in the simulation-foundation map.
+
+### Connected robot decisions — 2026-09-20
+
+The user rejected assuming congestion occurs at known passages or stable queues: it can emerge anywhere from generated terrain, actors and, later, building or modifiers. They requested moving both job and movement decisions out of the physics ticket while designing them together. Job intent and constraints inform movement decisions; movement outcomes feed back into job reconsideration. Both decision tickets belong outside the foundation wayfinder and do not block its migration. The assistant’s earlier expansion of that map was rejected and corrected; earlier fairness preferences do not establish an operational congestion model.
+
+### Exact-contact physics experiment accepted — 2026-09-20
+
+The user approved the [exact-contact and simultaneous-movement prototype](https://github.com/FBakkensen/signal-and-shelter/issues/36). Carry forward the demonstrated exact-fit clearance, safe partial movement and sliding, following with joint motion validation, and time-aware jump protection. The [archive](https://github.com/FBakkensen/signal-and-shelter/blob/9eab9caaf96950e1fd1ee6f3928959a039d2ac97/docs/testing/physics-contact-prototype.md) records the straight-to-clipped-endpoint tick convention and bounded evidence. This approves the experiment’s behavior, not production implementation or robot decision policy.
+
+### Foundation migration plan accepted — 2026-09-20
+
+The user accepted the [foundation migration sequence](simulation-migration.md): headless verification, coherent normal-play cutover, click-to-move integration, and combined replay/scale validation. This completes the foundation planning map. The subsequent [implementation backlog](simulation-implementation-plan.md) carries the work into the existing navigation execution map; robot job and autonomous movement policy remain future work outside the migration.
