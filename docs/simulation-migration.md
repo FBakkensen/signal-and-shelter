@@ -1,6 +1,6 @@
 # Foundation migration plan
 
-Status: accepted by the user, 2026-09-20. [Accept the foundation migration sequence and implementation gates](https://github.com/FBakkensen/signal-and-shelter/issues/31) owns the resolution. The planning map is complete; production implementation requires separate subsequent authorization. No production correctness, replay or capacity gate has passed through this approval.
+Status: accepted by the user, 2026-09-20. [Accept the foundation migration sequence and implementation gates](https://github.com/FBakkensen/signal-and-shelter/issues/31) owns the resolution. The planning map is complete. The subsequent [implementation handoff](simulation-implementation-plan.md) carries the accepted requirements into the existing navigation execution map. No production correctness, replay or capacity gate has passed through this approval.
 
 ## Contracts and evidence
 
@@ -48,7 +48,7 @@ Publish verified executable replay/benchmark commands in project configuration a
 
 ## Handoff and completion
 
-Planning completion and implementation completion are separate. This plan closes the foundation design map. After separate production authorization, stages 1–2 supply the first existing navigation increment, stage 3 supplies its second increment, and stage 4 gates the combined foundation migration's completion. Navigation may resume before final scale acceptance because its production planner is required to obtain that evidence.
+Planning completion and implementation completion are separate. This plan closes the foundation design map. The [implementation issues](simulation-implementation-plan.md) split stage 1 into concrete production prerequisites, retain stage 2 as keyboard-play integration and stage 3 as planner plus click integration, and give stage 4 a dedicated combined acceptance gate under the existing navigation execution map. Navigation may resume before final scale acceptance because its production planner is required to obtain that evidence.
 
 Robot job and autonomous movement-policy design remain separate future work. They may rely on the accepted command, capability, physical-safety and movement-outcome contracts as design inputs, but cannot claim an implemented foundation, autonomous fairness or combined job-workload capacity from this approval. Neither is a new prerequisite for migration.
 

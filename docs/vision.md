@@ -182,4 +182,4 @@ The user approved the [exact-contact and simultaneous-movement prototype](https:
 
 ### Foundation migration plan accepted — 2026-09-20
 
-The user accepted the [foundation migration sequence](simulation-migration.md): headless verification, coherent normal-play cutover, click-to-move integration, and combined replay/scale validation. This completes the foundation planning map. Production implementation awaits separate authorization; robot job and autonomous movement policy remain future work outside the migration.
+The user accepted the [foundation migration sequence](simulation-migration.md): headless verification, coherent normal-play cutover, click-to-move integration, and combined replay/scale validation. This completes the foundation planning map. The subsequent [implementation backlog](simulation-implementation-plan.md) carries the work into the existing navigation execution map; robot job and autonomous movement policy remain future work outside the migration.

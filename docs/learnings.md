@@ -253,3 +253,9 @@ The user selected B (fade obstructing scenery) after the comparison. Broad terra
 - Read-only archive inspection distinguished tested straight-to-endpoint tick motion from fractional-time impact, a finite target family from complete reachability, and fixture admission from autonomous robot policy. The contract preserves those distinctions and specifies exact comparisons, authoritative work state and invalidation.
 - Updated stale acceptance-document ownership after the previously agreed robot-policy scope split. Production replay, normal-speed scale, solver implementation and cross-region checks remain unperformed; they are implementation acceptance work, not fresh preference questions or claims supplied by prototype approval.
 - This increment changes documentation and tracker state only; no application or experiment source is promoted.
+
+## 2026-09-20 — Carry completed design into executable work
+
+The foundation handoff closed its design map after accepting broad phase order but left the expanded production work inside two older navigation issues. Native dependencies then made keyboard integration appear unblocked despite the missing core implementation. The user rejected the unclear handoff and the suggestion that adding one broad headless issue would fix it.
+
+The [implementation plan](simulation-implementation-plan.md) now maps accepted numeric, geometry, tick/replay, physics, gameplay, host, navigation and scale requirements to concrete issues under the existing execution map. It retains the two playable issue identities, adds production dependencies and keeps final acceptance open. This is tracker/documentation evidence only; design closure and existing baseline tests do not establish implemented behavior.

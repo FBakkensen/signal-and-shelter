@@ -1,6 +1,6 @@
 # Navigation design checkpoint
 
-Current gate — 2026-09-19: the user withdrew the first implementation attempt. The experience agreements below remain inputs, but production implementation must wait for the [shared simulation foundation](https://github.com/FBakkensen/signal-and-shelter/issues/26) and its migration gate. Historical acceptance below does not authorize bypassing this new prerequisite.
+Current gate — 2026-09-20: foundation design and migration sequence are accepted. Follow the [implementation backlog](simulation-implementation-plan.md): complete the core production prerequisites before keyboard-play cutover, then routing/click integration and combined acceptance. The withdrawn implementation remains archived and must never be merged.
 
 Status: accepted by the user, 2026-09-19, including both sequential playable increments and their acceptance criteria. Production implementation remains pending.
 
@@ -74,4 +74,4 @@ Arrival tolerance, steering strength and feedback wording may be refined against
 
 ## Foundation migration handoff — 2026-09-20
 
-The accepted [migration plan](simulation-migration.md) supersedes the earlier implementation sequence where it conflicts. After separate production authorization, build and verify the headless foundation before the first playable automatic-traversal cutover. Resume click-to-move after that cutover passes its gates, then complete combined replay and scale acceptance using the production planner. The foundation planning map is complete; no production gate is thereby passed. The existing two implementation tickets remain open.
+The accepted [migration plan](simulation-migration.md) supersedes the earlier implementation sequence where it conflicts. The existing navigation execution map now owns the [concrete implementation backlog](simulation-implementation-plan.md); build and verify its core production prerequisites before the first playable automatic-traversal cutover. Resume click-to-move after that cutover passes its gates, then complete combined replay and scale acceptance using the production planner. The foundation planning map is complete; no production gate is thereby passed. The existing two implementation tickets remain open.
