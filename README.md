@@ -73,3 +73,11 @@ This is the production implementation branch. `npm run dev` opens normal third-p
 The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
 The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play controls, shared exploration and the active strategic atlas are implemented. Sustained human playtesting and rendering-cost measurement remain for the final increment.
+
+## Active physics contact experiment
+
+On `codex/physics-contact-prototype`, run `npm run prototype:physics-contact` and open `http://127.0.0.1:5180/integer-traversal.html`. This is a throwaway experiment; never merge this branch. The normal game remains at `/`.
+
+Choose a course and use **Try course** for continuous movement or **Reset + one tick** for exact contact results. **One tick**, pause, release input, actor selection, WASD and camera controls are available. The timed crossing course uses explicitly labelled short actors; contact courses disable jumping to isolate ground contact. Job selection and replanning are not simulated.
+
+Validated commands: `npm run check`, `node --import tsx src/packages/traversal-prototype/tests/contact.test.ts`, and the local prototype command above. See [experiment evidence](docs/testing/physics-contact-prototype.md) for observed results and limits. The user accepted this prototype on 2026-09-20; the linked evidence retains its validation limits.
