@@ -167,3 +167,11 @@ The user agreed that the humanoid remains stationary during its seven-tick landi
 ### Adaptive integer traversal accepted — 2026-09-20
 
 The user accepted the adaptive integer traversal prototype: “this is working as expected.” Carry forward early takeoff on approach and vertical-first takeoff when already close, adaptive hops, bounded supported alignment, full supported landings and stationary recovery, with independently recorded actor capabilities. This is accepted behavior for the upcoming foundation, not implemented production gameplay. The [prototype decision](https://github.com/FBakkensen/signal-and-shelter/issues/34) and [archived evidence](https://github.com/FBakkensen/signal-and-shelter/blob/473279eba7f809bb17c34757be8e12f724dbbaf1/docs/testing/integer-traversal-prototype.md) preserve the experiment; general coordination and scale design remain open.
+
+### Upgrades at stations — 2026-09-20
+
+The user clarified that upgrades happen while stationary at a designated station, potentially the ship or another facility, not while moving. The specific station and interaction are undecided. This constrains future capability changes; it does not request an upgrade system in the simulation-foundation map.
+
+### Connected robot decisions — 2026-09-20
+
+The user rejected assuming congestion occurs at known passages or stable queues: it can emerge anywhere from generated terrain, actors and, later, building or modifiers. They requested moving both job and movement decisions out of the physics ticket while designing them together. Job intent and constraints inform movement decisions; movement outcomes feed back into job reconsideration. The foundation map now requires both decision tickets before migration. This expands the decision contract, not robot-job or construction implementation; earlier fairness preferences do not establish an operational congestion model.
