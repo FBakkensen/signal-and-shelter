@@ -19,9 +19,11 @@ The accepted visual variant B has a 440 mm total foot span, 160 mm individual wi
 - A wall blocks its normal movement component while permitting safe tangential movement. Do not boost tangential speed. The accepted blocked-axis residue rules apply.
 - Stop at an unsafe edge instead of permitting an uncontrolled fall. Use automatic traversal when a safe descent exists within the accepted 1 m elevation limit. Tangential edge movement still requires full support and body clearance.
 - Jump only as high as needed to safely clear the obstacle. Smaller hops may fit under lower ceilings only if the whole body clears the complete trajectory.
+- On small platforms, prefer a target near the centre of the safe landing area over the earliest fully supported edge position. Stay within the accepted jump/alignment limits and preserve full-body clearance and occupancy. This does not request travel to the centre of a large surface.
+- For the same landing, choose the lowest safe jump first, then the fastest safe horizontal speed at that height. Route costs use the resulting duration; this does not override route-level fastest-path selection.
 - A planned jump may use lower horizontal speed to avoid overshooting a supported landing, equally for player and robots. If no safe trajectory exists, remain before takeoff.
-- A small automatic sideways adjustment may align a safe landing while continuing toward the intended direction. This is supported, collision-checked movement, never a snap or teleport. It does not authorize arbitrary detours.
-- Finish alignment before beginning the seven-tick preparation. Then execute flight and the seven-tick recovery. Route cost includes all four phases. Exact alignment bounds, rates and flight arithmetic remain open.
+- A small automatic sideways adjustment may align a safe landing while continuing toward the intended direction. This is supported, collision-checked movement, never a snap or teleport. Its accepted starting lateral limit is 250 mm from the start of the alignment attempt; if a larger correction is needed, stop and let the player reposition. It does not authorize arbitrary detours.
+- Finish alignment before beginning the seven-tick preparation. Then execute flight and the seven-tick recovery. Route cost includes all four phases. Alignment rate and flight arithmetic remain open; the 250 mm starting limit still needs movement validation.
 - Changing direction or releasing direct movement cancels alignment/preparation. The accepted separate explicit-pause preservation rule still applies: clearing host-held keys for pause must not be mistaken for an ordinary release that cancels established traversal.
 
 ### Actor coordination
@@ -70,7 +72,7 @@ These are design obligations and proposed structure, not newly accepted algorith
 
 1. **Coverage and contact:** specify exact area coverage by the union of supporting static top surfaces, including seams, holes and multiple surface heights. Specify touching versus overlap and how safe integer positions are selected from swept contacts. Preserve full support during alignment/walking; airborne states require a verified safe continuation rather than standing support.
 2. **Trajectory kernel:** specify integer tick-based velocity/acceleration, adaptive arc selection, reduced horizontal speed, landing detection and bounded steering. Define the candidate search space, completeness limits and deterministic tie order. Do not substitute a planner estimate for executable physics. A trajectory must account for takeoff clearance, intermediate body sweeps and supported landing, not only endpoints.
-3. **Alignment bounds:** choose a bounded lateral correction and speed, prohibit movement away from the intended direction, and include its actual duration in costs. Validate cancellation, blocked alignment and repeated intent changes. These numeric tuning choices require representative movement evidence.
+3. **Alignment bounds:** use the accepted 250 mm maximum lateral displacement from the alignment start, choose its speed, preserve intended forward progress, and include actual duration in costs. Validate cancellation, blocked alignment and repeated intent changes. These numeric tuning choices require representative movement evidence.
 4. **Coordination:** choose how to protect a committed continuation against future occupancy, including stationary actors after landing. Define simultaneous requests, preserved queue age, deterministic contention groups, safe retreat selection and impossible traffic. Do not assume an actor will vacate its landing because its flight protection ended.
 5. **Geometry/index invalidation:** separate static geometry/capability feasibility from dynamic occupancy. Include relevant versions in reusable results. Rebuilding a cache cannot change the tick a gameplay result becomes available. Revalidate plans and clearance before committing movement; define safe handling of upgrades and invalidations during established traversal.
 6. **Interface:** use one headless simulation transition for direct control, planning trials and execution. Callers submit intent, not writable positions or render meshes. Expose read-only observations, ordinary blocked/rejected outcomes and separately typed invariant faults. Keep resumable planning and coordination state authoritative when it affects future ticks.
@@ -81,3 +83,25 @@ The engineering proposal should resolve the remaining rules without reopening ac
 ## Evidence boundary
 
 No foundation physics implementation has been produced in this interview. The archived feet comparison passed 71 tests and focused browser checks; its independent outline arithmetic is not a support solver. The conflict archive used floating-point baseline movement and controlled scenarios, not the accepted integer migration. No one-block traversal, adaptive integer jump, alignment, general fair coordination or 1,000-actor capacity claim is established by these archives.
+
+## Integer trajectory arithmetic investigation — 2026-09-20
+
+Read-only exact arithmetic explored a **proposed, unaccepted** discrete family: integer vertical velocity `v` mm/tick; each tick first advances by the current velocity, then subtracts 7 mm/tick from it. This corresponds to 25.2 m/s², and is a hypothesis for a representative prototype, not a settled tuning value. After `n` ticks, relative height is `n*v - 7*n*(n-1)/2`. These calculations assume straight swept segments between tick positions; a within-tick parabola would be a different contract.
+
+A launch velocity of 115 mm/tick reaches an apex of 1,003 mm; 114 reaches 986 mm. Height alone is insufficient. For a cardinal approach to a vertical 1 m step, the centre must travel at least 520 mm from first possible body entry (300 mm body half-width before the edge) to a fully supported landing (220 mm support half-width beyond it). A centre-of-cell landing needs 550 mm from that first body entry.
+
+At a maximum horizontal speed of 70 mm/tick, the theoretical horizontal distance available while the vertical centre-of-feet path is at or above 1 m is approximately:
+
+| Initial vertical velocity | Apex     | Available horizontal distance |
+| ------------------------- | -------- | ----------------------------- |
+| 115 mm/tick               | 1,003 mm | 122.5 mm                      |
+| 116 mm/tick               | 1,020 mm | 328.27 mm                     |
+| 117 mm/tick               | 1,037 mm | 453.13 mm                     |
+| 118 mm/tick               | 1,054 mm | 548.20 mm                     |
+| 119 mm/tick               | 1,071 mm | 634.00 mm                     |
+
+These are necessary geometric checks, not executed traversals or sufficient conditions. They expose why minimizing height must validate body clearance and landing together, and why reducing horizontal speed can prevent climbing even when it helps avoid overshoot. Diagonal movement must use actual Q24-derived integer displacements and residues, not a continuous-speed approximation.
+
+A prototype needs an explicit velocity/apex cap, safe integer landing/contact selection, exact within-tick sweep convention and a declared candidate family. No candidate found means none within that supported family, not mathematical impossibility for every imaginable trajectory. A naive search over 120 velocities × 71 speeds × roughly 42 ticks approaches 358,000 segment evaluations per heading before geometry work; this is an illustrative count, not a measured cost or proposed production strategy. Candidate generation and reused results need independent scale evidence.
+
+The investigation ran ephemeral reference arithmetic only. It did not execute production movement or modify application code.
