@@ -114,3 +114,7 @@ Represent supported surfaces at distinct heights where geometry permits them, in
 Navigation reports arrival or inability to progress. Humanoid recovery retains the requested destination and replans from actual position without immediately repeating the failed transition. Individual capabilities may depend on type and upgrades; upgrades interrupt movement before changes take effect. Robot retry/job scheduling and terrain-specific or flying movement remain separate future decisions. Exact public method names and internal search structures are implementation choices, not settled by the prototype archive.
 
 The user accepted the [navigation design checkpoint](navigation-design.md) and its two implementation increments. It consolidates the behavior, validation requirements and prototype-separation requirements for the pending production work.
+
+### Consolidated physics design — 2026-09-20; not implemented
+
+The [physics contract](physics-design.md) specifies a headless module with initialize, atomic tick advance and isolated trial operations. Direct control, navigation trials and execution share the same transition. Geometry indexes and protected-continuation storage are internal; snapshots retain every movement/work field affecting future ticks. Revision-keyed static feasibility is reusable, while dynamic occupancy is revalidated before commitment. The existing migration checkpoint owns production integration and evidence. Current production modules described above remain unchanged.
