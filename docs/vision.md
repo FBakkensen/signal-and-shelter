@@ -141,3 +141,7 @@ User-corrected numeric tuning policy: divisibility is a design constraint for au
 ### Movement-conflict behavior accepted — 2026-09-20
 
 The user accepted the refined conflict prototype: robots yield before jumping; everyone respects a jump already underway. Robots wait or cancel conflicting preparation before takeoff. After commitment, safe completion may briefly block entry or decline unsafe steering; restrictions should be small and understandable. Flight protection ends on landing, while ordinary body occupancy remains. [Prototype movement conflicts and safe landing behavior](https://github.com/FBakkensen/signal-and-shelter/issues/32#issuecomment-5748276198) owns the resolution and evidence. Support-footprint dimensions remain open. This accepts behavior, not a reservation implementation or production migration.
+
+### Humanoid feet and stance — 2026-09-20
+
+The user identified the visible feet being wider than one terrain block as the problem and agreed to narrow the humanoid's feet and stance, deliberately align the revised appearance with the physical support dimensions in this case. Physics defines what is possible independently of the visible model; appearance does not define or dynamically determine movement rules. Full support remains required. Exact dimensions await a visual comparison; no smaller invisible support footprint or production change is accepted. This continues [the shared-physics decision](https://github.com/FBakkensen/signal-and-shelter/issues/29).
