@@ -73,3 +73,7 @@ This is the production implementation branch. `npm run dev` opens normal third-p
 The throwaway comparisons remain on `codex/third-person-camera-prototype`, `codex/strategic-map-prototype` and `codex/occlusion-prototype`. The final production-fade fixture snapshot is preserved on `codex/third-person-prototype-archive-41ab0d5` at `41ab0d5`. Check out an archive in a separate worktree to run its documented prototype commands. Their source, styles, routes and tests are absent from this implementation branch.
 
 The [accepted design](docs/third-person-design.md) records camera B, atlas A and fading B. Close-play controls, shared exploration and the active strategic atlas are implemented. Sustained human playtesting and rendering-cost measurement remain for the final increment.
+
+## Feet and stance visual study (throwaway branch only)
+
+On `codex/feet-stance-prototype`, run `npm run prototype:feet -- --port 5174 --strictPort` and open <http://127.0.0.1:5174/feet-prototype.html>. The dedicated command was verified on 2026-09-20. Compare the existing avatar with two narrower visual candidates, adjust facing/walking pose/shelf offset, and inspect independently authored proposed support outlines. This is a visual comparison, not validated traversal physics. `npm run check` checks the branch. The prototype remains pending user selection and must never be merged.

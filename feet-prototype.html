@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Feet & stance · Signal & Shelter study</title>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <small>THROWAWAY VISUAL STUDY</small>
+        <h1>Feet & stance</h1>
+        <p>
+          Choose proportions against half-metre blocks. Physics stays
+          independent of appearance.
+        </p>
+      </section>
+      <canvas aria-label="Humanoid and one-block shelf"></canvas>
+      <aside>
+        <h2 id="variant-name"></h2>
+        <p id="description"></p>
+        <div class="views">
+          <button id="front">Front</button><button id="angle">Angle</button
+          ><button id="top">Top</button>
+        </div>
+        <label
+          >Facing
+          <input
+            id="heading"
+            type="range"
+            min="0"
+            max="180"
+            value="0"
+            step="15" /><output id="heading-value"></output
+        ></label>
+        <label
+          >Walking pose
+          <input id="pose" type="range" min="0" max="100" value="0" /><output
+            id="pose-value"
+          ></output
+        ></label>
+        <label
+          >Shelf offset
+          <input
+            id="offset"
+            type="range"
+            min="-150"
+            max="150"
+            value="0"
+            step="10" /><output id="offset-value"></output
+        ></label>
+        <label
+          >Shelf width
+          <select id="shelf">
+            <option value="500">One block · 500 mm</option>
+            <option value="1000">Two blocks · 1,000 mm</option>
+          </select></label
+        >
+        <label class="toggle"
+          ><input id="outlines" type="checkbox" checked /> Show physical
+          outlines</label
+        >
+        <p id="support-status" role="status"></p>
+        <p class="legend">
+          Mint/red: separate support square.<br />Gold: unchanged 600 mm
+          clearance square.
+        </p>
+        <p class="note">
+          Support sizes are proposals, not mesh measurements. A uses the old
+          clearance width for comparison; production has no separate
+          full-support footprint. Turning and leg animation change the visible
+          pose, not these proposed rules. This is not a traversal test.
+        </p>
+      </aside>
+      <nav aria-label="Proportion variants">
+        <button id="previous" aria-label="Previous variant">←</button
+        ><button data-variant="A">A · Current</button
+        ><button data-variant="B">B · Narrower</button
+        ><button data-variant="C">C · Compact</button
+        ><button id="next" aria-label="Next variant">→</button>
+      </nav>
+    </main>
+    <script type="module" src="/src/feet-prototype.ts"></script>
+  </body>
+</html>

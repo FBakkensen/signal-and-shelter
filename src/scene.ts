@@ -1,3 +1,4 @@
+import { createAvatar } from "./avatar.ts";
 import { createExplorationFog } from "./exploration-fog.ts";
 import { exploredAt } from "./packages/play/exploration.ts";
 import { createAtlas } from "./atlas.ts";
@@ -200,14 +201,9 @@ export function createScene(
     );
     scene.add(group);
   }
-  const avatar = new THREE.Group();
+  const avatarModel = createAvatar();
+  const avatar = avatarModel.group;
   scene.add(avatar);
-  block(avatar, 0, 0.68, 0, 0.55, 0.7, 0.35, "#ece7d7");
-  block(avatar, 0, 1.23, 0, 0.42, 0.42, 0.42, "#424c62");
-  block(avatar, 0, 1.25, -0.22, 0.3, 0.13, 0.03, "#8ce6bd");
-  block(avatar, 0, 0.76, 0.25, 0.43, 0.45, 0.22, WORLD_PALETTE.strata);
-  const left = block(avatar, -0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
-  const right = block(avatar, 0.17, 0.18, 0, 0.18, 0.38, 0.22, "#3e2c35");
   const visibility = createOcclusion(scene, avatar);
   const fog = createExplorationFog(scene, [avatar, sky]);
   let lastTime = 0;
@@ -231,8 +227,7 @@ export function createScene(
   ) {
     avatar.position.set(pose.ground.x, pose.ground.y, pose.ground.z);
     avatar.rotation.y = frame?.facing ?? state.yaw;
-    left.rotation.x = Math.sin(state.distance * 3) * 0.4;
-    right.rotation.x = -left.rotation.x;
+    avatarModel.pose(state.distance);
     const preview = !started;
     avatar.visible = preview || Boolean(frame);
     const fov = frame?.fov ?? (preview ? 44 : 70);
